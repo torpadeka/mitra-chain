@@ -1,13 +1,12 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { ChevronDown, ChevronUp } from "lucide-react"
 
 const faqs = [
   {
-    question:
-      "What makes MitraChain different from traditional franchise platforms?",
+    question: "What makes MitraChain different from traditional franchise platforms?",
     answer:
       "MitraChain uses blockchain technology to provide complete transparency, NFT-based franchise licenses for verifiable ownership, and community governance through DAO voting. This eliminates intermediaries, reduces costs, and ensures all transactions are publicly auditable.",
   },
@@ -46,29 +45,22 @@ const faqs = [
     answer:
       "No! We've designed MitraChain to be user-friendly for everyone. Our wallet integration is simple, and we provide step-by-step guidance for all blockchain interactions. You can focus on finding the right franchise opportunity.",
   },
-];
+]
 
 export function FAQ() {
-  const [openItems, setOpenItems] = useState<number[]>([]);
+  const [openItems, setOpenItems] = useState<number[]>([])
 
   const toggleItem = (index: number) => {
-    setOpenItems((prev) =>
-      prev.includes(index)
-        ? prev.filter((item) => item !== index)
-        : [...prev, index]
-    );
-  };
+    setOpenItems((prev) => (prev.includes(index) ? prev.filter((item) => item !== index) : [...prev, index]))
+  }
 
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="font-bold text-3xl md:text-4xl text-gray-900 mb-4">
-            Frequently Asked Questions
-          </h2>
+          <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900 mb-4">Frequently Asked Questions</h2>
           <p className="text-xl text-gray-600">
-            Get answers to common questions about MitraChain and
-            blockchain-powered franchising.
+            Get answers to common questions about MitraChain and blockchain-powered franchising.
           </p>
         </div>
 
@@ -81,9 +73,7 @@ export function FAQ() {
                   className="w-full text-left p-6 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg text-gray-900 pr-4">
-                      {faq.question}
-                    </h3>
+                    <h3 className="font-semibold text-lg text-gray-900 pr-4">{faq.question}</h3>
                     {openItems.includes(index) ? (
                       <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
                     ) : (
@@ -93,9 +83,7 @@ export function FAQ() {
                 </button>
                 {openItems.includes(index) && (
                   <div className="px-6 pb-6">
-                    <p className="text-gray-600 leading-relaxed">
-                      {faq.answer}
-                    </p>
+                    <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
                   </div>
                 )}
               </CardContent>
@@ -104,5 +92,5 @@ export function FAQ() {
         </div>
       </div>
     </section>
-  );
+  )
 }

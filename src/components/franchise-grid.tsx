@@ -183,7 +183,7 @@ export function FranchiseGrid() {
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                  <h3 className="font-serif font-semibold text-lg text-gray-900 mb-1">
                     {franchise.name}
                   </h3>
                   <p className="text-sm text-green-600 font-medium">

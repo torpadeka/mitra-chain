@@ -52,7 +52,7 @@ export function RelatedFranchises({
   return (
     <section className="mt-16">
       <div className="mb-8">
-        <h2 className="font-bold text-2xl md:text-3xl text-gray-900 mb-4">
+        <h2 className="font-serif font-bold text-2xl md:text-3xl text-gray-900 mb-4">
           Similar Franchises You Might Like
         </h2>
         <p className="text-gray-600">
@@ -77,7 +77,7 @@ export function RelatedFranchises({
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                  <h3 className="font-serif font-semibold text-lg text-gray-900 mb-1">
                     {franchise.name}
                   </h3>
                   <Badge variant="secondary" className="text-xs">

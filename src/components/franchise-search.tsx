@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Search, SlidersHorizontal, Grid3X3, List } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Search, SlidersHorizontal, Grid3X3, List } from "lucide-react";
 
 export function FranchiseSearch() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
@@ -19,7 +19,7 @@ export function FranchiseSearch() {
             placeholder="Search by franchise name, industry, or location..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+            className="text-foreground w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
           />
         </div>
 
@@ -30,7 +30,9 @@ export function FranchiseSearch() {
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-md transition-colors ${
-                viewMode === "grid" ? "bg-white shadow-sm text-green-600" : "text-gray-500 hover:text-gray-700"
+                viewMode === "grid"
+                  ? "bg-white shadow-sm text-green-600"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               <Grid3X3 className="w-4 h-4" />
@@ -38,7 +40,9 @@ export function FranchiseSearch() {
             <button
               onClick={() => setViewMode("list")}
               className={`p-2 rounded-md transition-colors ${
-                viewMode === "list" ? "bg-white shadow-sm text-green-600" : "text-gray-500 hover:text-gray-700"
+                viewMode === "list"
+                  ? "bg-white shadow-sm text-green-600"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               <List className="w-4 h-4" />
@@ -64,5 +68,5 @@ export function FranchiseSearch() {
         </p>
       </div>
     </div>
-  )
+  );
 }

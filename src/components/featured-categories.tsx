@@ -1,13 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Coffee,
-  Utensils,
-  Dumbbell,
-  GraduationCap,
-  Car,
-  Home,
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Coffee, Utensils, Dumbbell, GraduationCap, Car, Home } from "lucide-react"
 
 const categories = [
   {
@@ -52,25 +45,23 @@ const categories = [
     count: "75+ franchises",
     trending: true,
   },
-];
+]
 
 export function FeaturedCategories() {
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="font-bold text-3xl md:text-4xl text-gray-900 mb-4">
-            Explore Franchise Categories
-          </h2>
+          <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900 mb-4">Explore Franchise Categories</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover opportunities across diverse industries with verified
-            franchisors and transparent investment details.
+            Discover opportunities across diverse industries with verified franchisors and transparent investment
+            details.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {categories.map((category, index) => {
-            const IconComponent = category.icon;
+            const IconComponent = category.icon
             return (
               <Card
                 key={index}
@@ -87,25 +78,19 @@ export function FeaturedCategories() {
                       </span>
                     )}
                   </div>
-                  <h3 className="font-semibold text-xl text-gray-900 mb-2">
-                    {category.title}
-                  </h3>
+                  <h3 className="font-serif font-semibold text-xl text-gray-900 mb-2">{category.title}</h3>
                   <p className="text-gray-600 mb-3">{category.description}</p>
-                  <p className="text-sm text-green-600 font-medium">
-                    {category.count}
-                  </p>
+                  <p className="text-sm text-green-600 font-medium">{category.count}</p>
                 </CardContent>
               </Card>
-            );
+            )
           })}
         </div>
 
         <div className="text-center">
-          <Button className="btn-primary text-lg px-8 py-4">
-            View All Categories
-          </Button>
+          <Button className="btn-primary text-lg px-8 py-4">View All Categories</Button>
         </div>
       </div>
     </section>
-  );
+  )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X, Search, Wallet } from "lucide-react";
 
 export function Navigation() {
@@ -15,15 +16,17 @@ export function Navigation() {
   ];
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-surface-primary shadow-sm border-b border-primary sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <a href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 from-brand-500 to-brand-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">M</span>
             </div>
-            <span className="font-bold text-xl text-gray-900">MitraChain</span>
+            <span className="font-serif font-bold text-xl text-primary">
+              MitraChain
+            </span>
           </a>
 
           {/* Desktop Navigation */}
@@ -32,7 +35,7 @@ export function Navigation() {
               <a
                 key={item.href}
                 href={item.href}
-                className="text-gray-600 hover:text-green-600 font-medium transition-colors"
+                className="text-secondary hover:text-brand font-medium transition-colors"
               >
                 {item.label}
               </a>
@@ -44,19 +47,21 @@ export function Navigation() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-gray-600 hover:text-green-600"
+              className="text-secondary hover:text-brand"
             >
-              <Search className="w-4 h-4 mr-2" />
-              Search
+              {/* <Search className="w-4 h-4 mr-2" />
+              Search */}
             </Button>
+            {/* <ThemeToggle /> */}
             <Button className="btn-primary">
               <Wallet className="w-4 h-4 mr-2" />
-              Connect Wallet
+              Login
             </Button>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
+            {/* <ThemeToggle /> */}
             <Button
               variant="ghost"
               size="sm"
@@ -73,22 +78,22 @@ export function Navigation() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
+          <div className="md:hidden py-4 border-t border-primary">
             <div className="flex flex-col space-y-4">
               {navItems.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="text-gray-600 hover:text-green-600 font-medium transition-colors px-2 py-1"
+                  className="text-secondary hover:text-brand font-medium transition-colors px-2 py-1"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
                 </a>
               ))}
-              <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200">
+              <div className="flex flex-col space-y-2 pt-4 border-t border-primary">
                 <Button
                   variant="ghost"
-                  className="justify-start text-gray-600 hover:text-green-600"
+                  className="justify-start text-secondary hover:text-brand"
                 >
                   <Search className="w-4 h-4 mr-2" />
                   Search

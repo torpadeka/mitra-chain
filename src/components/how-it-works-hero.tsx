@@ -3,10 +3,10 @@ import { ArrowDown, Shield, Users, Zap } from "lucide-react";
 
 export function HowItWorksHero() {
   return (
-    <section className="bg-gradient-to-br from-green-50 to-white py-20">
+    <section className="from-green-50 to-white py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="font-bold text-4xl md:text-6xl text-gray-900 mb-6">
+          <h1 className="font-serif font-bold text-4xl md:text-6xl text-gray-900 mb-6">
             How MitraChain
             <span className="text-green-600 block">Works</span>
           </h1>
@@ -21,7 +21,7 @@ export function HowItWorksHero() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-semibold text-lg text-gray-900 mb-2">
+              <h3 className="font-serif font-semibold text-lg text-gray-900 mb-2">
                 Blockchain Secured
               </h3>
               <p className="text-gray-600">
@@ -32,7 +32,7 @@ export function HowItWorksHero() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-semibold text-lg text-gray-900 mb-2">
+              <h3 className="font-serif font-semibold text-lg text-gray-900 mb-2">
                 Community Owned
               </h3>
               <p className="text-gray-600">DAO governance by token holders</p>
@@ -41,7 +41,7 @@ export function HowItWorksHero() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-semibold text-lg text-gray-900 mb-2">
+              <h3 className="font-serif font-semibold text-lg text-gray-900 mb-2">
                 Instant Verification
               </h3>
               <p className="text-gray-600">

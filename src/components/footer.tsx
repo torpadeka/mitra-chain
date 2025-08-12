@@ -1,4 +1,5 @@
-import { Twitter, Github, Mail, Linkedin } from "lucide-react";
+import Link from "next/link";
+import { Twitter, Linkedin, Github, Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -11,7 +12,7 @@ export function Footer() {
               <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">M</span>
               </div>
-              <span className="font-bold text-xl">MitraChain</span>
+              <span className="font-serif font-bold text-xl">MitraChain</span>
             </a>
             <p className="text-gray-400 mb-6 max-w-md">
               The future of franchising is here. Transparent, efficient, and
@@ -46,9 +47,9 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick as */}
+          {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Quick as</h3>
+            <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
                 <a
