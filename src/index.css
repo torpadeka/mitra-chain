@@ -110,7 +110,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-.lexend-100 {
+/* .lexend-100 {
   font-family: "Lexend", sans-serif;
   font-optical-sizing: auto;
   font-weight: 100;
@@ -213,7 +213,7 @@
   font-optical-sizing: auto;
   font-weight: 800;
   font-style: normal;
-}
+} */
 
 @layer base {
   * {
@@ -222,4 +222,23 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+body {
+  margin: 0;
+  font-family: "Figtree", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  color: #222;
+  z-index: 1;
+  position: relative;
 }
