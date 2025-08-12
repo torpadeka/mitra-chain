@@ -2,6 +2,10 @@ import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import LandingPage from "./pages/LandingPage";
 import { UserProvider, useUser } from "@/context/AuthContext";
+import AboutPage from "./pages/AboutPage";
+import FranchisesPage from "./pages/FranchisesPage";
+import HowItWorksPage from "./pages/HowItWorks";
+import FranchiseDetailsPage from "./pages/Franchise";
 
 const App: React.FC = () => {
   const { user, setUser, getUser, actor, principal, isAuthenticated } =
@@ -30,6 +34,10 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-black text-white">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/franchises" element={<FranchisesPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/franchise/:id" element={<FranchiseDetailsPage />} />
         </Routes>
       </div>
     </Router>

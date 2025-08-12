@@ -1,7 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Search, TrendingUp, Shield, Users } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export function Hero() {
+  const navigate = useNavigate();
+  const [inputValue, setInputValue] = useState("");
   return (
     <section className="bg-gradient-to-br from-green-50 to-white py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,9 +27,16 @@ export function Hero() {
               <input
                 type="text"
                 placeholder="Search franchises by industry, investment level, or location..."
-                className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none
+                text-foreground"
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                }}
               />
-              <Button className="absolute right-2 top-1/2 transform -translate-y-1/2 btn-primary">
+              <Button
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 btn-primary"
+                onClick={() => navigate(`/franchises?q=${inputValue}`)}
+              >
                 Search
               </Button>
             </div>
@@ -33,10 +44,16 @@ export function Hero() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button className="btn-primary text-lg px-8 py-4">
+            <Button
+              className="btn-primary text-lg px-8 py-4 hover:cursor-pointer"
+              onClick={() => navigate("/franchises")}
+            >
               Browse Franchises
             </Button>
-            <Button className="btn-secondary text-lg px-8 py-4">
+            <Button
+              className="btn-secondary text-lg px-8 py-4 hover:cursor-pointer"
+              onClick={() => navigate("/how-it-works")}
+            >
               Learn How It Works
             </Button>
           </div>
