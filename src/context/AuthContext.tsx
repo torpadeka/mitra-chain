@@ -8,8 +8,9 @@ import React, {
 import { AuthClient } from "@dfinity/auth-client";
 import { ActorSubclass, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
-import { createActor, canisterId } from "@/declarations/user_service";
-import { _SERVICE, User } from "@/declarations/user_service/user_service.did";
+import { createActor, canisterId } from "@/declarations/backend";
+import { _SERVICE, Role } from "@/declarations/backend/backend.did";
+import { User } from "@/declarations/backend/backend.did";
 
 const network = process.env.DFX_NETWORK || "local";
 const identityProvider =
@@ -95,7 +96,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       onSuccess: async () => {
         try {
           const fetchedUser = await getUser(principal);
-          if (!fetchedUser || fetchedUser.username === "") {
+          if (!fetchedUser || fetchedUser.name === "") {
             window.location.href = "/register";
           } else {
             setUser(fetchedUser);
@@ -127,18 +128,31 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (!actor) return null;
     const result = await actor.getUser(principal);
     if ("ok" in result) {
-      return result.ok.length > 0 ? (result.ok[0] ?? null) : null;
+      const okResult = result.ok as User[];
+      return okResult.length > 0 ? (okResult[0] ?? null) : null;
     }
     return null;
   };
 
-  const createUser = async (username: string, email: string): Promise<User> => {
+  const createUser = async (
+    name: string,
+    email: string,
+    bio: string,
+    role: Role,
+    profilePicUrl: string
+  ): Promise<User> => {
     if (!actor) throw new Error("Actor not initialized");
-    const result = await actor.createUser(username, email);
-    if ("ok" in result) {
-      return result.ok;
+    const result = await actor.registerUser(
+      name,
+      email,
+      bio,
+      role,
+      profilePicUrl
+    );
+    if (result) {
+      return result;
     } else {
-      throw new Error(result.err);
+      throw new Error(result);
     }
   };
 
