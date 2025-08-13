@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, UserCheck, Building2 } from "lucide-react";
-import Link from "next/link";
 
 export function GetStartedCTA() {
   return (
-    <section className="py-20 from-green-600 to-green-700">
+    <section className="py-20 bg-gradient-to-b from-green-400 to-green-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="font-serif font-bold text-3xl md:text-4xl text-white mb-4">
+          <h2 className="font-serif font-bold text-3xl md:text-4xl text-foreground mb-4">
             Ready to Get Started?
           </h2>
           <p className="text-xl text-green-100 max-w-2xl mx-auto">

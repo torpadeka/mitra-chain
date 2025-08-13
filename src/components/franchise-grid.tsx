@@ -13,7 +13,6 @@ import {
   Users,
   Clock,
 } from "lucide-react";
-import Link from "next/link";
 
 const franchises = [
   {
@@ -24,7 +23,7 @@ const franchises = [
     investment: { min: 150000, max: 300000 },
     rating: 4.8,
     reviews: 124,
-    image: "/cafe-franchise.png",
+    image: "https://picsum.photos/200/400",
     description:
       "Sustainable coffee shop franchise with organic, locally-sourced ingredients.",
     features: ["Training Provided", "Financing Available", "Ongoing Support"],
@@ -39,7 +38,7 @@ const franchises = [
     investment: { min: 250000, max: 500000 },
     rating: 4.6,
     reviews: 89,
-    image: "/gym-franchise.png",
+    image: "https://picsum.photos/200/400",
     description:
       "Modern fitness center franchise with state-of-the-art equipment and personal training.",
     features: ["Training Provided", "Marketing Support"],
@@ -54,7 +53,7 @@ const franchises = [
     investment: { min: 75000, max: 150000 },
     rating: 4.9,
     reviews: 156,
-    image: "/education-franchise.png",
+    image: "https://picsum.photos/200/400",
     description:
       "STEM education franchise teaching coding and robotics to children aged 6-16.",
     features: ["Training Provided", "Curriculum Included", "Ongoing Support"],
@@ -69,7 +68,7 @@ const franchises = [
     investment: { min: 200000, max: 400000 },
     rating: 4.5,
     reviews: 67,
-    image: "/auto-franchise.png",
+    image: "https://picsum.photos/200/400",
     description:
       "Full-service automotive repair and maintenance franchise with certified technicians.",
     features: ["Training Provided", "Equipment Included"],
@@ -84,7 +83,7 @@ const franchises = [
     investment: { min: 50000, max: 100000 },
     rating: 4.7,
     reviews: 203,
-    image: "/cleaning-franchise.png",
+    image: "https://picsum.photos/200/400",
     description:
       "Residential and commercial cleaning service franchise with eco-friendly products.",
     features: ["Low Investment", "Training Provided", "Marketing Support"],
@@ -99,7 +98,7 @@ const franchises = [
     investment: { min: 100000, max: 250000 },
     rating: 4.4,
     reviews: 78,
-    image: "/fashion-franchise.png",
+    image: "https://picsum.photos/200/400",
     description:
       "Contemporary fashion retail franchise targeting young professionals and students.",
     features: ["Inventory Support", "Training Provided"],
@@ -123,7 +122,7 @@ export function FranchiseGrid() {
   return (
     <div className="space-y-6">
       {/* Sort Controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between text-foreground">
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">Sort by:</span>
           <select
@@ -249,7 +248,10 @@ export function FranchiseGrid() {
 
       {/* Load More */}
       <div className="text-center pt-8">
-        <Button variant="outline" className="px-8 py-3 bg-transparent">
+        <Button
+          variant="outline"
+          className="px-8 py-3 bg-transparent text-foreground"
+        >
           <Clock className="w-4 h-4 mr-2" />
           Load More Franchises
         </Button>

@@ -30,7 +30,7 @@ export function AboutHero() {
 
           <div className="relative">
             <img
-              src="/about-hero-image.jpg"
+              src="https://picsum.photos/500"
               alt="MitraChain team collaboration"
               className="w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-lg"
             />
