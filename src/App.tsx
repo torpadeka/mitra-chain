@@ -6,6 +6,12 @@ import AboutPage from "./pages/AboutPage";
 import FranchisesPage from "./pages/FranchisesPage";
 import HowItWorksPage from "./pages/HowItWorks";
 import FranchiseDetailsPage from "./pages/Franchise";
+import FranchiseeDashboard from "./pages/dashboard/FranchiseeDashboardPage";
+import FranchisorDashboard from "./pages/dashboard/FranchisorDashboardPage";
+import ProfilePage from "./pages/ProfilePage";
+import FranchiseDetailPage from "./pages/dashboard/FranchiseeDetailPage";
+import FranchiseeDetailPage from "./pages/dashboard/FranchiseeDetailPage";
+import FranchisorFranchiseDetailPage from "./pages/dashboard/FranchisorDetailPage";
 
 const App: React.FC = () => {
   const { user, setUser, getUser, actor, principal, isAuthenticated } =
@@ -38,6 +44,23 @@ const App: React.FC = () => {
           <Route path="/franchises" element={<FranchisesPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/franchise/:id" element={<FranchiseDetailsPage />} />
+          <Route
+            path="/dashboard/franchisee"
+            element={<FranchiseeDashboard />}
+          />
+          <Route
+            path="/dashboard/franchisor"
+            element={<FranchisorDashboard />}
+          />
+          <Route
+            path="/dashboard/franchisee/franchise/:id"
+            element={<FranchiseeDetailPage />}
+          />
+          <Route
+            path="/dashboard/franchisor/franchise/:id"
+            element={<FranchisorFranchiseDetailPage />}
+          />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </div>
     </Router>
