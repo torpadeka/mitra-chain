@@ -13,6 +13,7 @@ import Text "mo:base/Text";
 import Float "mo:base/Float";
 import Array "mo:base/Array";
 import Hash "mo:base/Hash";
+import Buffer "mo:base/Buffer";
 
 persistent actor {
   private func natHash(n: Nat) : Hash.Hash {
@@ -151,6 +152,19 @@ persistent actor {
     Iter.toArray(franchises.vals());
   };
 
+  public query func listFranchisesByCategoryIds(categoryIds: [Nat]): async [Types.Franchise] {
+    let results = Buffer.Buffer<Types.Franchise>(0);
+
+    for ((franchiseKey, franchiseValue) in franchises.entries()) {
+      for (categoryId in categoryIds.vals()) {
+        if (List.some(franchiseValue.categoryIds, func (id: Nat): Bool { id == categoryId })) {
+          results.add(franchiseValue);
+        }
+      }
+    };
+    Buffer.toArray(results);
+  };
+
   // Category functions (admin only, for simplicity)
   public shared(msg) func createCategory(name: Text, description: Text): async Nat {
     let caller = msg.caller;
@@ -191,6 +205,38 @@ persistent actor {
 
   public query func getApplication(id: Nat): async ?Types.Application {
     applications.get(id);
+  };
+
+  public query func getApplicationsByOwner(owner: Principal): async [Types.Application] {
+    let results = Buffer.Buffer<Types.Application>(0);
+
+    // First, find all franchises owned by the specified principal
+    let ownerFranchises = Buffer.Buffer<Types.Franchise>(0);
+    for (franchise in franchises.vals()) {
+      if (Principal.equal(franchise.owner, owner)) {
+        ownerFranchises.add(franchise);
+      };
+    };
+
+    for ((k, v) in applications.entries()) {
+      for (franchise in ownerFranchises.vals()) {
+        if (v.franchiseId == franchise.id) {
+          results.add(v);
+        }
+      };
+    };
+
+    Buffer.toArray(results);
+  };
+
+  public query func getApplicationsByApplicant(applicant: Principal): async [Types.Application] {
+    let results = Buffer.Buffer<Types.Application>(0);
+    for (application in applications.vals()) {
+      if (Principal.equal(application.applicantPrincipal, applicant)) {
+        results.add(application);
+      };
+    };
+    Buffer.toArray(results);
   };
 
   // Admin approves application and mints NFT license
@@ -295,11 +341,20 @@ persistent actor {
   public query func icrc7_balance_of(account: Types.Account): async Nat {
     var count: Nat = 0;
     for (nft in nfts.vals()) {
-      if (Principal.equal(nft.owner.owner, account.owner) and Option.equal<Blob>(nft.owner.subaccount, account.subaccount, Blob.equal)) {
+      if (Principal.equal(nft.owner.owner, account.owner) and subaccountsEqual(nft.owner.subaccount, account.subaccount)) {
         count += 1;
       };
     };
     count;
+  };
+
+  // Helper function to compare optional subaccounts
+  private func subaccountsEqual(sub1: ?Blob, sub2: ?Blob): Bool {
+    switch (sub1, sub2) {
+      case (null, null) { true }; // Both are null
+      case (?b1, ?b2) { Blob.equal(b1, b2) }; // Both are blobs, compare them
+      case _ { false }; // One is null, the other is not
+    };
   };
 
   public query func icrc7_owner_of(tokenId: Nat): async ?Types.Account {
