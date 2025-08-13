@@ -46,7 +46,7 @@ module {
     bio : Text;
     role : Role;
     createdAt : Time.Time;
-    profilePicUrl : ?Text;
+    profilePicUrl : Text;
   };
 
   public type Franchise = {
@@ -101,7 +101,7 @@ module {
     issueDate : Time.Time;
     expiryDate : ?Time.Time;
     metadata : [MetadataEntry];
-    transferHistory : List.List<{ from: Account; to: Account; timestamp: Time.Time }>;
+    transferHistory : List.List<{ from : Account; to : Account; timestamp : Time.Time }>;
   };
 
   public type Transaction = {

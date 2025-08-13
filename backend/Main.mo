@@ -68,7 +68,7 @@ persistent actor {
     email : Text,
     bio : Text,
     role : Types.Role,
-    profilePicUrl : ?Text,
+    profilePicUrl : Text,
   ) : async ?Types.User {
     let caller = msg.caller;
 

@@ -30,7 +30,13 @@ interface UserContextType {
   logout: (onSuccess: () => void) => Promise<void>;
   whoami: () => Promise<string>;
   getUser: (principal: Principal) => Promise<User | null>;
-  createUser: (username: string, email: string) => Promise<User>;
+  createUser: (
+    name: string,
+    email: string,
+    bio: string,
+    role: Role,
+    profilePicUrl: string
+  ) => Promise<User>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -142,18 +148,17 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     profilePicUrl: string
   ): Promise<User> => {
     if (!actor) throw new Error("Actor not initialized");
-    const result = await actor.registerUser(
+    const userArr = await actor.registerUser(
       name,
       email,
       bio,
       role,
       profilePicUrl
     );
-    if (result) {
-      return result;
-    } else {
-      throw new Error(result);
+    if (!userArr || userArr.length === 0) {
+      throw new Error("User registration failed");
     }
+    return userArr[0];
   };
 
   return (

@@ -12,6 +12,8 @@ import ProfilePage from "./pages/ProfilePage";
 import FranchiseDetailPage from "./pages/dashboard/FranchiseeDetailPage";
 import FranchiseeDetailPage from "./pages/dashboard/FranchiseeDetailPage";
 import FranchisorFranchiseDetailPage from "./pages/dashboard/FranchisorDetailPage";
+import { Navigation } from "./components/navigation";
+import RegisterPage from "./pages/RegisterPage";
 
 const App: React.FC = () => {
   const { user, setUser, getUser, actor, principal, isAuthenticated } =
@@ -38,6 +40,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="min-h-screen bg-black text-white">
+        <Navigation />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<AboutPage />} />
@@ -61,6 +64,7 @@ const App: React.FC = () => {
             element={<FranchisorFranchiseDetailPage />}
           />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </div>
     </Router>

@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X, Search, Wallet } from "lucide-react";
+import { useUser } from "@/context/AuthContext";
+import { useNavigate } from "react-router";
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, login, isAuthenticated } = useUser();
+  const navigate = useNavigate();
+  console.log("User in Navigation:", user, isAuthenticated);
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -53,10 +58,19 @@ export function Navigation() {
               Search */}
             </Button>
             {/* <ThemeToggle /> */}
-            <Button className="btn-primary">
-              <Wallet className="w-4 h-4 mr-2" />
-              Login
-            </Button>
+            {user == null ? (
+              <Button
+                className="btn-primary"
+                onClick={() => {
+                  login();
+                }}
+              >
+                <Wallet className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            ) : (
+              <div className="">{user?.name ?? "User"}</div>
+            )}
           </div>
 
           {/* Mobile menu button */}
