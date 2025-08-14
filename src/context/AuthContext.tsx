@@ -133,10 +133,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const getUser = async (principal: Principal): Promise<User | null> => {
     if (!actor) return null;
     const result = await actor.getUser(principal);
-    if ("ok" in result) {
-      const okResult = result.ok as User[];
-      return okResult.length > 0 ? (okResult[0] ?? null) : null;
-    }
+    console.log("getUser result:", result);
+    return result.length > 0 ? (result[0] ?? null) : null;
     return null;
   };
 

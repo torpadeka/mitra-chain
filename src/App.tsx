@@ -22,10 +22,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const restoreUser = async () => {
-      // Only attempt to restore user if authenticated, actor and principal are available, and no user is set
       if (!user && actor && principal && isAuthenticated) {
         try {
           const fetchedUser = await getUser(principal);
+          console.log("Restored user:", fetchedUser);
           if (fetchedUser) {
             setUser(fetchedUser);
           }
