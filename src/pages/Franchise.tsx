@@ -6,66 +6,57 @@ import { FranchiseContact } from "@/components/franchise-contact";
 import { RelatedFranchises } from "@/components/related-franchises";
 import { Footer } from "@/components/footer";
 import { useParams } from "react-router";
+import { Principal } from "@dfinity/principal";
 
-// Mock data - in real app this would come from API/database
-const getFranchiseData = (id: string) => {
+// Types
+export type LicenseDuration = {
+  years: number;
+  months?: number;
+};
+
+// Mock data
+const getFranchiseData = (id: string): Franchise => {
   return {
-    id,
+    id: Number(id) || 1,
+    owner: Principal.anonymous().toString(),
     name: "Green Leaf Cafe",
-    industry: "Food & Beverage",
-    location: "North America",
-    investment: { min: 150000, max: 300000 },
-    rating: 4.8,
-    reviews: 124,
-    verified: true,
-    trending: true,
+    categoryIds: [101, 205],
     description:
-      "Green Leaf Cafe is a sustainable coffee shop franchise committed to serving organic, locally-sourced ingredients while creating a warm, community-focused environment. Our franchise model combines environmental responsibility with profitable business practices.",
-    longDescription:
-      "Founded in 2018, Green Leaf Cafe has grown from a single location to over 50 franchises across North America. We specialize in premium coffee, fresh pastries, and healthy meal options, all sourced from local suppliers whenever possible. Our unique approach to sustainability and community engagement has made us a favorite among environmentally conscious consumers.",
-    features: [
-      "Training Provided",
-      "Financing Available",
-      "Ongoing Support",
-      "Marketing Support",
-      "Site Selection Help",
-    ],
-    images: [
+      "Green Leaf Cafe is a sustainable coffee shop franchise committed to serving organic, locally-sourced ingredients while creating a warm, community-focused environment.",
+    startingPrice: 150000,
+    foundedIn: new Date("2018-03-01").getTime(),
+    totalOutlets: 52,
+    legalEntity: "Green Leaf Cafe LLC",
+    minGrossProfit: 50000,
+    maxGrossProfit: 120000,
+    minNetProfit: 30000,
+    maxNetProfit: 80000,
+    isDepositRequired: true,
+    royaltyFee: "6%",
+    licenseDuration: { years: 5, months: 0 },
+    coverImageUrl: "/cafe-interior-1.jpg",
+    productGallery: [
       "/cafe-interior-1.jpg",
       "/cafe-exterior.jpg",
       "/cafe-products.jpg",
       "/cafe-team.jpg",
     ],
-    financials: {
-      franchiseFee: 45000,
-      totalInvestment: { min: 150000, max: 300000 },
-      liquidCapital: 100000,
-      netWorth: 250000,
-      royaltyFee: "6%",
-      marketingFee: "2%",
-    },
-    support: {
-      training: "3 weeks initial training + ongoing support",
-      marketing: "National advertising campaigns + local marketing support",
-      operations: "Operations manual + regular consultations",
-      technology: "POS system + mobile app integration",
-    },
-    requirements: {
-      experience: "No prior experience required",
-      space: "1,200 - 2,500 sq ft",
-      employees: "8-15 employees",
-      territory: "Protected territory radius",
-    },
+    contactNumber: "+1 555-123-4567",
+    contactEmail: "info@greenleafcafe.com",
+    locations: ["North America", "Europe"],
+    status: "Active",
+    isVerified: true,
+    reviewsCount: 124,
   };
 };
 
 export default function FranchiseDetailsPage() {
-  const { id } = useParams<{ id: string }>(); // same as params.id in Next.js
-
-  const franchise = getFranchiseData(id || "");
+  const { id } = useParams<{ id: string }>();
+  const franchise = getFranchiseData(id || "1");
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* You may need to update FranchiseHero to accept new fields */}
       <FranchiseHero franchise={franchise} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -73,8 +64,8 @@ export default function FranchiseDetailsPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             <FranchiseDetails franchise={franchise} />
-            <FranchiseGallery images={franchise.images} />
-            <FranchiseReviews franchiseId={franchise.id} />
+            <FranchiseGallery images={franchise.productGallery} />
+            <FranchiseReviews franchiseId={String(franchise.id)} />
           </div>
 
           {/* Sidebar */}
@@ -83,7 +74,7 @@ export default function FranchiseDetailsPage() {
           </div>
         </div>
 
-        <RelatedFranchises currentFranchiseId={franchise.id} />
+        <RelatedFranchises currentFranchiseId={String(franchise.id)} />
       </div>
 
       <Footer />
