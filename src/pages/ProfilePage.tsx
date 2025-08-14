@@ -44,21 +44,14 @@ export default function ProfilePage() {
 
   // Mock user data - replace with actual API calls
   const userProfile = {
-    id: user?.id || "1",
-    firstName: user?.username || "John",
+    firstName: user?.name || "John",
     email: user?.email || "john.doe@example.com",
     phone: "+1 (555) 123-4567",
     address: "123 Business Ave, Seattle, WA 98101",
-    userType: user?.userType || "franchisee",
+    userType: user?.role || "franchisee",
     joinDate: "January 15, 2024",
-    profilePicture: "/professional-man-smiling.png",
-    bio: "Experienced business professional with a passion for franchise development and customer service excellence.",
-    company:
-      user?.userType === "franchisor" ? "Green Leaf Enterprises" : undefined,
-    website:
-      user?.userType === "franchisor"
-        ? "www.greenleafenterprises.com"
-        : undefined,
+    profilePicture: user?.profilePicUrl,
+    bio: user?.bio,
     linkedIn: "linkedin.com/in/johndoe",
     twitter: "@johndoe",
   };
@@ -128,21 +121,21 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="flex gap-8 ">
             {/* Profile Card */}
-            <div className="lg:col-span-1">
+            <div className="min-w-80">
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="px-6 pt-6">
                   <div className="flex flex-col items-center text-center">
                     <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gray-100">
                       <img
                         src={userProfile.profilePicture || "/placeholder.svg"}
-                        alt={`${userProfile.firstName} ${userProfile.lastName}`}
+                        alt={`${userProfile.firstName} `}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <h2 className="text-xl font-semibold text-foreground mb-1">
-                      {userProfile.firstName} {userProfile.lastName}
+                      {userProfile.firstName}
                     </h2>
                     <Badge
                       variant="secondary"
@@ -178,18 +171,18 @@ export default function ProfilePage() {
                       <Calendar className="w-4 h-4 text-muted-foreground" />
                       <span>Joined {userProfile.joinDate}</span>
                     </div>
-                    {userProfile.company && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Building2 className="w-4 h-4 text-muted-foreground" />
-                        <span>{userProfile.company}</span>
-                      </div>
-                    )}
+                  </div>
+                  <div className="mt-10">
+                    <Button>Go to Dashboard</Button>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Quick Stats */}
-              <Card className="mt-6">
+            </div>
+
+            <div className="w-full">
+              <Card className="mb-2">
                 <CardHeader>
                   <CardTitle className="text-lg">Account Overview</CardTitle>
                 </CardHeader>
@@ -213,7 +206,7 @@ export default function ProfilePage() {
                           Average Rating
                         </span>
                         <span className="font-semibold">
-                          {stats.averageRating}/5
+                          {stats?.averageRating}/5
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -221,7 +214,7 @@ export default function ProfilePage() {
                           Years Active
                         </span>
                         <span className="font-semibold">
-                          {stats.yearsActive} year
+                          {stats?.yearsActive} year
                         </span>
                       </div>
                     </>
@@ -244,7 +237,7 @@ export default function ProfilePage() {
                           Average Rating
                         </span>
                         <span className="font-semibold">
-                          {stats.averageRating}/5
+                          {stats?.averageRating}/5
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -252,17 +245,59 @@ export default function ProfilePage() {
                           Years Active
                         </span>
                         <span className="font-semibold">
-                          {stats.yearsActive} years
+                          {stats?.yearsActive} years
                         </span>
                       </div>
                     </>
                   )}
                 </CardContent>
               </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Social Links</CardTitle>
+                  <CardDescription>
+                    Connect your social media profiles
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">LinkedIn</p>
+                        <p className="text-xs text-muted-foreground">
+                          {userProfile.linkedIn}
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Edit
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Twitter</p>
+                        <p className="text-xs text-muted-foreground">
+                          {userProfile.twitter}
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Edit
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Main Content */}
-            <div className="lg:col-span-2">
+            {/* <div className="lg:col-span-2">
               <Tabs defaultValue="activity" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="activity">Recent Activity</TabsTrigger>
@@ -306,7 +341,6 @@ export default function ProfilePage() {
                     </CardContent>
                   </Card>
 
-                  {/* Social Links */}
                   <Card>
                     <CardHeader>
                       <CardTitle>Social Links</CardTitle>
@@ -511,16 +545,16 @@ export default function ProfilePage() {
                   </Card>
                 </TabsContent>
               </Tabs>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 
-      <EditProfileModal
+      {/* <EditProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         userProfile={userProfile}
-      />
+      /> */}
     </div>
   );
 }
