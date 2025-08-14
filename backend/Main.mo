@@ -96,6 +96,10 @@ persistent actor {
     users.get(principal);
   };
 
+  public query (message) func whoami() : async Principal {
+    message.caller;
+  };
+
   // Franchise functions (only franchisors can create)
   public shared (msg) func createFranchise(
     name : Text,
@@ -409,9 +413,5 @@ persistent actor {
 
   public query func listTransactions() : async [Types.Transaction] {
     Iter.toArray(transactions.vals());
-  };
-
-  public query (message) func whoami() : async Principal {
-    message.caller;
   };
 };

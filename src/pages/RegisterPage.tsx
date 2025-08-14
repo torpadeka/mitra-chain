@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,10 +18,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, Building2, Store, Upload, X } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { Role } from "@/declarations/backend/backend.did";
+import { useNavigate } from "react-router";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const { createUser, login } = useUser();
+  const navigate = useNavigate();
+  const { actor, createUser, login, whoami } = useUser();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userType, setUserType] = useState<"franchisee" | "franchisor">(
     "franchisee"
@@ -36,6 +38,22 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+
+  const [whoamiResult, setWhoamiResult] = useState<string>("Loading...");
+  useEffect(() => {
+    const fetchWhoami = async () => {
+      if (!actor) return setWhoamiResult("Actor not available");
+      try {
+        const result = await whoami();
+        setWhoamiResult(result);
+      } catch (error) {
+        console.error("Whoami call failed:", error);
+        setWhoamiResult("Failed to fetch whoami");
+      }
+    };
+
+    fetchWhoami();
+  }, [actor, whoami]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -110,6 +128,8 @@ export default function RegisterPage() {
       roleVariant,
       userData.profilePicUrl
     );
+
+    navigate("/");
   };
 
   return (
@@ -150,6 +170,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSignup} className="space-y-4">
               {/* Profile Picture Upload */}
               <div className="space-y-2">
+                {whoamiResult}
                 <Label>Profile Picture</Label>
                 <div className="flex items-center gap-4">
                   {profilePicUrl ? (

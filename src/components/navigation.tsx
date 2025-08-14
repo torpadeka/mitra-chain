@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Menu, X, Search, Wallet } from "lucide-react";
+import { Menu, X, Wallet } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, login, isAuthenticated } = useUser();
+  const { user, login, isAuthenticated, principal, logout } = useUser();
   const navigate = useNavigate();
-  console.log("User in Navigation:", user, isAuthenticated);
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -19,6 +23,12 @@ export function Navigation() {
     { href: "/how-it-works", label: "How It Works" },
     { href: "/about", label: "About Us" },
   ];
+
+  const handleLogout = () => {
+    logout(() => {
+      navigate("/");
+    });
+  };
 
   return (
     <nav className="bg-surface-primary shadow-sm border-b border-primary sticky top-0 z-50">
@@ -49,33 +59,41 @@ export function Navigation() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-secondary hover:text-brand"
-            >
-              {/* <Search className="w-4 h-4 mr-2" />
-              Search */}
-            </Button>
-            {/* <ThemeToggle /> */}
             {user == null ? (
-              <Button
-                className="btn-primary"
-                onClick={() => {
-                  login();
-                }}
-              >
+              <Button className="btn-primary" onClick={login}>
                 <Wallet className="w-4 h-4 mr-2" />
                 Login
               </Button>
             ) : (
-              <div className="">{user?.name ?? "User"}</div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
+                    <img
+                      src={
+                        user?.profilePicUrl || "https://via.placeholder.com/150"
+                      }
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-500"
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            {/* <ThemeToggle /> */}
             <Button
               variant="ghost"
               size="sm"
@@ -105,17 +123,38 @@ export function Navigation() {
                 </a>
               ))}
               <div className="flex flex-col space-y-2 pt-4 border-t border-primary">
-                <Button
-                  variant="ghost"
-                  className="justify-start text-secondary hover:text-brand"
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  Search
-                </Button>
-                <Button className="btn-primary justify-start">
-                  <Wallet className="w-4 h-4 mr-2" />
-                  Connect Wallet
-                </Button>
+                {user == null ? (
+                  <Button className="btn-primary" onClick={login}>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Login
+                  </Button>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
+                        <img
+                          src={
+                            user?.profilePicUrl ||
+                            "https://via.placeholder.com/150"
+                          }
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem onClick={() => navigate("/profile")}>
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="text-red-500"
+                      >
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </div>
