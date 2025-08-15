@@ -129,7 +129,8 @@ export default function RegisterPage() {
       userData.profilePicUrl
     );
 
-    navigate("/");
+    // navigate("/");
+    window.location.href = "/";
   };
 
   return (

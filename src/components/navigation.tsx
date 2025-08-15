@@ -24,9 +24,9 @@ export function Navigation() {
     { href: "/about", label: "About Us" },
   ];
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout(() => {
-      navigate("/");
+      window.location.reload();
     });
   };
 

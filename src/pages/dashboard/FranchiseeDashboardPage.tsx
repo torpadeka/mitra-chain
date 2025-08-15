@@ -23,51 +23,107 @@ import {
   Eye,
 } from "lucide-react";
 import { ChatSystem } from "@/components/chat";
+import { FranchiseCard } from "@/components/franchise-card-dash";
 
 export default function FranchiseeDashboard() {
   // const { user } = useAuth();
 
-  const franchises = [
+  const franchises: Franchise[] = [
     {
-      id: "1",
+      id: 1,
+      owner: "aaaaa-aa", // mock principal
       name: "Green Leaf Cafe",
-      location: "Downtown Seattle, WA",
-      licenseNumber: "GLC-2024-001",
+      categoryIds: [1, 2],
+      description:
+        "Sustainable coffee shop franchise with organic, locally-sourced ingredients.",
+      startingPrice: 150000,
+      foundedIn: new Date("2015-06-15").getTime(),
+      totalOutlets: 45,
+      legalEntity: "Green Leaf Ltd.",
+      minGrossProfit: 50000,
+      maxGrossProfit: 120000,
+      minNetProfit: 25000,
+      maxNetProfit: 80000,
+      isDepositRequired: true,
+      royaltyFee: "5%",
+      licenseDuration: { years: 5, months: 0 },
+      coverImageUrl: "https://picsum.photos/200/400",
+      productGallery: [
+        "https://picsum.photos/400/300",
+        "https://picsum.photos/401/300",
+      ],
+      contactNumber: "+1-555-1234",
+      contactEmail: "info@greenleaf.com",
+      locations: ["New York", "Los Angeles", "Chicago"],
       status: "Active",
-      startDate: "January 15, 2024",
-      monthlyRevenue: "$45,000",
-      category: "Food & Beverage",
-      image: "/cafe-franchise.png",
+      isVerified: true,
+      reviewsCount: 124,
     },
     {
-      id: "2",
+      id: 2,
+      owner: "bbbbb-aa",
+      name: "TechKids Academy",
+      categoryIds: [3],
+      description:
+        "STEM education franchise teaching coding and robotics to children aged 6-16.",
+      startingPrice: 75000,
+      foundedIn: new Date("2018-01-10").getTime(),
+      totalOutlets: 20,
+      legalEntity: "TechKids Inc.",
+      minGrossProfit: 30000,
+      maxGrossProfit: 90000,
+      minNetProfit: 15000,
+      maxNetProfit: 50000,
+      isDepositRequired: false,
+      royaltyFee: "3%",
+      licenseDuration: { years: 3, months: 6 },
+      coverImageUrl: "https://picsum.photos/200/401",
+      productGallery: [
+        "https://picsum.photos/402/300",
+        "https://picsum.photos/403/300",
+      ],
+      contactNumber: "+44-1234-5678",
+      contactEmail: "contact@techkids.com",
+      locations: ["Global"],
+      status: "Active",
+      isVerified: true,
+      reviewsCount: 156,
+    },
+    {
+      id: 3,
+      owner: "ccccc-aa",
       name: "FitZone Gym",
-      location: "Bellevue, WA",
-      licenseNumber: "FZG-2024-002",
+      categoryIds: [4],
+      description:
+        "Modern fitness center with state-of-the-art equipment and personal training.",
+      startingPrice: 250000,
+      foundedIn: new Date("2012-03-20").getTime(),
+      totalOutlets: 60,
+      legalEntity: "FitZone International",
+      minGrossProfit: 80000,
+      maxGrossProfit: 200000,
+      minNetProfit: 40000,
+      maxNetProfit: 120000,
+      isDepositRequired: true,
+      royaltyFee: "6%",
+      licenseDuration: { years: 10, months: 0 },
+      coverImageUrl: "https://picsum.photos/200/402",
+      productGallery: [
+        "https://picsum.photos/404/300",
+        "https://picsum.photos/405/300",
+      ],
+      contactNumber: "+1-222-555-7890",
+      contactEmail: "join@fitzone.com",
+      locations: ["Los Angeles", "San Diego"],
       status: "Active",
-      startDate: "March 10, 2024",
-      monthlyRevenue: "$32,000",
-      category: "Fitness",
-      image: "/gym-franchise.png",
-    },
-    {
-      id: "3",
-      name: "TechLearn Academy",
-      location: "Redmond, WA",
-      licenseNumber: "TLA-2024-003",
-      status: "Pending Setup",
-      startDate: "May 1, 2024",
-      monthlyRevenue: "$0",
-      category: "Education",
-      image: "/education-franchise.png",
+      isVerified: true,
+      reviewsCount: 89,
     },
   ];
 
   const totalRevenue = franchises.reduce((sum, franchise) => {
-    const revenue = Number.parseInt(
-      franchise.monthlyRevenue.replace(/[$,]/g, "")
-    );
-    return sum + revenue;
+    const revenue = franchise.minNetProfit ?? 0;
+    return sum + revenue / 12;
   }, 0);
 
   return (
@@ -157,98 +213,7 @@ export default function FranchiseeDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {franchises.map((franchise) => (
-                    <Card
-                      key={franchise.id}
-                      className="hover:shadow-lg transition-shadow"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">
-                              {franchise.name}
-                            </CardTitle>
-                            <CardDescription className="flex items-center gap-1 mt-1">
-                              <MapPin className="w-3 h-3" />
-                              {franchise.location}
-                            </CardDescription>
-                          </div>
-                          <Badge
-                            variant={
-                              franchise.status === "Active"
-                                ? "default"
-                                : "secondary"
-                            }
-                            className={
-                              franchise.status === "Active"
-                                ? "bg-green-100 text-green-800"
-                                : ""
-                            }
-                          >
-                            {franchise.status}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            src={franchise.image || "/placeholder.svg"}
-                            alt={franchise.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Category:
-                            </span>
-                            <span className="font-medium">
-                              {franchise.category}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              License:
-                            </span>
-                            <span className="font-mono text-xs">
-                              {franchise.licenseNumber}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Monthly Revenue:
-                            </span>
-                            <span className="font-medium text-green-600">
-                              {franchise.monthlyRevenue}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              Start Date:
-                            </span>
-                            <span>{franchise.startDate}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2 pt-2">
-                          <a
-                            href={`/dashboard/franchisee/franchise/${franchise.id}`}
-                            className="flex-1"
-                          >
-                            <Button
-                              variant="outline"
-                              className="w-full bg-transparent"
-                            >
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Details
-                            </Button>
-                          </a>
-                          <Button variant="outline" size="icon">
-                            <MessageSquare className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <FranchiseCard franchise={franchise} />
                   ))}
                 </div>
               </div>

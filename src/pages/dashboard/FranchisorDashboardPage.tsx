@@ -39,39 +39,96 @@ export default function FranchisorDashboard() {
     averageRating: 4.7,
   };
 
-  const franchiseListings = [
+  const franchises: Franchise[] = [
     {
       id: 1,
+      owner: "aaaaa-aa", // mock principal
       name: "Green Leaf Cafe",
-      category: "Food & Beverage",
-      investment: "$50,000 - $100,000",
-      locations: 12,
+      categoryIds: [1, 2],
+      description:
+        "Sustainable coffee shop franchise with organic, locally-sourced ingredients.",
+      startingPrice: 150000,
+      foundedIn: new Date("2015-06-15").getTime(),
+      totalOutlets: 45,
+      legalEntity: "Green Leaf Ltd.",
+      minGrossProfit: 50000,
+      maxGrossProfit: 120000,
+      minNetProfit: 25000,
+      maxNetProfit: 80000,
+      isDepositRequired: true,
+      royaltyFee: "5%",
+      licenseDuration: { years: 5, months: 0 },
+      coverImageUrl: "https://picsum.photos/200/400",
+      productGallery: [
+        "https://picsum.photos/400/300",
+        "https://picsum.photos/401/300",
+      ],
+      contactNumber: "+1-555-1234",
+      contactEmail: "info@greenleaf.com",
+      locations: ["New York", "Los Angeles", "Chicago"],
       status: "Active",
-      rating: 4.8,
-      applications: 5,
-      image: "/cafe-franchise.png",
+      isVerified: true,
+      reviewsCount: 124,
     },
     {
       id: 2,
-      name: "FitZone Gym",
-      category: "Fitness",
-      investment: "$100,000 - $200,000",
-      locations: 8,
+      owner: "bbbbb-aa",
+      name: "TechKids Academy",
+      categoryIds: [3],
+      description:
+        "STEM education franchise teaching coding and robotics to children aged 6-16.",
+      startingPrice: 75000,
+      foundedIn: new Date("2018-01-10").getTime(),
+      totalOutlets: 20,
+      legalEntity: "TechKids Inc.",
+      minGrossProfit: 30000,
+      maxGrossProfit: 90000,
+      minNetProfit: 15000,
+      maxNetProfit: 50000,
+      isDepositRequired: false,
+      royaltyFee: "3%",
+      licenseDuration: { years: 3, months: 6 },
+      coverImageUrl: "https://picsum.photos/200/401",
+      productGallery: [
+        "https://picsum.photos/402/300",
+        "https://picsum.photos/403/300",
+      ],
+      contactNumber: "+44-1234-5678",
+      contactEmail: "contact@techkids.com",
+      locations: ["Global"],
       status: "Active",
-      rating: 4.6,
-      applications: 3,
-      image: "/gym-franchise.png",
+      isVerified: true,
+      reviewsCount: 156,
     },
     {
       id: 3,
-      name: "TechRepair Pro",
-      category: "Technology",
-      investment: "$25,000 - $50,000",
-      locations: 15,
+      owner: "ccccc-aa",
+      name: "FitZone Gym",
+      categoryIds: [4],
+      description:
+        "Modern fitness center with state-of-the-art equipment and personal training.",
+      startingPrice: 250000,
+      foundedIn: new Date("2012-03-20").getTime(),
+      totalOutlets: 60,
+      legalEntity: "FitZone International",
+      minGrossProfit: 80000,
+      maxGrossProfit: 200000,
+      minNetProfit: 40000,
+      maxNetProfit: 120000,
+      isDepositRequired: true,
+      royaltyFee: "6%",
+      licenseDuration: { years: 10, months: 0 },
+      coverImageUrl: "https://picsum.photos/200/402",
+      productGallery: [
+        "https://picsum.photos/404/300",
+        "https://picsum.photos/405/300",
+      ],
+      contactNumber: "+1-222-555-7890",
+      contactEmail: "join@fitzone.com",
+      locations: ["Los Angeles", "San Diego"],
       status: "Active",
-      rating: 4.9,
-      applications: 7,
-      image: "/auto-franchise.png",
+      isVerified: true,
+      reviewsCount: 89,
     },
   ];
 
@@ -226,7 +283,7 @@ export default function FranchisorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {franchiseListings.map((franchise) => (
+                    {franchises.map((franchise) => (
                       <Card
                         key={franchise.id}
                         className="hover:shadow-lg transition-shadow"
@@ -238,7 +295,7 @@ export default function FranchisorDashboard() {
                                 {franchise.name}
                               </CardTitle>
                               <CardDescription className="mt-1">
-                                {franchise.category}
+                                {franchise.categoryIds.join(", ")}
                               </CardDescription>
                             </div>
                             <Badge className={getStatusColor(franchise.status)}>
@@ -249,7 +306,10 @@ export default function FranchisorDashboard() {
                         <CardContent className="space-y-4">
                           <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
                             <img
-                              src={franchise.image || "/placeholder.svg"}
+                              src={
+                                franchise.coverImageUrl ||
+                                "https://picsum.photos/300/200"
+                              }
                               alt={franchise.name}
                               className="w-full h-full object-cover"
                             />
@@ -261,7 +321,7 @@ export default function FranchisorDashboard() {
                                 Investment:
                               </span>
                               <span className="font-medium">
-                                {franchise.investment}
+                                ${franchise.startingPrice.toLocaleString()}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
@@ -274,19 +334,10 @@ export default function FranchisorDashboard() {
                             </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">
-                                Rating:
+                                Reviews:
                               </span>
                               <span className="flex items-center gap-1 font-medium">
-                                <Star className="w-3 h-3 fill-current text-yellow-500" />
-                                {franchise.rating}
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">
-                                Applications:
-                              </span>
-                              <span className="font-medium text-brand-600">
-                                {franchise.applications}
+                                {franchise.reviewsCount}
                               </span>
                             </div>
                           </div>

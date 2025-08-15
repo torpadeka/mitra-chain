@@ -5,7 +5,7 @@ type Franchise = {
   categoryIds: number[];
   description: string;
   startingPrice: number;
-  foundedIn: number; // ✅ matches getTime()
+  foundedIn: number;
   totalOutlets: number;
   legalEntity: string;
   minGrossProfit?: number;

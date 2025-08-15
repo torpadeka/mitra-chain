@@ -1,559 +1,614 @@
-"use client";
-
-import { useState } from "react";
-// import { ProtectedRoute } from "@/components/protected-route";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AddBusinessModal } from "@/components/add-business-modal";
-import {
-  ArrowLeft,
-  Building2,
-  Users,
-  Edit,
-  MessageSquare,
-  MapPin,
-  Star,
-  FileText,
-  Calendar,
-  TrendingUp,
-  DollarSign,
-  Eye,
-  Phone,
-} from "lucide-react";
 import { useParams } from "react-router";
+import { Principal } from "@dfinity/principal";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  DollarSign,
+  Briefcase,
+  CalendarArrowDown,
+  ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  Store,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
-export default function FranchisorFranchiseDetailPage() {
-  const params = useParams();
-  const franchiseId = params.id;
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+// Types
+export type LicenseDuration = {
+  years: number;
+  months?: number;
+};
 
-  // Mock data - replace with actual API calls based on franchiseId
-  const franchiseData = {
-    id: franchiseId,
+// Mock data for initial state
+const getInitialFranchiseData = (id: string): Franchise => {
+  return {
+    id: Number(id) || 1,
+    owner: "aaaaa-aa", // mock principal
     name: "Green Leaf Cafe",
-    category: "Food & Beverage",
-    investment: "$50,000 - $100,000",
-    locations: 12,
-    status: "Active",
-    rating: 4.8,
-    applications: 5,
-    image: "/cafe-franchise.png",
+    categoryIds: [1, 2],
     description:
-      "A premium coffee franchise offering artisanal beverages and fresh pastries in a cozy atmosphere.",
-    features: [
-      "Training Program",
-      "Marketing Support",
-      "Site Selection",
-      "Equipment Package",
+      "Sustainable coffee shop franchise with organic, locally-sourced ingredients.",
+    startingPrice: 150000,
+    foundedIn: new Date("2015-06-15").getTime(),
+    totalOutlets: 45,
+    legalEntity: "Green Leaf Ltd.",
+    minGrossProfit: 50000,
+    maxGrossProfit: 120000,
+    minNetProfit: 25000,
+    maxNetProfit: 80000,
+    isDepositRequired: true,
+    royaltyFee: "5%",
+    licenseDuration: { years: 5, months: 0 },
+    coverImageUrl: "https://picsum.photos/200/400",
+    productGallery: [
+      "https://picsum.photos/400/300",
+      "https://picsum.photos/401/300",
     ],
-    requirements: [
-      "$75,000 liquid capital",
-      "Business experience preferred",
-      "Passion for coffee culture",
-    ],
-    territory: "Exclusive 3-mile radius",
-    royaltyFee: "6%",
-    franchiseFee: "$45,000",
-    totalInvestment: "$150,000 - $250,000",
+    contactNumber: "+1-555-1234",
+    contactEmail: "info@greenleaf.com",
+    locations: ["New York", "Los Angeles", "Chicago"],
+    status: "Active",
+    isVerified: true,
+    reviewsCount: 124,
+  };
+};
+
+export default function FranchiseDashboard() {
+  const { id } = useParams<{ id: string }>();
+  const [franchise, setFranchise] = useState<Franchise>(
+    getInitialFranchiseData(id || "1")
+  );
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingData, setEditingData] = useState<Franchise | null>(null);
+  const [currentImage, setCurrentImage] = useState(0);
+
+  const nextImage = () => {
+    setCurrentImage((prev) => (prev + 1) % franchise.productGallery.length);
   };
 
-  const franchiseeLocations = [
-    {
-      id: 1,
-      franchiseeName: "Sarah Johnson",
-      location: "Downtown Seattle, WA",
-      status: "Active",
-      openDate: "Jan 2024",
-      monthlyRevenue: "$45,000",
-      rating: 4.9,
-    },
-    {
-      id: 2,
-      franchiseeName: "Mike Chen",
-      location: "Portland, OR",
-      status: "Active",
-      openDate: "Mar 2024",
-      monthlyRevenue: "$38,000",
-      rating: 4.7,
-    },
-    {
-      id: 3,
-      franchiseeName: "Emily Davis",
-      location: "Bellevue, WA",
-      status: "Opening Soon",
-      openDate: "May 2024",
-      monthlyRevenue: "$0",
-      rating: 0,
-    },
-  ];
+  const prevImage = () => {
+    setCurrentImage(
+      (prev) =>
+        (prev - 1 + franchise.productGallery.length) %
+        franchise.productGallery.length
+    );
+  };
 
-  const recentApplications = [
-    {
-      id: 1,
-      applicantName: "John Smith",
-      location: "Austin, TX",
-      date: "2024-01-20",
-      status: "Under Review",
-      investment: "$180,000",
-    },
-    {
-      id: 2,
-      applicantName: "Lisa Wang",
-      location: "Denver, CO",
-      date: "2024-01-19",
-      status: "Approved",
-      investment: "$165,000",
-    },
-    {
-      id: 3,
-      applicantName: "Robert Brown",
-      location: "Phoenix, AZ",
-      date: "2024-01-18",
-      status: "Pending Documents",
-      investment: "$175,000",
-    },
-  ];
+  const handleEditOpen = () => {
+    setEditingData({ ...franchise });
+    setIsEditOpen(true);
+  };
 
-  const performanceMetrics = [
-    { label: "Total Revenue", value: "$1.2M", change: "+15%", trend: "up" },
-    { label: "Average Rating", value: "4.8/5", change: "+0.1", trend: "up" },
-    { label: "Active Locations", value: "12", change: "+2", trend: "up" },
-    { label: "Application Rate", value: "85%", change: "+5%", trend: "up" },
-  ];
+  const handleEditChange = (field: keyof Franchise, value: any) => {
+    if (editingData) {
+      setEditingData({ ...editingData, [field]: value });
+    }
+  };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-800";
-      case "Opening Soon":
-        return "bg-blue-100 text-blue-800";
-      case "Under Review":
-        return "bg-yellow-100 text-yellow-800";
-      case "Approved":
-        return "bg-green-100 text-green-800";
-      case "Pending Documents":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const handleArrayChange = (
+    field: "categoryIds" | "productGallery" | "locations",
+    value: string
+  ) => {
+    if (editingData) {
+      if (field === "categoryIds") {
+        const array = value
+          .split(",")
+          .map((item) => Number(item.trim()))
+          .filter((item) => !isNaN(item));
+        setEditingData({ ...editingData, [field]: array });
+      } else {
+        const array = value.split(",").map((item) => item.trim());
+        setEditingData({ ...editingData, [field]: array });
+      }
+    }
+  };
+
+  const handleLicenseDurationChange = (
+    subField: "years" | "months",
+    value: string
+  ) => {
+    if (editingData) {
+      const numValue = Number(value);
+      setEditingData({
+        ...editingData,
+        licenseDuration: {
+          ...editingData.licenseDuration,
+          [subField]: isNaN(numValue) ? undefined : numValue,
+        },
+      });
+    }
+  };
+
+  const handleDateChange = (value: string) => {
+    if (editingData) {
+      const timestamp = new Date(value).getTime();
+      setEditingData({
+        ...editingData,
+        foundedIn: isNaN(timestamp) ? 0 : timestamp,
+      });
+    }
+  };
+
+  const handleSave = () => {
+    if (editingData) {
+      setFranchise(editingData);
+      setIsEditOpen(false);
     }
   };
 
   return (
-    <div>
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <a
-              href="/dashboard/franchisor"
-              className="inline-flex items-center text-brand-600 hover:text-brand-700 mb-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </a>
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
-                  {franchiseData.name}
-                </h1>
-                <p className="text-muted-foreground">
-                  {franchiseData.category}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge className={getStatusColor(franchiseData.status)}>
-                  {franchiseData.status}
-                </Badge>
-                <Button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="bg-brand-600 hover:bg-brand-700"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Franchise
-                </Button>
-              </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Dashboard Header */}
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {franchise.name} Dashboard
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Manage your franchise details and operations
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <Button onClick={handleEditOpen} variant="default">
+                Edit Details
+              </Button>
+              {/* <Button variant="outline">Generate Report</Button> */}
             </div>
           </div>
+        </div>
+      </header>
 
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="locations">Locations</TabsTrigger>
-              <TabsTrigger value="applications">Applications</TabsTrigger>
-              <TabsTrigger value="performance">Performance</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Franchise Image and Details */}
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
-                      <img
-                        src={franchiseData.image || "/placeholder.svg"}
-                        alt={franchiseData.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="font-semibold">{franchiseData.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {franchiseData.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Key Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5" />
-                      Franchise Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">
-                        Investment Range:
-                      </span>
-                      <span className="text-sm font-semibold">
-                        {franchiseData.investment}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">
-                        Franchise Fee:
-                      </span>
-                      <span className="text-sm">
-                        {franchiseData.franchiseFee}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Royalty Fee:</span>
-                      <span className="text-sm">
-                        {franchiseData.royaltyFee}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Territory:</span>
-                      <span className="text-sm">{franchiseData.territory}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">
-                        Active Locations:
-                      </span>
-                      <span className="text-sm font-semibold text-brand-600">
-                        {franchiseData.locations}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">
-                        Average Rating:
-                      </span>
-                      <span className="flex items-center gap-1 text-sm">
-                        <Star className="w-3 h-3 fill-current text-yellow-500" />
-                        {franchiseData.rating}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogTrigger asChild>
+          <span />
+        </DialogTrigger>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Franchise Details</DialogTitle>
+          </DialogHeader>
+          {editingData && (
+            <form className="space-y-4">
+              <div>
+                <label className="block mb-1 font-medium">Name</label>
+                <Input
+                  value={editingData.name}
+                  onChange={(e) => handleEditChange("name", e.target.value)}
+                />
               </div>
 
-              {/* Features and Requirements */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>What We Provide</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {franchiseData.features.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-brand-500 rounded-full"></div>
-                          <span className="text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Requirements</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {franchiseData.requirements.map((requirement, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-brand-500 rounded-full"></div>
-                          <span className="text-sm">{requirement}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+              <div>
+                <label className="block mb-1 font-medium">Description</label>
+                <Textarea
+                  value={editingData.description}
+                  onChange={(e) =>
+                    handleEditChange("description", e.target.value)
+                  }
+                />
               </div>
-            </TabsContent>
 
-            <TabsContent value="locations" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5" />
-                    Franchisee Locations
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your franchise network
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {franchiseeLocations.map((location) => (
-                      <div
-                        key={location.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold">
-                              {location.franchiseeName}
-                            </h3>
-                            <Badge className={getStatusColor(location.status)}>
-                              {location.status}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {location.location}
-                            </span>
-                            <span>Opened: {location.openDate}</span>
-                            <span>Revenue: {location.monthlyRevenue}</span>
-                            {location.rating > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Star className="w-3 h-3 fill-current text-yellow-500" />
-                                {location.rating}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <MessageSquare className="w-4 h-4 mr-1" />
-                            Contact
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+              <div>
+                <label className="block mb-1 font-medium">Starting Price</label>
+                <Input
+                  type="number"
+                  value={editingData.startingPrice}
+                  onChange={(e) =>
+                    handleEditChange("startingPrice", Number(e.target.value))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Founded In</label>
+                <Input
+                  type="date"
+                  value={
+                    new Date(editingData.foundedIn).toISOString().split("T")[0]
+                  }
+                  onChange={(e) => handleDateChange(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Total Outlets</label>
+                <Input
+                  type="number"
+                  value={editingData.totalOutlets}
+                  onChange={(e) =>
+                    handleEditChange("totalOutlets", Number(e.target.value))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Legal Entity</label>
+                <Input
+                  value={editingData.legalEntity}
+                  onChange={(e) =>
+                    handleEditChange("legalEntity", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Min Gross Profit
+                </label>
+                <Input
+                  type="number"
+                  value={editingData.minGrossProfit}
+                  onChange={(e) =>
+                    handleEditChange("minGrossProfit", Number(e.target.value))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Max Gross Profit
+                </label>
+                <Input
+                  type="number"
+                  value={editingData.maxGrossProfit}
+                  onChange={(e) =>
+                    handleEditChange("maxGrossProfit", Number(e.target.value))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Min Net Profit</label>
+                <Input
+                  type="number"
+                  value={editingData.minNetProfit}
+                  onChange={(e) =>
+                    handleEditChange("minNetProfit", Number(e.target.value))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Max Net Profit</label>
+                <Input
+                  type="number"
+                  value={editingData.maxNetProfit}
+                  onChange={(e) =>
+                    handleEditChange("maxNetProfit", Number(e.target.value))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Royalty Fee</label>
+                <Input
+                  value={editingData.royaltyFee}
+                  onChange={(e) =>
+                    handleEditChange("royaltyFee", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  License Duration (Years)
+                </label>
+                <Input
+                  type="number"
+                  value={editingData.licenseDuration.years}
+                  onChange={(e) =>
+                    handleLicenseDurationChange("years", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  License Duration (Months)
+                </label>
+                <Input
+                  type="number"
+                  value={editingData.licenseDuration.months || ""}
+                  onChange={(e) =>
+                    handleLicenseDurationChange("months", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Cover Image URL
+                </label>
+                <Input
+                  value={editingData.coverImageUrl}
+                  onChange={(e) =>
+                    handleEditChange("coverImageUrl", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Product Gallery (comma separated)
+                </label>
+                <Input
+                  value={editingData.productGallery.join(", ")}
+                  onChange={(e) =>
+                    handleArrayChange("productGallery", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">
+                  Category IDs (comma separated)
+                </label>
+                <Input
+                  value={editingData.categoryIds.join(", ")}
+                  onChange={(e) =>
+                    handleArrayChange("categoryIds", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="checkbox"
+                  checked={editingData.isDepositRequired}
+                  onChange={(e) =>
+                    handleEditChange("isDepositRequired", e.target.checked)
+                  }
+                  className="w-5 h-5"
+                />
+                <span>Deposit Required</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="checkbox"
+                  checked={editingData.isVerified}
+                  onChange={(e) =>
+                    handleEditChange("isVerified", e.target.checked)
+                  }
+                  className="w-5 h-5"
+                />
+                <span>Verified</span>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-medium">Status</label>
+                <select
+                  className="w-full border rounded px-3 py-2"
+                  value={editingData.status}
+                  onChange={(e) => handleEditChange("status", e.target.value)}
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </form>
+          )}
+          <DialogFooter>
+            <Button onClick={handleSave}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Main Dashboard Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-gray-600">
+                Total Outlets
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center">
+              <Store className="w-8 h-8 text-green-600 mr-3" />
+              <span className="text-2xl font-bold">
+                {franchise.totalOutlets}
+              </span>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-gray-600">
+                Net Profit Range
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center">
+              <DollarSign className="w-8 h-8 text-green-600 mr-3" />
+              <span className="text-2xl font-bold">
+                ${franchise.minNetProfit?.toLocaleString()} - $
+                {franchise.maxNetProfit?.toLocaleString()}
+              </span>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-gray-600">
+                Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center">
+              <Briefcase className="w-8 h-8 text-green-600 mr-3" />
+              <span className="text-2xl font-bold">{franchise.status}</span>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Franchise Details */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-green-600" />
+              Franchise Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <p className="text-gray-600 font-medium">Description</p>
+                <p className="text-gray-700">{franchise.description}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 font-medium">Legal Entity</p>
+                <p className="text-gray-700">{franchise.legalEntity}</p>
+              </div>
+              <div>
+                <p className="text-gray-600 font-medium">Founded</p>
+                <p className="text-gray-700">
+                  {new Date(franchise.foundedIn).getFullYear()}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-600 font-medium">Locations</p>
+                <p className="text-gray-700">
+                  {franchise.locations.join(", ")}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Financial Information */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              Financial Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Franchise Fee</span>
+                  <span className="font-semibold">{franchise.royaltyFee}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Starting Price</span>
+                  <span className="font-semibold">
+                    ${franchise.startingPrice.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Gross Profit</span>
+                  <span className="font-semibold">
+                    ${franchise.minGrossProfit?.toLocaleString()} - $
+                    {franchise.maxGrossProfit?.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-600">Net Profit</span>
+                  <span className="font-semibold">
+                    ${franchise.minNetProfit?.toLocaleString()} - $
+                    {franchise.maxNetProfit?.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium">
+                    Deposit Required
+                  </span>
+                  <span className="text-black">
+                    {franchise.isDepositRequired ? "Yes" : "No"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-gray-600 font-medium mt-4">
+                    License Duration
+                  </span>
+                  <span className="text-black">
+                    {franchise.licenseDuration.years} years{" "}
+                    {franchise.licenseDuration.months
+                      ? `, ${franchise.licenseDuration.months} months`
+                      : ""}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Gallery Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-green-600" />
+              Gallery Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="relative">
+                <img
+                  src={
+                    franchise.productGallery[currentImage] ||
+                    "/placeholder.svg?height=400&width=600"
+                  }
+                  alt={`Gallery image ${currentImage + 1}`}
+                  className="w-full h-80 object-cover rounded-lg"
+                />
+                <div className="absolute inset-0 flex items-center justify-between p-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={prevImage}
+                    className="bg-white/90 hover:bg-white"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={nextImage}
+                    className="bg-white/90 hover:bg-white"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                    {currentImage + 1} / {franchise.productGallery.length}
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="applications" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Recent Applications
-                  </CardTitle>
-                  <CardDescription>
-                    Review applications for this franchise
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentApplications.map((application) => (
-                      <div
-                        key={application.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold">
-                              {application.applicantName}
-                            </h3>
-                            <Badge
-                              className={getStatusColor(application.status)}
-                            >
-                              {application.status}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {application.location}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {application.date}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="w-3 h-3" />
-                              {application.investment}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
-                            Review
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Phone className="w-4 h-4 mr-1" />
-                            Contact
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="performance" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {performanceMetrics.map((metric, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            {metric.label}
-                          </p>
-                          <p className="text-2xl font-bold text-foreground">
-                            {metric.value}
-                          </p>
-                          <p
-                            className={`text-sm ${metric.trend === "up" ? "text-green-600" : metric.trend === "down" ? "text-red-600" : "text-muted-foreground"}`}
-                          >
-                            {metric.change}
-                          </p>
-                        </div>
-                        <TrendingUp
-                          className={`h-8 w-8 ${metric.trend === "up" ? "text-green-500" : metric.trend === "down" ? "text-red-500" : "text-gray-400"}`}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {franchise.productGallery.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImage(index)}
+                    className={`relative overflow-hidden rounded-md ${
+                      currentImage === index ? "ring-2 ring-green-500" : ""
+                    }`}
+                  >
+                    <img
+                      src={image || "/placeholder.svg?height=100&width=100"}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-20 object-cover hover:scale-105 transition-transform"
+                    />
+                  </button>
                 ))}
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Performance Overview</CardTitle>
-                  <CardDescription>
-                    Key metrics for this franchise
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <DollarSign className="h-8 w-8 text-green-600" />
-                        <div>
-                          <h4 className="font-medium">Revenue Performance</h4>
-                          <p className="text-sm text-muted-foreground">
-                            15% above industry average
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant="default"
-                        className="bg-green-100 text-green-800"
-                      >
-                        Excellent
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Users className="h-8 w-8 text-blue-600" />
-                        <div>
-                          <h4 className="font-medium">
-                            Franchisee Satisfaction
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            4.8/5 average rating
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant="default"
-                        className="bg-blue-100 text-blue-800"
-                      >
-                        Great
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="settings" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Franchise Settings</CardTitle>
-                  <CardDescription>
-                    Manage settings for this franchise
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Update Franchise Documents
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                  >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Territory Management
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                  >
-                    <DollarSign className="w-4 h-4 mr-2" />
-                    Fee Structure
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Franchisee Requirements
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-
-      <AddBusinessModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        // editMode={true}
-        // franchiseData={franchiseData}
-      />
     </div>
   );
 }
