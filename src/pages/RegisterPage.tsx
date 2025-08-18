@@ -58,8 +58,8 @@ export default function RegisterPage() {
   }, [actor, whoami]);
 
   useEffect(() => {
-    if (!(user?.name == "")) window.location.href = "/";
-  }, []);
+    if (user != null) window.location.href = "/";
+  }, [user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -177,7 +177,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSignup} className="space-y-4">
               {/* Profile Picture Upload */}
               <div className="space-y-2">
-                {whoamiResult}
+                {/* {whoamiResult} */}
                 <Label>Profile Picture</Label>
                 <div className="flex items-center gap-4">
                   {profilePicUrl ? (

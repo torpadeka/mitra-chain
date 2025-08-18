@@ -11,12 +11,80 @@ import {
   Calendar,
   Store,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useUser } from "@/context/AuthContext";
+import { useState } from "react";
+import { FranchiseHandler } from "@/handler/FranchiseHandler";
+import { ApplicationHandler } from "@/handler/ApplicationHandler";
+
+interface FrontendFranchise {
+  id: number;
+  owner: string;
+  name: string;
+  categoryIds: number[];
+  description: string;
+  startingPrice: number;
+  foundedIn: Date;
+  totalOutlets: number;
+  legalEntity: string;
+  minGrossProfit?: number;
+  maxGrossProfit?: number;
+  minNetProfit?: number;
+  maxNetProfit?: number;
+  isDepositRequired: boolean;
+  royaltyFee?: string;
+  licenseDuration: { OneTime?: true; Years?: number };
+  coverImageUrl: string;
+  productGallery: string[];
+  contactNumber?: string;
+  contactEmail?: string;
+  locations: string[];
+  status: "Active" | "Inactive";
+  isVerified: boolean;
+  reviewsCount: number;
+}
 
 interface FranchiseHeroProps {
-  franchise: Franchise;
+  franchise: FrontendFranchise;
 }
 
 export function FranchiseHero({ franchise }: FranchiseHeroProps) {
+  const { user, actor } = useUser();
+  const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [coverLetter, setCoverLetter] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleApply = async () => {
+    if (!user || !actor) {
+      setError("You must be logged in to apply.");
+      return;
+    }
+
+    if (!("Franchisee" in user.role)) {
+      setError("Only franchisees can apply for franchises.");
+      return;
+    }
+
+    try {
+      const applicationHandler = new ApplicationHandler(actor);
+      await applicationHandler.applyForFranchise(franchise.id, coverLetter);
+      setIsApplyOpen(false);
+      setCoverLetter("");
+      setError(null);
+      alert("Application submitted successfully!");
+    } catch (err: any) {
+      setError("Failed to submit application: " + err.message);
+    }
+  };
+
   return (
     <section className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -45,12 +113,12 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
                 </Badge>
               )}
 
-              {franchise.status ? (
+              {franchise.status === "Active" ? (
                 <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
                   Active
                 </Badge>
               ) : (
-                <Badge className="bg-red-100 text-red-700 hover:bg-green-100">
+                <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
                   Inactive
                 </Badge>
               )}
@@ -74,7 +142,7 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
               </div>
               <div className="flex items-center text-gray-600">
                 <Calendar className="w-4 h-4 mr-1" />
-                {new Date(franchise.foundedIn).getFullYear()}
+                {franchise.foundedIn.getFullYear()}
               </div>
             </div>
 
@@ -92,9 +160,49 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="btn-primary text-lg px-8 py-4">
-                Apply Now
-              </Button>
+              <Dialog open={isApplyOpen} onOpenChange={setIsApplyOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    className="btn-primary text-lg px-8 py-4"
+                    onClick={() => {
+                      if (!user) {
+                        setError("You must be logged in to apply.");
+                        return;
+                      }
+                      if (!("Franchisee" in user.role)) {
+                        setError("Only franchisees can apply for franchises.");
+                        return;
+                      }
+                      setIsApplyOpen(true);
+                    }}
+                  >
+                    Apply Now
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Apply for {franchise.name}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Textarea
+                      placeholder="Write your application letter here..."
+                      value={coverLetter}
+                      onChange={(e) => setCoverLetter(e.target.value)}
+                      className="min-h-[150px]"
+                    />
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      onClick={handleApply}
+                      disabled={!coverLetter.trim()}
+                    >
+                      Submit Application
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
               <Button className="btn-secondary text-lg px-8 py-4">
                 Contact Franchisor
               </Button>
