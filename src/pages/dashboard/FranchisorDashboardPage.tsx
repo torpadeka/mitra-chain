@@ -24,6 +24,8 @@ import {
   Calendar,
   Star,
   FileText,
+  Text,
+  Notebook,
 } from "lucide-react";
 import { ChatSystem } from "@/components/chat";
 import { useUser } from "@/context/AuthContext";
@@ -31,6 +33,16 @@ import {
   FranchiseHandler,
   FrontendFranchise,
 } from "@/handler/FranchiseHandler";
+import {
+  ApplicationHandler,
+  FrontendApplication,
+} from "@/handler/ApplicationHandler";
+import { ApplicationsTab } from "@/components/application-tab";
+
+interface ApplicationDetails {
+  application: FrontendApplication;
+  franchise: FrontendFranchise;
+}
 
 export default function FranchisorDashboard() {
   //   const { user } = useAuth();
@@ -38,6 +50,12 @@ export default function FranchisorDashboard() {
 
   const { actor, principal } = useUser();
   const [franchises, setFranchises] = useState<FrontendFranchise[]>([]);
+  const [recentApplications, setRecentApplications] = useState<
+    FrontendApplication[]
+  >([]);
+  const [applicationDetails, setApplicationDetails] = useState<
+    ApplicationDetails[]
+  >([]);
 
   useEffect(() => {
     if (!actor || !principal) {
@@ -45,18 +63,41 @@ export default function FranchisorDashboard() {
       return;
     }
 
-    const fetchFranchise = async () => {
+    const fetchAll = async () => {
       setFranchises((prev) => ({ ...prev, loading: true }));
       try {
         const franchiseHandler = new FranchiseHandler(actor);
         const franchise = await franchiseHandler.getFranchiseByOwner(principal);
         setFranchises(franchise);
+        const applicationHandler = new ApplicationHandler(actor);
+        const applications = await applicationHandler.getApplicationsByOwner(
+          principal.toString()
+        );
+        setRecentApplications(applications);
+
+        const franchiseResults = await Promise.all(
+          applications.map((app) =>
+            franchiseHandler.getFranchise(app.franchiseId)
+          )
+        );
+
+        setApplicationDetails(
+          applications
+            .map((app, idx) => {
+              const franchise = franchiseResults[idx];
+              if (franchise) {
+                return { application: app, franchise };
+              }
+              return null;
+            })
+            .filter((detail): detail is ApplicationDetails => detail !== null)
+        );
       } catch (error: any) {
         setFranchises([]);
       }
     };
 
-    fetchFranchise();
+    fetchAll();
   }, [actor, principal]);
 
   // Mock data - replace with actual API calls
@@ -66,33 +107,6 @@ export default function FranchisorDashboard() {
     pendingApplications: 8,
     averageRating: 4.7,
   };
-
-  const recentApplications = [
-    {
-      id: 1,
-      applicantName: "Sarah Johnson",
-      franchise: "Green Leaf Cafe",
-      location: "Portland, OR",
-      date: "2024-01-20",
-      status: "Under Review",
-    },
-    {
-      id: 2,
-      applicantName: "Mike Chen",
-      franchise: "FitZone Gym",
-      location: "Austin, TX",
-      date: "2024-01-19",
-      status: "Approved",
-    },
-    {
-      id: 3,
-      applicantName: "Emily Davis",
-      franchise: "TechRepair Pro",
-      location: "Denver, CO",
-      date: "2024-01-18",
-      status: "Pending Documents",
-    },
-  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -214,7 +228,6 @@ export default function FranchisorDashboard() {
                   <TabsTrigger value="chat">Messages</TabsTrigger>
                   <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
-
                 <TabsContent value="franchises" className="space-y-6">
                   <Card>
                     <CardHeader>
@@ -315,69 +328,13 @@ export default function FranchisorDashboard() {
                     </CardContent>
                   </Card>
                 </TabsContent>
-
-                <TabsContent value="applications" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Recent Applications
-                      </CardTitle>
-                      <CardDescription>
-                        Review and manage franchise applications
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {recentApplications.map((application) => (
-                          <div
-                            key={application.id}
-                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                          >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="font-semibold">
-                                  {application.applicantName}
-                                </h3>
-                                <Badge
-                                  className={getStatusColor(application.status)}
-                                >
-                                  {application.status}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                                <span>Franchise: {application.franchise}</span>
-                                <span className="flex items-center gap-1">
-                                  <MapPin className="w-3 h-3" />
-                                  {application.location}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="w-3 h-3" />
-                                  {application.date}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
-                                <Eye className="w-4 h-4 mr-1" />
-                                Review
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <MessageSquare className="w-4 h-4 mr-1" />
-                                Contact
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
+                <ApplicationsTab
+                  applicationDetails={applicationDetails}
+                  getStatusColor={getStatusColor}
+                />
                 <TabsContent value="chat" className="space-y-6">
                   <ChatSystem userType="franchisor" />
                 </TabsContent>
-
                 <TabsContent value="settings" className="space-y-6">
                   <Card>
                     <CardHeader>
