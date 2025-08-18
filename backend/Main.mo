@@ -14,6 +14,7 @@ import Float "mo:base/Float";
 import Array "mo:base/Array";
 import Hash "mo:base/Hash";
 import Buffer "mo:base/Buffer";
+import Result "mo:base/Result";
 
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
@@ -159,8 +160,85 @@ persistent actor {
     id;
   };
 
+  public shared (msg) func updateFranchise(
+    id : Nat,
+    name : Text,
+    categoryIds : [Nat],
+    description : Text,
+    startingPrice : Float,
+    foundedIn : Time.Time,
+    totalOutlets : Nat,
+    legalEntity : Text,
+    minGrossProfit : ?Float,
+    maxGrossProfit : ?Float,
+    minNetProfit : ?Float,
+    maxNetProfit : ?Float,
+    isDepositRequired : Bool,
+    royaltyFee : ?Text,
+    licenseDuration : Types.LicenseDuration,
+    coverImageUrl : Text,
+    productGallery : [Text],
+    contactNumber : ?Text,
+    contactEmail : ?Text,
+    locations : [Text],
+    status : { #Active; #Inactive },
+    isVerified : Bool,
+  ) : async Result.Result<Nat, Text> {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else return #err("User not registered");
+    let ?franchise = franchises.get(id) else return #err("Franchise not found");
+
+    if (user.role != #Franchisor or franchise.owner != caller) {
+      return #err("Only the franchise owner can update this franchise");
+    };
+
+    let updatedFranchise : Types.Franchise = {
+      id = franchise.id;
+      owner = franchise.owner;
+      name;
+      categoryIds = List.fromArray(categoryIds);
+      description;
+      startingPrice;
+      foundedIn;
+      totalOutlets;
+      legalEntity;
+      minGrossProfit;
+      maxGrossProfit;
+      minNetProfit;
+      maxNetProfit;
+      isDepositRequired;
+      royaltyFee;
+      licenseDuration;
+      coverImageUrl;
+      productGallery = List.fromArray(productGallery);
+      contactNumber;
+      contactEmail;
+      locations = List.fromArray(locations);
+      status;
+      isVerified;
+      reviewsCount = franchise.reviewsCount;
+    };
+
+    franchises.put(id, updatedFranchise);
+    #ok(id);
+  };
+
   public query func getFranchise(id : Nat) : async ?Types.Franchise {
     franchises.get(id);
+  };
+
+  public query func getFranchisesByOwner(owner : Principal) : async [Types.Franchise] {
+    let entries = Iter.toArray(franchises.entries());
+    let ownedFranchises = Iter.toArray(
+      Iter.filter<Types.Franchise>(
+        Iter.map<(Nat, Types.Franchise), Types.Franchise>(
+          Iter.fromArray(entries),
+          func((id, franchise)) { franchise },
+        ),
+        func(franchise) { franchise.owner == owner },
+      )
+    );
+    ownedFranchises;
   };
 
   public query func listFranchises() : async [Types.Franchise] {

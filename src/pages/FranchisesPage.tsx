@@ -3,11 +3,14 @@ import { FranchiseGrid } from "@/components/franchise-grid";
 import { FranchiseSearch } from "@/components/franchise-search";
 import { Footer } from "@/components/footer";
 import { useSearchParams } from "react-router";
+import { FranchiseHandler } from "@/handler/FranchiseHandler";
+import { useUser } from "@/context/AuthContext";
 
 export default function FranchisesPage() {
   const [searchParams] = useSearchParams();
   const q = searchParams.get("q");
   console.log("Search query:", q);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
