@@ -114,4 +114,18 @@ module {
     relatedNftId : ?Nat;
     relatedApplicationId : ?Nat;
   };
+
+  public type Message = {
+    messageId : Nat;
+    senderPrincipal : Principal;
+    recipientPrincipal : Principal;
+    text : Text;
+    timestamp : Time.Time;
+    conversationId : Nat;
+  };
+
+  public type Conversation = {
+    conversationId : Nat;
+    participants : List.List<Principal>;
+  };
 };

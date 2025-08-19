@@ -9,15 +9,20 @@ export type List_1 = [] | [[string, List_1]];
 export type List_2 =
   | []
   | [[{ to: Account; from: Account; timestamp: Time }, List_2]];
+export type List_3 = [] | [[Principal, List_3]];
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
 export const listToArray = <
-  T extends string | bigint | { to: Account; from: Account; timestamp: Time },
+  T extends
+    | string
+    | bigint
+    | { to: Account; from: Account; timestamp: Time }
+    | Principal,
 >(
-  list: List | List_1 | List_2
+  list: List | List_1 | List_2 | List_3
 ): T[] => {
   const result: T[] = [];
   let current = list;

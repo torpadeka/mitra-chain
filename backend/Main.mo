@@ -27,6 +27,8 @@ persistent actor {
   var nextApplicationId : Nat = 0;
   var nextTokenId : Nat = 0;
   var nextTransactionId : Nat = 0;
+  var nextConversationId : Nat = 0;
+  var nextMessageId : Nat = 0;
 
   // Stable storage arrays for upgrades
   var usersEntries : [(Principal, Types.User)] = [];
@@ -35,6 +37,8 @@ persistent actor {
   var applicationsEntries : [(Nat, Types.Application)] = [];
   var nftsEntries : [(Nat, Types.NFTLicense)] = [];
   var transactionsEntries : [(Nat, Types.Transaction)] = [];
+  var conversationsEntries : [(Nat, Types.Conversation)] = [];
+  var messagesEntries : [(Nat, Types.Message)] = [];
 
   // HashMaps for data
   transient var users = HashMap.HashMap<Principal, Types.User>(0, Principal.equal, Principal.hash);
@@ -43,6 +47,8 @@ persistent actor {
   transient var applications = HashMap.HashMap<Nat, Types.Application>(0, Nat.equal, natHash);
   transient var nfts = HashMap.HashMap<Nat, Types.NFTLicense>(0, Nat.equal, natHash);
   transient var transactions = HashMap.HashMap<Nat, Types.Transaction>(0, Nat.equal, natHash);
+  transient var conversations = HashMap.HashMap<Nat, Types.Conversation>(0, Nat.equal, natHash);
+  transient var messages = HashMap.HashMap<Nat, Types.Message>(0, Nat.equal, natHash);
 
   // Upgrade hooks
   system func preupgrade() {
@@ -52,6 +58,8 @@ persistent actor {
     applicationsEntries := Iter.toArray(applications.entries());
     nftsEntries := Iter.toArray(nfts.entries());
     transactionsEntries := Iter.toArray(transactions.entries());
+    conversationsEntries := Iter.toArray(conversations.entries());
+    messagesEntries := Iter.toArray(messages.entries());
   };
 
   system func postupgrade() {
@@ -61,6 +69,8 @@ persistent actor {
     applications := HashMap.fromIter<Nat, Types.Application>(applicationsEntries.vals(), applicationsEntries.size(), Nat.equal, natHash);
     nfts := HashMap.fromIter<Nat, Types.NFTLicense>(nftsEntries.vals(), nftsEntries.size(), Nat.equal, natHash);
     transactions := HashMap.fromIter<Nat, Types.Transaction>(transactionsEntries.vals(), transactionsEntries.size(), Nat.equal, natHash);
+    conversations := HashMap.fromIter<Nat, Types.Conversation>(conversationsEntries.vals(), conversationsEntries.size(), Nat.equal, natHash);
+    messages := HashMap.fromIter<Nat, Types.Message>(messagesEntries.vals(), messagesEntries.size(), Nat.equal, natHash);
   };
 
   // User functions
@@ -491,5 +501,81 @@ persistent actor {
 
   public query func listTransactions() : async [Types.Transaction] {
     Iter.toArray(transactions.vals());
+  };
+
+  // Chat functions
+  public shared (msg) func createConversation(participants : [Principal]) : async Nat {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+
+    // Ensure exactly two participants
+    if (participants.size() != 2) {
+      throw Error.reject("Conversation must have exactly two participants");
+    };
+
+    // Ensure both participants are registered and distinct
+    for (p in participants.vals()) {
+      let ?_ = users.get(p) else throw Error.reject("All participants must be registered users");
+    };
+    if (Principal.equal(participants[0], participants[1])) {
+      throw Error.reject("Participants must be distinct users");
+    };
+
+    let id = nextConversationId;
+    nextConversationId += 1;
+    let conversation : Types.Conversation = {
+      conversationId = id;
+      participants = List.fromArray(participants);
+    };
+    conversations.put(id, conversation);
+    id;
+  };
+
+  public query func getAllConversationsByPrincipal(principal : Principal) : async [Types.Conversation] {
+    let results = Buffer.Buffer<Types.Conversation>(0);
+    for (conversation in conversations.vals()) {
+      if (List.some(conversation.participants, func(p : Principal) : Bool { Principal.equal(p, principal) })) {
+        results.add(conversation);
+      };
+    };
+    Buffer.toArray(results);
+  };
+
+  public query func getAllMessagesByConversation(conversationId : Nat) : async [Types.Message] {
+    let ?_ = conversations.get(conversationId) else return [];
+    let results = Buffer.Buffer<Types.Message>(0);
+    for (message in messages.vals()) {
+      if (message.conversationId == conversationId) {
+        results.add(message);
+      };
+    };
+    Buffer.toArray(results);
+  };
+
+  public shared (msg) func sendMessage(conversationId : Nat, recipientPrincipal : Principal, text : Text) : async Nat {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    let ?conversation = conversations.get(conversationId) else throw Error.reject("Conversation not found");
+    
+    // Verify sender and recipient are in the conversation
+    if (not List.some(conversation.participants, func(p : Principal) : Bool { Principal.equal(p, caller) })) {
+      throw Error.reject("Sender not a participant in this conversation");
+    };
+    if (not List.some(conversation.participants, func(p : Principal) : Bool { Principal.equal(p, recipientPrincipal) })) {
+      throw Error.reject("Recipient not a participant in this conversation");
+    };
+
+    let messageId = nextMessageId;
+    nextMessageId += 1;
+    let message : Types.Message = {
+      messageId;
+      senderPrincipal = caller;
+      recipientPrincipal;
+      text;
+      timestamp = Time.now();
+      conversationId;
+    };
+    messages.put(messageId, message);
+    messageId;
   };
 };
