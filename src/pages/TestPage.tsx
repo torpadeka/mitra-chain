@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/context/AuthContext";
 import { FranchiseHandler } from "@/handler/FranchiseHandler";
@@ -18,6 +18,7 @@ import {
   XCircle,
   Copy,
 } from "lucide-react";
+import { useAuth } from "@ic-reactor/react";
 
 interface TestResult {
   method: string;
@@ -28,12 +29,16 @@ interface TestResult {
 }
 
 const TestPage: React.FC = () => {
-  const { actor, principal } = useUser();
+  const { user, actor, principal } = useUser();
   const [results, setResults] = useState<TestResult[]>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set()
   );
   const [loadingTests, setLoadingTests] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
 
   // Form states
   const [franchiseId, setFranchiseId] = useState<string>("1");
@@ -140,7 +145,7 @@ const TestPage: React.FC = () => {
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-primary bg-surface-primary"
         placeholder={placeholder}
       />
     </div>
