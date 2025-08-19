@@ -8,9 +8,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Briefcase, DollarSign } from "lucide-react";
+import { FrontendFranchise } from "@/handler/FranchiseHandler";
 
 interface FranchiseCardProps {
-  franchise: Franchise;
+  franchise: FrontendFranchise;
 }
 
 export function FranchiseCard({ franchise }: FranchiseCardProps) {

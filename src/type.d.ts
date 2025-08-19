@@ -14,7 +14,7 @@ type Franchise = {
   maxNetProfit?: number;
   isDepositRequired: boolean;
   royaltyFee?: string;
-  licenseDuration: { years: number; months: number };
+  licenseDuration: { OneTime?: true; Years?: number };
   coverImageUrl: string;
   productGallery: string[];
   contactNumber?: string;
@@ -24,3 +24,9 @@ type Franchise = {
   isVerified: boolean;
   reviewsCount: number;
 };
+
+interface FranchiseResult {
+  data?: any;
+  error?: string;
+  loading: boolean;
+}

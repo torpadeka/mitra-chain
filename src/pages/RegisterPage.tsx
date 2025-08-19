@@ -19,11 +19,13 @@ import { Eye, EyeOff, Building2, Store, Upload, X } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { Role } from "@/declarations/backend/backend.did";
 import { useNavigate } from "react-router";
+import { Principal } from "@ic-reactor/react/dist/types";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { actor, createUser, login, whoami } = useUser();
+  const { actor, createUser, login, whoami, getUser, principal, user } =
+    useUser();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userType, setUserType] = useState<"franchisee" | "franchisor">(
     "franchisee"
@@ -54,6 +56,10 @@ export default function RegisterPage() {
 
     fetchWhoami();
   }, [actor, whoami]);
+
+  useEffect(() => {
+    if (user != null) window.location.href = "/";
+  }, [user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -153,14 +159,14 @@ export default function RegisterPage() {
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger
-                value="Franchisee"
+                value="franchisee"
                 className="flex items-center gap-2"
               >
                 <Store className="h-4 w-4" />
                 Franchisee
               </TabsTrigger>
               <TabsTrigger
-                value="Franchisor"
+                value="franchisor"
                 className="flex items-center gap-2"
               >
                 <Building2 className="h-4 w-4" />
@@ -171,7 +177,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSignup} className="space-y-4">
               {/* Profile Picture Upload */}
               <div className="space-y-2">
-                {whoamiResult}
+                {/* {whoamiResult} */}
                 <Label>Profile Picture</Label>
                 <div className="flex items-center gap-4">
                   {profilePicUrl ? (
