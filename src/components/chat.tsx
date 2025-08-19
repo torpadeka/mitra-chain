@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { useAuth } from "@/contexts/auth-context";
 import {
   MessageSquare,
   Send,
@@ -20,161 +18,109 @@ import {
   Paperclip,
   Smile,
 } from "lucide-react";
-
-interface Message {
-  id: string;
-  senderId: string;
-  senderName: string;
-  senderType: "franchisee" | "franchisor";
-  content: string;
-  timestamp: string;
-  read: boolean;
-}
-
-interface Conversation {
-  id: string;
-  participantId: string;
-  participantName: string;
-  participantType: "franchisee" | "franchisor";
-  lastMessage: string;
-  lastMessageTime: string;
-  unreadCount: number;
-  avatar?: string;
-  franchise?: string;
-}
+import { ActorSubclass } from "@dfinity/agent";
+import { _SERVICE } from "@/declarations/backend/backend.did";
+import { Principal } from "@dfinity/principal";
+import {
+  ChatHandler,
+  FrontendConversation,
+  FrontendMessage,
+} from "@/handler/ChatHandler";
+import { useUser } from "@/context/AuthContext";
 
 interface ChatSystemProps {
   userType: "franchisee" | "franchisor";
+  currentChat?: string;
 }
 
-export function ChatSystem({ userType }: ChatSystemProps) {
-  //   const { user } = useAuth();
-  const user = {
-    id: "1",
-    email: "test@example.com",
-    firstName: "John",
-    lastName: "Doe",
-    userType,
-    phone: "+1 (555) 123-4567",
-  };
+export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
+  const { actor, principal, getUser } = useUser();
+  if (!actor || !principal) {
+    return (
+      <div className="flex items-center justify-center h-[600px]">
+        <p className="text-muted-foreground">Please log in to view messages</p>
+      </div>
+    );
+  }
+
+  const chatHandler = new ChatHandler(actor);
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
-  >(null);
+  >(currentChat ? currentChat.toString() : null);
   const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [conversations, setConversations] = useState<FrontendConversation[]>(
+    []
+  );
+  const [messages, setMessages] = useState<FrontendMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userNameCache, setUserNameCache] = useState<Record<string, string>>(
+    {}
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock data - replace with actual API calls
-  const conversations: Conversation[] =
-    userType === "franchisee"
-      ? [
-          {
-            id: "1",
-            participantId: "franchisor-1",
-            participantName: "Green Leaf Cafe Support",
-            participantType: "franchisor",
-            lastMessage:
-              "Thanks for the monthly report. Everything looks great!",
-            lastMessageTime: "2 hours ago",
-            unreadCount: 0,
-            franchise: "Green Leaf Cafe",
-          },
-          {
-            id: "2",
-            participantId: "franchisor-2",
-            participantName: "Marketing Team",
-            participantType: "franchisor",
-            lastMessage: "New promotional materials are ready for download",
-            lastMessageTime: "1 day ago",
-            unreadCount: 2,
-            franchise: "Green Leaf Cafe",
-          },
-        ]
-      : [
-          {
-            id: "1",
-            participantId: "franchisee-1",
-            participantName: "Sarah Johnson",
-            participantType: "franchisee",
-            lastMessage: "Question about the new menu items implementation",
-            lastMessageTime: "30 minutes ago",
-            unreadCount: 1,
-            franchise: "Green Leaf Cafe - Seattle",
-          },
-          {
-            id: "2",
-            participantId: "franchisee-2",
-            participantName: "Mike Chen",
-            participantType: "franchisee",
-            lastMessage: "Equipment maintenance completed successfully",
-            lastMessageTime: "2 hours ago",
-            unreadCount: 0,
-            franchise: "FitZone Gym - Austin",
-          },
-          {
-            id: "3",
-            participantId: "franchisee-3",
-            participantName: "Emily Davis",
-            participantType: "franchisee",
-            lastMessage: "Marketing campaign results exceeded expectations!",
-            lastMessageTime: "1 day ago",
-            unreadCount: 0,
-            franchise: "TechRepair Pro - Denver",
-          },
-        ];
+  // Fetch conversations and pre-fetch participant names
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        setLoading(true);
+        const convs =
+          await chatHandler.getAllConversationsByPrincipal(principal);
+        setConversations(convs);
 
-  const messages: Message[] = [
-    {
-      id: "1",
-      senderId: userType === "franchisee" ? "franchisor-1" : "franchisee-1",
-      senderName:
-        userType === "franchisee" ? "Green Leaf Support" : "Sarah Johnson",
-      senderType: userType === "franchisee" ? "franchisor" : "franchisee",
-      content: "Hi! I wanted to follow up on the monthly report submission.",
-      timestamp: "10:30 AM",
-      read: true,
-    },
-    {
-      id: "2",
-      senderId: user?.id || "current-user",
-      senderName: user?.firstName + " " + user?.lastName || "You",
-      senderType: userType,
-      content:
-        "Thanks for reaching out! I submitted it yesterday. Did you receive it?",
-      timestamp: "10:32 AM",
-      read: true,
-    },
-    {
-      id: "3",
-      senderId: userType === "franchisee" ? "franchisor-1" : "franchisee-1",
-      senderName:
-        userType === "franchisee" ? "Green Leaf Support" : "Sarah Johnson",
-      senderType: userType === "franchisee" ? "franchisor" : "franchisee",
-      content:
-        "Yes, I received it. Everything looks great! Your sales numbers are impressive this month.",
-      timestamp: "10:35 AM",
-      read: true,
-    },
-    {
-      id: "4",
-      senderId: user?.id || "current-user",
-      senderName: user?.firstName + " " + user?.lastName || "You",
-      senderType: userType,
-      content:
-        "That's wonderful to hear! The new marketing campaign really helped drive traffic.",
-      timestamp: "10:37 AM",
-      read: true,
-    },
-  ];
+        // Pre-fetch participant names
+        const uniquePrincipals = new Set<string>();
+        convs.forEach((conv) => {
+          conv.participants.forEach((p) => uniquePrincipals.add(p));
+        });
+        await Promise.all(
+          Array.from(uniquePrincipals).map(async (principalH) => {
+            if (!userNameCache[principalH]) {
+              const user = await getUser(Principal.fromText(principalH));
+              setUserNameCache((prev) => ({
+                ...prev,
+                [principalH]: user
+                  ? user.name
+                  : `${principalH.slice(0, 5)}...${principalH.slice(-5)}`,
+              }));
+            }
+          })
+        );
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConversations();
+  }, [principal, getUser]);
 
-  const filteredConversations = conversations.filter(
-    (conv) =>
-      conv.participantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.franchise?.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch messages when conversation is selected
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (selectedConversation) {
+        try {
+          const msgs = await chatHandler.getAllMessagesByConversation(
+            Number(selectedConversation)
+          );
+          msgs.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+          setMessages(msgs);
+        } catch (error) {
+          console.error("Error fetching messages:", error);
+        }
+      }
+    };
+    fetchMessages();
+  }, [selectedConversation]);
+
+  const filteredConversations = conversations.filter((conv) =>
+    conv.participants.some((p) =>
+      (userNameCache[p] || p).toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   const selectedConv = conversations.find(
-    (conv) => conv.id === selectedConversation
+    (conv) => conv.conversationId.toString() === selectedConversation
   );
 
   const scrollToBottom = () => {
@@ -185,11 +131,32 @@ export function ChatSystem({ userType }: ChatSystemProps) {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      // Here you would typically send the message to your backend
-      console.log("Sending message:", message);
-      setMessage("");
+  const handleSendMessage = async () => {
+    if (message.trim() && selectedConv && principal) {
+      try {
+        const recipient = selectedConv.participants.find(
+          (p) => p !== principal.toText()
+        );
+        if (recipient) {
+          await chatHandler.sendMessage(
+            Number(selectedConversation),
+            recipient,
+            message
+          );
+          // Refresh messages
+          const updatedMessages =
+            await chatHandler.getAllMessagesByConversation(
+              Number(selectedConversation)
+            );
+          updatedMessages.sort(
+            (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+          );
+          setMessages(updatedMessages);
+          setMessage("");
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 
@@ -198,6 +165,33 @@ export function ChatSystem({ userType }: ChatSystemProps) {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  // Get participant name (async, cached)
+  const getParticipantName = async (principalH: string): Promise<string> => {
+    if (principalH === principal?.toText()) {
+      return "You";
+    }
+    if (userNameCache[principalH]) {
+      return userNameCache[principalH];
+    }
+    const user = await getUser(Principal.fromText(principalH));
+    const name = user
+      ? user.name
+      : `${principalH.slice(0, 5)}...${principalH.slice(-5)}`;
+    setUserNameCache((prev) => ({ ...prev, [principalH]: name }));
+    return name;
+  };
+
+  // Synchronous display name for rendering
+  const getDisplayName = (principalH: string): string => {
+    if (principalH === principal?.toText()) {
+      return "You";
+    }
+    return (
+      userNameCache[principalH] ||
+      `${principalH.slice(0, 5)}...${principalH.slice(-5)}`
+    );
   };
 
   return (
@@ -221,57 +215,74 @@ export function ChatSystem({ userType }: ChatSystemProps) {
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-[480px]">
-            <div className="space-y-1 p-4">
-              {filteredConversations.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  onClick={() => setSelectedConversation(conversation.id)}
-                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                    selectedConversation === conversation.id
-                      ? "bg-brand-50 border border-brand-200"
-                      : "hover:bg-muted/50"
-                  }`}
-                >
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={conversation.avatar || "/placeholder.svg"}
-                    />
-                    <AvatarFallback>
-                      {conversation.participantName
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-sm truncate">
-                        {conversation.participantName}
-                      </h4>
-                      <span className="text-xs text-muted-foreground">
-                        {conversation.lastMessageTime}
-                      </span>
-                    </div>
-                    {conversation.franchise && (
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {conversation.franchise}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground truncate">
-                      {conversation.lastMessage}
-                    </p>
-                  </div>
-                  {conversation.unreadCount > 0 && (
-                    <Badge
-                      variant="default"
-                      className="bg-brand-500 text-white text-xs"
+            {loading ? (
+              <div className="p-4">Loading conversations...</div>
+            ) : (
+              <div className="space-y-1 p-4">
+                {filteredConversations.map((conversation) => {
+                  const otherParticipant =
+                    conversation.participants.find(
+                      (p) => p !== principal?.toText()
+                    ) || "";
+                  return (
+                    <div
+                      key={conversation.conversationId}
+                      onClick={() =>
+                        setSelectedConversation(
+                          conversation.conversationId.toString()
+                        )
+                      }
+                      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                        selectedConversation ===
+                        conversation.conversationId.toString()
+                          ? "bg-brand-50 border border-brand-200"
+                          : "hover:bg-muted/50"
+                      }`}
                     >
-                      {conversation.unreadCount}
-                    </Badge>
-                  )}
-                </div>
-              ))}
-            </div>
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>
+                          {getDisplayName(otherParticipant)
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-sm truncate">
+                            {getDisplayName(otherParticipant)}
+                          </h4>
+                          <span className="text-xs text-muted-foreground">
+                            {messages
+                              .filter(
+                                (m) =>
+                                  m.conversationId ===
+                                  conversation.conversationId
+                              )
+                              .sort(
+                                (a, b) =>
+                                  b.timestamp.getTime() - a.timestamp.getTime()
+                              )[0]
+                              ?.timestamp.toLocaleTimeString() || ""}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {messages
+                            .filter(
+                              (m) =>
+                                m.conversationId === conversation.conversationId
+                            )
+                            .sort(
+                              (a, b) =>
+                                b.timestamp.getTime() - a.timestamp.getTime()
+                            )[0]?.text || ""}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </ScrollArea>
         </CardContent>
       </Card>
@@ -285,11 +296,12 @@ export function ChatSystem({ userType }: ChatSystemProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={selectedConv.avatar || "/placeholder.svg"}
-                    />
                     <AvatarFallback>
-                      {selectedConv.participantName
+                      {getDisplayName(
+                        selectedConv.participants.find(
+                          (p) => p !== principal?.toText()
+                        ) || ""
+                      )
                         .split(" ")
                         .map((n) => n[0])
                         .join("")}
@@ -297,13 +309,12 @@ export function ChatSystem({ userType }: ChatSystemProps) {
                   </Avatar>
                   <div>
                     <h3 className="font-semibold">
-                      {selectedConv.participantName}
+                      {getDisplayName(
+                        selectedConv.participants.find(
+                          (p) => p !== principal?.toText()
+                        ) || ""
+                      )}
                     </h3>
-                    {selectedConv.franchise && (
-                      <p className="text-sm text-muted-foreground">
-                        {selectedConv.franchise}
-                      </p>
-                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -324,35 +335,39 @@ export function ChatSystem({ userType }: ChatSystemProps) {
             <CardContent className="p-0">
               <ScrollArea className="h-[400px] p-4">
                 <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${
-                        msg.senderId === (user?.id || "current-user")
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
+                  {messages
+                    .filter(
+                      (m) => m.conversationId === Number(selectedConversation)
+                    )
+                    .map((msg) => (
                       <div
-                        className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                          msg.senderId === (user?.id || "current-user")
-                            ? "bg-brand-500 text-white"
-                            : "bg-muted"
+                        key={msg.messageId}
+                        className={`flex ${
+                          msg.senderPrincipal === principal?.toText()
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
-                        <p className="text-sm">{msg.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            msg.senderId === (user?.id || "current-user")
-                              ? "text-brand-100"
-                              : "text-muted-foreground"
+                        <div
+                          className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                            msg.senderPrincipal === principal?.toText()
+                              ? "bg-brand-500 text-white"
+                              : "bg-muted"
                           }`}
                         >
-                          {msg.timestamp}
-                        </p>
+                          <p className="text-sm">{msg.text}</p>
+                          <p
+                            className={`text-xs mt-1 ${
+                              msg.senderPrincipal === principal?.toText()
+                                ? "text-brand-100"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {msg.timestamp.toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>

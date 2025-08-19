@@ -34,12 +34,16 @@ import {
   ApplicationHandler,
   FrontendApplication,
 } from "@/handler/ApplicationHandler";
+import { useParams } from "react-router";
 
 export default function FranchiseeDashboard() {
   const { actor, principal } = useUser();
   const [franchises, setFranchises] = useState<FrontendFranchise[]>([]);
   const [applications, setApplications] = useState<FrontendApplication[]>([]);
   const [loading, setLoading] = useState(false);
+  const { conversationId } = useParams<{ conversationId: string }>();
+
+  const defaultTab = conversationId ? "chat" : "franchises";
 
   useEffect(() => {
     if (!actor || !principal) {
@@ -103,7 +107,7 @@ export default function FranchiseeDashboard() {
               </p>
             </div>
 
-            <Tabs defaultValue="franchises" className="space-y-6">
+            <Tabs defaultValue={defaultTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="franchises">My Franchises</TabsTrigger>
                 <TabsTrigger value="chat">Messages</TabsTrigger>
@@ -228,7 +232,10 @@ export default function FranchiseeDashboard() {
               </TabsContent>
 
               <TabsContent value="chat" className="space-y-6">
-                <ChatSystem userType="franchisee" />
+                <ChatSystem
+                  userType="franchisee"
+                  currentChat={conversationId}
+                />
               </TabsContent>
             </Tabs>
           </div>
