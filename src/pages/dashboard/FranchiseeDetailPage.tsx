@@ -383,7 +383,7 @@ export default function FranchiseDashboard() {
                   <img
                     src={
                       franchise.data.productGallery[currentImage] ||
-                      "/placeholder.svg?height=400&width=600"
+                      "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
                     }
                     alt={`Gallery image ${currentImage + 1}`}
                     className="w-full h-80 object-cover rounded-lg"
@@ -424,7 +424,10 @@ export default function FranchiseDashboard() {
                         }`}
                       >
                         <img
-                          src={image || "/placeholder.svg?height=100&width=100"}
+                          src={
+                            image ||
+                            "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                          }
                           alt={`Thumbnail ${index + 1}`}
                           className="w-full h-20 object-cover hover:scale-105 transition-transform"
                         />

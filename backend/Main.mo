@@ -269,6 +269,10 @@ persistent actor {
   };
 
   // Category functions (admin only, for simplicity)
+  public query func listCategories() : async [Types.Category] {
+    Iter.toArray(categories.vals());
+  };
+  
   public shared (msg) func createCategory(name : Text, description : Text) : async Nat {
     let caller = msg.caller;
     let ?user = users.get(caller) else throw Error.reject("User not registered");

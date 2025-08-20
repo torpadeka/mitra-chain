@@ -23,6 +23,11 @@ export class CategoryHandler {
     };
   }
 
+  async listCategories(): Promise<FrontendCategory[]> {
+    const result = await this.actor.listCategories();
+    return result.map(this.mapCategory);
+  }
+
   async createCategory(name: string, description: string): Promise<number> {
     const result = await this.actor.createCategory(name, description);
     return Number(result);

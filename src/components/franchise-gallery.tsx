@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react"
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 
 interface FranchiseGalleryProps {
-  images: string[]
+  images: string[];
 }
 
 export function FranchiseGallery({ images }: FranchiseGalleryProps) {
-  const [currentImage, setCurrentImage] = useState(0)
+  const [currentImage, setCurrentImage] = useState(0);
 
   const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length)
-  }
+    setCurrentImage((prev) => (prev + 1) % images.length);
+  };
 
   const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length)
-  }
+    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <Card>
@@ -33,15 +33,28 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
           {/* Main Image */}
           <div className="relative">
             <img
-              src={images[currentImage] || "/placeholder.svg?height=400&width=600"}
+              src={
+                images[currentImage] ||
+                "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+              }
               alt={`Gallery image ${currentImage + 1}`}
               className="w-full h-80 object-cover rounded-lg"
             />
             <div className="absolute inset-0 flex items-center justify-between p-4">
-              <Button variant="outline" size="sm" onClick={prevImage} className="bg-white/90 hover:bg-white">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={prevImage}
+                className="bg-white/90 hover:bg-white"
+              >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={nextImage} className="bg-white/90 hover:bg-white">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={nextImage}
+                className="bg-white/90 hover:bg-white"
+              >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
@@ -63,7 +76,10 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
                 }`}
               >
                 <img
-                  src={image || "/placeholder.svg?height=100&width=100"}
+                  src={
+                    image ||
+                    "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                  }
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-20 object-cover hover:scale-105 transition-transform"
                 />
@@ -73,5 +89,5 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -183,7 +183,10 @@ export default function RegisterPage() {
                   {profilePicUrl ? (
                     <div className="relative">
                       <img
-                        src={profilePicUrl || "/placeholder.svg"}
+                        src={
+                          profilePicUrl ||
+                          "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                        }
                         alt="Profile"
                         width={80}
                         height={80}

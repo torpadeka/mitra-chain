@@ -129,7 +129,10 @@ export default function ProfilePage() {
                   <div className="flex flex-col items-center text-center">
                     <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gray-100">
                       <img
-                        src={userProfile.profilePicture || "/placeholder.svg"}
+                        src={
+                          userProfile.profilePicture ||
+                          "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                        }
                         alt={`${userProfile.firstName} `}
                         className="w-full h-full object-cover"
                       />
