@@ -1,13 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal, Grid3X3, List } from "lucide-react";
 
-export function FranchiseSearch() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+interface FranchiseSearchProps {
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  viewMode: "grid" | "list";
+  setViewMode: (value: "grid" | "list") => void;
+  totalFranchises: number;
+}
 
+export function FranchiseSearch({
+  searchQuery,
+  setSearchQuery,
+  viewMode,
+  setViewMode,
+  totalFranchises,
+}: FranchiseSearchProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
       <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -63,8 +73,13 @@ export function FranchiseSearch() {
       {/* Results Summary */}
       <div className="mt-4 pt-4 border-t border-gray-200">
         <p className="text-sm text-gray-600">
-          Showing <span className="font-medium text-gray-900">1-24</span> of{" "}
-          <span className="font-medium text-gray-900">156</span> franchises
+          Showing{" "}
+          <span className="font-medium text-gray-900">
+            1-{Math.min(totalFranchises, 24)}
+          </span>{" "}
+          of{" "}
+          <span className="font-medium text-gray-900">{totalFranchises}</span>{" "}
+          franchises
         </p>
       </div>
     </div>

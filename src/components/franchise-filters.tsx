@@ -1,64 +1,88 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Slider } from "@/components/ui/slider"
-import { ChevronDown, ChevronUp, X } from "lucide-react"
+import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 
-const industries = [
-  { id: "food-beverage", label: "Food & Beverage", count: 45 },
-  { id: "fitness", label: "Health & Fitness", count: 32 },
-  { id: "education", label: "Education", count: 28 },
-  { id: "automotive", label: "Automotive", count: 19 },
-  { id: "home-services", label: "Home Services", count: 24 },
-  { id: "retail", label: "Retail", count: 18 },
-]
+interface Industry {
+  id: string;
+  label: string;
+  count: number;
+}
 
-const locations = [
-  { id: "north-america", label: "North America", count: 89 },
-  { id: "europe", label: "Europe", count: 34 },
-  { id: "asia-pacific", label: "Asia Pacific", count: 28 },
-  { id: "latin-america", label: "Latin America", count: 15 },
-]
+interface Location {
+  id: string;
+  label: string;
+  count: number;
+}
 
-export function FranchiseFilters() {
-  const [investmentRange, setInvestmentRange] = useState([50000, 500000])
-  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([])
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([])
-  const [expandedSections, setExpandedSections] = useState({
-    investment: true,
-    industry: true,
-    location: true,
-    features: false,
-  })
+interface FranchiseFiltersProps {
+  investmentRange: number[];
+  setInvestmentRange: (value: number[]) => void;
+  selectedIndustries: string[];
+  setSelectedIndustries: (value: string[]) => void;
+  selectedLocations: string[];
+  setSelectedLocations: (value: string[]) => void;
+  expandedSections: {
+    investment: boolean;
+    industry: boolean;
+    location: boolean;
+    features: boolean;
+  };
+  setExpandedSections: (value: {
+    investment: boolean;
+    industry: boolean;
+    location: boolean;
+    features: boolean;
+  }) => void;
+  industries: Industry[];
+  locations: Location[];
+}
 
+export function FranchiseFilters({
+  investmentRange,
+  setInvestmentRange,
+  selectedIndustries,
+  setSelectedIndustries,
+  selectedLocations,
+  setSelectedLocations,
+  expandedSections,
+  setExpandedSections,
+  industries,
+  locations,
+}: FranchiseFiltersProps) {
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
-  }
+    setExpandedSections({
+      ...expandedSections,
+      [section]: !expandedSections[section],
+    });
+  };
 
   const handleIndustryChange = (industryId: string, checked: boolean) => {
     if (checked) {
-      setSelectedIndustries([...selectedIndustries, industryId])
+      setSelectedIndustries([...selectedIndustries, industryId]);
     } else {
-      setSelectedIndustries(selectedIndustries.filter((id) => id !== industryId))
+      setSelectedIndustries(
+        selectedIndustries.filter((id) => id !== industryId)
+      );
     }
-  }
+  };
 
   const handleLocationChange = (locationId: string, checked: boolean) => {
     if (checked) {
-      setSelectedLocations([...selectedLocations, locationId])
+      setSelectedLocations([...selectedLocations, locationId]);
     } else {
-      setSelectedLocations(selectedLocations.filter((id) => id !== locationId))
+      setSelectedLocations(selectedLocations.filter((id) => id !== locationId));
     }
-  }
+  };
 
   const clearAllFilters = () => {
-    setInvestmentRange([50000, 500000])
-    setSelectedIndustries([])
-    setSelectedLocations([])
-  }
+    setInvestmentRange([50000, 500000]);
+    setSelectedIndustries([]);
+    setSelectedLocations([]);
+  };
 
   return (
     <div className="space-y-6">
@@ -67,8 +91,15 @@ export function FranchiseFilters() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Active Filters</CardTitle>
-              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-gray-500 hover:text-gray-700">
+              <CardTitle className="text-sm font-medium">
+                Active Filters
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X className="w-4 h-4 mr-1" />
                 Clear All
               </Button>
@@ -77,7 +108,7 @@ export function FranchiseFilters() {
           <CardContent className="pt-0">
             <div className="flex flex-wrap gap-2">
               {selectedIndustries.map((industryId) => {
-                const industry = industries.find((i) => i.id === industryId)
+                const industry = industries.find((i) => i.id === industryId);
                 return (
                   <span
                     key={industryId}
@@ -91,10 +122,10 @@ export function FranchiseFilters() {
                       <X className="w-3 h-3" />
                     </button>
                   </span>
-                )
+                );
               })}
               {selectedLocations.map((locationId) => {
-                const location = locations.find((l) => l.id === locationId)
+                const location = locations.find((l) => l.id === locationId);
                 return (
                   <span
                     key={locationId}
@@ -108,7 +139,7 @@ export function FranchiseFilters() {
                       <X className="w-3 h-3" />
                     </button>
                   </span>
-                )
+                );
               })}
             </div>
           </CardContent>
@@ -122,8 +153,14 @@ export function FranchiseFilters() {
             onClick={() => toggleSection("investment")}
             className="flex items-center justify-between w-full text-left"
           >
-            <CardTitle className="text-sm font-medium">Investment Range</CardTitle>
-            {expandedSections.investment ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <CardTitle className="text-sm font-medium">
+              Investment Range
+            </CardTitle>
+            {expandedSections.investment ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
           </button>
         </CardHeader>
         {expandedSections.investment && (
@@ -154,25 +191,39 @@ export function FranchiseFilters() {
             className="flex items-center justify-between w-full text-left"
           >
             <CardTitle className="text-sm font-medium">Industry</CardTitle>
-            {expandedSections.industry ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {expandedSections.industry ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
           </button>
         </CardHeader>
         {expandedSections.industry && (
           <CardContent className="pt-0">
             <div className="space-y-3">
               {industries.map((industry) => (
-                <div key={industry.id} className="flex items-center justify-between">
+                <div
+                  key={industry.id}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={industry.id}
                       checked={selectedIndustries.includes(industry.id)}
-                      onCheckedChange={(checked) => handleIndustryChange(industry.id, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleIndustryChange(industry.id, checked as boolean)
+                      }
                     />
-                    <label htmlFor={industry.id} className="text-sm text-gray-700 cursor-pointer">
+                    <label
+                      htmlFor={industry.id}
+                      className="text-sm text-gray-700 cursor-pointer"
+                    >
                       {industry.label}
                     </label>
                   </div>
-                  <span className="text-xs text-gray-500">({industry.count})</span>
+                  <span className="text-xs text-gray-500">
+                    ({industry.count})
+                  </span>
                 </div>
               ))}
             </div>
@@ -188,25 +239,39 @@ export function FranchiseFilters() {
             className="flex items-center justify-between w-full text-left"
           >
             <CardTitle className="text-sm font-medium">Location</CardTitle>
-            {expandedSections.location ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {expandedSections.location ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
           </button>
         </CardHeader>
         {expandedSections.location && (
           <CardContent className="pt-0">
             <div className="space-y-3">
               {locations.map((location) => (
-                <div key={location.id} className="flex items-center justify-between">
+                <div
+                  key={location.id}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={location.id}
                       checked={selectedLocations.includes(location.id)}
-                      onCheckedChange={(checked) => handleLocationChange(location.id, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleLocationChange(location.id, checked as boolean)
+                      }
                     />
-                    <label htmlFor={location.id} className="text-sm text-gray-700 cursor-pointer">
+                    <label
+                      htmlFor={location.id}
+                      className="text-sm text-gray-700 cursor-pointer"
+                    >
                       {location.label}
                     </label>
                   </div>
-                  <span className="text-xs text-gray-500">({location.count})</span>
+                  <span className="text-xs text-gray-500">
+                    ({location.count})
+                  </span>
                 </div>
               ))}
             </div>
@@ -222,7 +287,11 @@ export function FranchiseFilters() {
             className="flex items-center justify-between w-full text-left"
           >
             <CardTitle className="text-sm font-medium">Features</CardTitle>
-            {expandedSections.features ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {expandedSections.features ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
           </button>
         </CardHeader>
         {expandedSections.features && (
@@ -230,25 +299,37 @@ export function FranchiseFilters() {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Checkbox id="verified" />
-                <label htmlFor="verified" className="text-sm text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="verified"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
                   Verified Franchisors
                 </label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox id="financing" />
-                <label htmlFor="financing" className="text-sm text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="financing"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
                   Financing Available
                 </label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox id="training" />
-                <label htmlFor="training" className="text-sm text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="training"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
                   Training Provided
                 </label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox id="support" />
-                <label htmlFor="support" className="text-sm text-gray-700 cursor-pointer">
+                <label
+                  htmlFor="support"
+                  className="text-sm text-gray-700 cursor-pointer"
+                >
                   Ongoing Support
                 </label>
               </div>
@@ -257,5 +338,5 @@ export function FranchiseFilters() {
         )}
       </Card>
     </div>
-  )
+  );
 }
