@@ -41,7 +41,10 @@ export function FranchiseCard({ franchise }: FranchiseCardProps) {
       <CardContent className="space-y-4">
         <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
           <img
-            src={franchise.coverImageUrl || "/placeholder.svg"}
+            src={
+              franchise.coverImageUrl ||
+              "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+            }
             alt={franchise.name}
             className="w-full h-full object-cover"
           />

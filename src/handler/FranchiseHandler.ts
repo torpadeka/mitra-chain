@@ -124,63 +124,63 @@ export class FranchiseHandler {
   }
 
   async updateFranchise(
-  id: number,
-  name: string,
-  categoryIds: number[],
-  description: string,
-  startingPrice: number,
-  foundedIn: Date,
-  totalOutlets: number,
-  legalEntity: string,
-  minGrossProfit: number | undefined,
-  maxGrossProfit: number | undefined,
-  minNetProfit: number | undefined,
-  maxNetProfit: number | undefined,
-  isDepositRequired: boolean,
-  royaltyFee: string | undefined,
-  licenseDuration: { OneTime?: true; Years?: number },
-  coverImageUrl: string,
-  productGallery: string[],
-  contactNumber: string | undefined,
-  contactEmail: string | undefined,
-  locations: string[],
-  status: "Active" | "Inactive",
-  isVerified: boolean
-): Promise<number> {
-  console.log("YEAR", BigInt(licenseDuration.Years!))
-  const result = await this.actor.updateFranchise(
-    BigInt(id),
-    name,
-    categoryIds.map(BigInt),
-    description,
-    startingPrice,
-    BigInt(foundedIn.getTime() * 1_000_000), // Convert to nanoseconds
-    BigInt(totalOutlets),
-    legalEntity,
-    minGrossProfit ? [minGrossProfit] : [],
-    maxGrossProfit ? [maxGrossProfit] : [],
-    minNetProfit ? [minNetProfit] : [],
-    maxNetProfit ? [maxNetProfit] : [],
-    isDepositRequired,
-    royaltyFee ? [royaltyFee] : [],
-    licenseDuration.OneTime
-      ? { OneTime: null }
-      : { Years: BigInt(licenseDuration.Years!) },
-    coverImageUrl,
-    productGallery,
-    contactNumber ? [contactNumber] : [],
-    contactEmail ? [contactEmail] : [],
-    locations,
-    status === "Active" ? { Active: null } : { Inactive: null },
-    isVerified
-  );
+    id: number,
+    name: string,
+    categoryIds: number[],
+    description: string,
+    startingPrice: number,
+    foundedIn: Date,
+    totalOutlets: number,
+    legalEntity: string,
+    minGrossProfit: number | undefined,
+    maxGrossProfit: number | undefined,
+    minNetProfit: number | undefined,
+    maxNetProfit: number | undefined,
+    isDepositRequired: boolean,
+    royaltyFee: string | undefined,
+    licenseDuration: { OneTime?: true; Years?: number },
+    coverImageUrl: string,
+    productGallery: string[],
+    contactNumber: string | undefined,
+    contactEmail: string | undefined,
+    locations: string[],
+    status: "Active" | "Inactive",
+    isVerified: boolean
+  ): Promise<number> {
+    console.log("YEAR", BigInt(licenseDuration.Years!));
+    const result = await this.actor.updateFranchise(
+      BigInt(id),
+      name,
+      categoryIds.map(BigInt),
+      description,
+      startingPrice,
+      BigInt(foundedIn.getTime() * 1_000_000), // Convert to nanoseconds
+      BigInt(totalOutlets),
+      legalEntity,
+      minGrossProfit ? [minGrossProfit] : [],
+      maxGrossProfit ? [maxGrossProfit] : [],
+      minNetProfit ? [minNetProfit] : [],
+      maxNetProfit ? [maxNetProfit] : [],
+      isDepositRequired,
+      royaltyFee ? [royaltyFee] : [],
+      licenseDuration.OneTime
+        ? { OneTime: null }
+        : { Years: BigInt(licenseDuration.Years!) },
+      coverImageUrl,
+      productGallery,
+      contactNumber ? [contactNumber] : [],
+      contactEmail ? [contactEmail] : [],
+      locations,
+      status === "Active" ? { Active: null } : { Inactive: null },
+      isVerified
+    );
 
-  if ("ok" in result) {
-    return Number(result.ok);
-  } else {
-    throw new Error(result.err);
+    if ("ok" in result) {
+      return Number(result.ok);
+    } else {
+      throw new Error(result.err);
+    }
   }
-}
 
   async getFranchise(id: number): Promise<FrontendFranchise | null> {
     const result = await this.actor.getFranchise(BigInt(id));
@@ -193,7 +193,9 @@ export class FranchiseHandler {
     const result = await this.actor.listFranchises();
     return result.map(this.mapFranchise);
   }
-  async getFranchiseByOwner(principle: Principal): Promise<FrontendFranchise[]> {
+  async getFranchiseByOwner(
+    principle: Principal
+  ): Promise<FrontendFranchise[]> {
     const result = await this.actor.getFranchisesByOwner(principle);
     return result.map(this.mapFranchise);
   }

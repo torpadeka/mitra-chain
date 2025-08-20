@@ -70,7 +70,8 @@ export function Navigation() {
                   <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
                     <img
                       src={
-                        user?.profilePicUrl || "https://via.placeholder.com/150"
+                        user?.profilePicUrl ||
+                        "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
                       }
                       alt="Profile"
                       className="w-full h-full object-cover"
@@ -135,7 +136,7 @@ export function Navigation() {
                         <img
                           src={
                             user?.profilePicUrl ||
-                            "https://via.placeholder.com/150"
+                            "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
                           }
                           alt="Profile"
                           className="w-full h-full object-cover"

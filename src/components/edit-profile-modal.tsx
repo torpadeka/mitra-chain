@@ -111,7 +111,10 @@ export function EditProfileModal({
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300">
                 <img
-                  src={profileImagePreview || "/placeholder.svg"}
+                  src={
+                    profileImagePreview ||
+                    "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                  }
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />

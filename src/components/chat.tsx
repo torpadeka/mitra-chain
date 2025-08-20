@@ -234,7 +234,10 @@ export function ChatSystem({ userType }: ChatSystemProps) {
                 >
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={conversation.avatar || "/placeholder.svg"}
+                      src={
+                        conversation.avatar ||
+                        "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                      }
                     />
                     <AvatarFallback>
                       {conversation.participantName
@@ -286,7 +289,10 @@ export function ChatSystem({ userType }: ChatSystemProps) {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={selectedConv.avatar || "/placeholder.svg"}
+                      src={
+                        selectedConv.avatar ||
+                        "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                      }
                     />
                     <AvatarFallback>
                       {selectedConv.participantName
