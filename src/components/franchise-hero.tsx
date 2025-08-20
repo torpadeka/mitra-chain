@@ -21,9 +21,13 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/context/AuthContext";
-import { useState } from "react";
+import { act, useState } from "react";
 import { FranchiseHandler } from "@/handler/FranchiseHandler";
 import { ApplicationHandler } from "@/handler/ApplicationHandler";
+import { useNavigate } from "react-router";
+import { principal } from "@ic-reactor/react/dist/utils";
+import { ChatHandler } from "@/handler/ChatHandler";
+import { Principal } from "@dfinity/principal";
 
 interface FrontendFranchise {
   id: number;
@@ -57,11 +61,11 @@ interface FranchiseHeroProps {
 }
 
 export function FranchiseHero({ franchise }: FranchiseHeroProps) {
-  const { user, actor } = useUser();
+  const { user, actor, principal } = useUser();
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
   const handleApply = async () => {
     if (!user || !actor) {
       setError("You must be logged in to apply.");
@@ -82,6 +86,36 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
       alert("Application submitted successfully!");
     } catch (err: any) {
       setError("Failed to submit application: " + err.message);
+    }
+  };
+
+  const handleContact = async () => {
+    if (!actor || !principal) return;
+    const chatHandler = new ChatHandler(actor);
+    try {
+      const conversations =
+        await chatHandler.getAllConversationsByPrincipal(principal);
+
+      let existingConversation = conversations.find((c: any) => {
+        return c.participants.some((p: string) => p === franchise.owner);
+      });
+
+      let conversationId: number;
+
+      if (existingConversation) {
+        conversationId = Number(existingConversation.conversationId);
+      } else {
+        conversationId = Number(
+          await actor.createConversation([
+            principal,
+            Principal.fromText(franchise.owner),
+          ])
+        );
+      }
+
+      navigate(`/dashboard/franchisee/chat/${conversationId}`);
+    } catch (err) {
+      console.error("Error handling contact:", err);
     }
   };
 
@@ -203,9 +237,15 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
                 </DialogContent>
               </Dialog>
 
-              <Button className="btn-secondary text-lg px-8 py-4">
-                Contact Franchisor
-              </Button>
+              {user?.role && "Franchisee" in user?.role && (
+                <Button
+                  className="btn-secondary text-lg px-8 py-4"
+                  onClick={handleContact}
+                >
+                  Contact Franchisor
+                </Button>
+              )}
+
               <div className="flex gap-2">
                 <Button
                   variant="outline"

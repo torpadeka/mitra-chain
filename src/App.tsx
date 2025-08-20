@@ -54,6 +54,10 @@ const App: React.FC = () => {
             element={<FranchiseeDashboard />}
           />
           <Route
+            path="/dashboard/franchisee/chat/:conversationId"
+            element={<FranchiseeDashboard />}
+          />
+          <Route
             path="/dashboard/franchisor"
             element={<FranchisorDashboard />}
           />
