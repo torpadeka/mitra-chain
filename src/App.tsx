@@ -17,17 +17,31 @@ import RegisterPage from "./pages/RegisterPage";
 import TestPage from "./pages/TestPage";
 
 const App: React.FC = () => {
-  const { user, setUser, getUser, actor, principal, isAuthenticated } =
-    useUser();
+  const {
+    user,
+    setUser,
+    getUser,
+    actor,
+    principal,
+    isAuthenticated,
+    saveToSession,
+    loadFromSession,
+  } = useUser();
 
   useEffect(() => {
     const restoreUser = async () => {
-      if (!user && actor && principal && isAuthenticated) {
+      if (!user && actor && principal) {
         try {
           const fetchedUser = await getUser(principal);
           console.log("Restored user:", fetchedUser);
           if (fetchedUser) {
             setUser(fetchedUser);
+            saveToSession(fetchedUser, true, principal.toString());
+            console.log(loadFromSession());
+            console.log("Ada user.");
+          } else {
+            saveToSession(null, false, principal.toString());
+            console.warn("No user found, session cleared.");
           }
         } catch (err) {
           console.error("Failed to restore user:", err);

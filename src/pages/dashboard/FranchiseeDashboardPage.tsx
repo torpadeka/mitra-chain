@@ -34,14 +34,16 @@ import {
   ApplicationHandler,
   FrontendApplication,
 } from "@/handler/ApplicationHandler";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { protectedPage } from "@/context/ProtectedRoutes";
 
 export default function FranchiseeDashboard() {
-  const { actor, principal } = useUser();
+  const { actor, principal, loadFromSession } = useUser();
   const [franchises, setFranchises] = useState<FrontendFranchise[]>([]);
   const [applications, setApplications] = useState<FrontendApplication[]>([]);
   const [loading, setLoading] = useState(false);
   const { conversationId } = useParams<{ conversationId: string }>();
+  const navigate = useNavigate();
 
   const defaultTab = conversationId ? "chat" : "franchises";
 
@@ -50,6 +52,13 @@ export default function FranchiseeDashboard() {
       setFranchises([]);
       setApplications([]);
       return;
+    }
+
+    const session = loadFromSession();
+    if (!session.user) {
+      window.location.href = "/";
+    } else if (!("Franchisee" in session.user.role)) {
+      window.location.href = "/";
     }
 
     const fetchFranchises = async () => {

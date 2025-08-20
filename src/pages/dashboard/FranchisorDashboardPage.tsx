@@ -38,6 +38,8 @@ import {
   FrontendApplication,
 } from "@/handler/ApplicationHandler";
 import { ApplicationsTab } from "@/components/application-tab";
+import { protectedPage } from "@/context/ProtectedRoutes";
+import { useNavigate } from "react-router";
 
 interface ApplicationDetails {
   application: FrontendApplication;
@@ -48,7 +50,7 @@ export default function FranchisorDashboard() {
   //   const { user } = useAuth();
   const [isAddBusinessModalOpen, setIsAddBusinessModalOpen] = useState(false);
 
-  const { actor, principal } = useUser();
+  const { actor, principal, loadFromSession } = useUser();
   const [franchises, setFranchises] = useState<FrontendFranchise[]>([]);
   const [recentApplications, setRecentApplications] = useState<
     FrontendApplication[]
@@ -56,6 +58,15 @@ export default function FranchisorDashboard() {
   const [applicationDetails, setApplicationDetails] = useState<
     ApplicationDetails[]
   >([]);
+  const navigate = useNavigate();
+
+  const session = loadFromSession();
+  console.log("Session:", session);
+  if (!session.user) {
+    window.location.href = "/";
+  } else if (!("Franchisor" in session.user.role)) {
+    window.location.href = "/";
+  }
 
   useEffect(() => {
     if (!actor || !principal) {

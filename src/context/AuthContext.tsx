@@ -27,6 +27,17 @@ interface UserContextType {
   isAuthenticated: boolean;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: () => Promise<void>;
+  saveToSession: (
+    user: User | null,
+    isAuthenticated: boolean,
+    principal: string | null
+  ) => void;
+  loadFromSession: () => {
+    user: User | null;
+    isAuthenticated: boolean;
+    principal: string | null;
+  };
+  clearSession: () => void;
   logout: (onSuccess: () => void) => Promise<void>;
   whoami: () => Promise<string>;
   getUser: (principal: Principal) => Promise<User | null>;
@@ -47,6 +58,58 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [principal, setPrincipal] = useState<Principal | null>(null);
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const serializeUser = (user: User | null): any => {
+    if (!user) return null;
+    return {
+      ...user,
+      createdAt: user.createdAt.toString(),
+      principal: user.principal.toString(),
+    };
+  };
+
+  const deserializeUser = (storedUser: any): User | null => {
+    if (!storedUser) return null;
+    return {
+      ...storedUser,
+      createdAt: BigInt(storedUser.createdAt),
+      principal: Principal.fromText(storedUser.principal),
+    };
+  };
+
+  const saveToSession = (
+    user: User | null,
+    isAuthenticated: boolean,
+    principal: string | null
+  ) => {
+    sessionStorage.setItem(
+      "auth_isAuthenticated",
+      JSON.stringify(isAuthenticated)
+    );
+    sessionStorage.setItem("auth_user", JSON.stringify(serializeUser(user)));
+    sessionStorage.setItem("auth_principal", JSON.stringify(principal));
+  };
+
+  const loadFromSession = () => {
+    const storedUser = sessionStorage.getItem("auth_user");
+    const storedIsAuthenticated = sessionStorage.getItem(
+      "auth_isAuthenticated"
+    );
+    const storedPrincipal = sessionStorage.getItem("auth_principal");
+    return {
+      user: storedUser ? deserializeUser(JSON.parse(storedUser)) : null,
+      isAuthenticated: storedIsAuthenticated
+        ? JSON.parse(storedIsAuthenticated)
+        : false,
+      principal: storedPrincipal ? JSON.parse(storedPrincipal) : null,
+    };
+  };
+
+  const clearSession = () => {
+    sessionStorage.removeItem("auth_user");
+    sessionStorage.removeItem("auth_isAuthenticated");
+    sessionStorage.removeItem("auth_principal");
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -168,6 +231,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         authClient,
         isAuthenticated,
         setUser,
+        saveToSession,
+        loadFromSession,
+        clearSession,
         login,
         logout,
         whoami,

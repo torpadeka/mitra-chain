@@ -17,11 +17,23 @@ export function Navigation() {
   const { user, login, isAuthenticated, principal, logout } = useUser();
   const navigate = useNavigate();
 
+  // Determine dashboard path based on user role
+  const getDashboardPath = () => {
+    if (!user || !isAuthenticated) return null;
+    const roleKey = Object.keys(user.role)[0];
+    if (roleKey === "Franchisee") return "/dashboard/franchisee";
+    if (roleKey === "Franchisor") return "/dashboard/franchisor";
+    return null;
+  };
+
+  const dashboardPath = getDashboardPath();
+
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/franchises", label: "Browse Franchises" },
     { href: "/how-it-works", label: "How It Works" },
     { href: "/about", label: "About Us" },
+    ...(dashboardPath ? [{ href: dashboardPath, label: "Dashboard" }] : []),
   ];
 
   const handleLogout = async () => {
