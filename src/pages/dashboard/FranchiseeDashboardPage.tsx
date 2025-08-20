@@ -36,11 +36,27 @@ import {
 } from "@/handler/ApplicationHandler";
 import { useNavigate, useParams } from "react-router";
 import { protectedPage } from "@/context/ProtectedRoutes";
+import { ApplicationsTab } from "@/components/application-tab-franchisee";
+import { cp } from "fs";
+
+interface ApplicationDetail {
+  franchise: FrontendFranchise;
+  application: FrontendApplication;
+}
 
 export default function FranchiseeDashboard() {
   const { actor, principal, loadFromSession } = useUser();
   const [franchises, setFranchises] = useState<FrontendFranchise[]>([]);
   const [applications, setApplications] = useState<FrontendApplication[]>([]);
+  const [pendingFranchises, setPendingFranchises] = useState<
+    FrontendFranchise[]
+  >([]);
+  const [pendingApplications, setPendingApplications] = useState<
+    FrontendApplication[]
+  >([]);
+  const [combinePendingApplications, setCombinePendingApplications] = useState<
+    ApplicationDetail[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
@@ -71,11 +87,20 @@ export default function FranchiseeDashboard() {
           principal.toString()
         );
 
+        console.log("All Applications:", allApps);
+
         const approvedApps = allApps.filter((app) => app.status === "Approved");
+        const pendingApps = allApps.filter((app) => app.status === "Submitted");
         setApplications(approvedApps);
+        setPendingApplications(pendingApps);
 
         const franchiseResults = await Promise.all(
           approvedApps.map((app) =>
+            franchiseHandler.getFranchise(app.franchiseId)
+          )
+        );
+        const pendingFranchiseResults = await Promise.all(
+          pendingApps.map((app) =>
             franchiseHandler.getFranchise(app.franchiseId)
           )
         );
@@ -83,6 +108,23 @@ export default function FranchiseeDashboard() {
         setFranchises(
           franchiseResults.filter((fr): fr is FrontendFranchise => fr !== null)
         );
+        console.log("Raw Pending Franchise Results:", pendingFranchiseResults);
+        const pendingFranchiseResults2 = pendingFranchiseResults.filter(
+          (fr): fr is FrontendFranchise => fr != null
+        );
+        setPendingFranchises(pendingFranchiseResults2);
+        const combined: ApplicationDetail[] = pendingApps
+          .map((app) => {
+            const franchise = pendingFranchiseResults2.find(
+              (f) => f.id == app.franchiseId
+            );
+            if (!franchise) return null; // no matching franchise
+            return { franchise, application: app };
+          })
+          .filter((item): item is ApplicationDetail => item !== null);
+        console.log(combined);
+
+        setCombinePendingApplications(combined);
       } catch (error) {
         setFranchises([]);
         setApplications([]);
@@ -98,6 +140,19 @@ export default function FranchiseeDashboard() {
     const revenue = franchise.minNetProfit ?? 0;
     return sum + revenue / 12;
   }, 0);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Approved":
+        return "bg-green-100 text-green-700";
+      case "Rejected":
+        return "bg-red-100 text-red-700";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -117,8 +172,9 @@ export default function FranchiseeDashboard() {
             </div>
 
             <Tabs defaultValue={defaultTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="franchises">My Franchises</TabsTrigger>
+                <TabsTrigger value="pending">Pending Franchises</TabsTrigger>
                 <TabsTrigger value="chat">Messages</TabsTrigger>
               </TabsList>
 
@@ -238,6 +294,13 @@ export default function FranchiseeDashboard() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="pending" className="space-y-6">
+                <ApplicationsTab
+                  getStatusColor={getStatusColor}
+                  applicationDetails={combinePendingApplications}
+                />
               </TabsContent>
 
               <TabsContent value="chat" className="space-y-6">

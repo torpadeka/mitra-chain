@@ -39,6 +39,7 @@ import {
 import { ApplicationsTab } from "@/components/application-tab";
 import { protectedPage } from "@/context/ProtectedRoutes";
 import { useNavigate } from "react-router";
+import { AddFranchiseModal } from "@/components/add-franchise-modal";
 
 interface ApplicationDetails {
   application: FrontendApplication;
@@ -338,6 +339,7 @@ export default function FranchisorDashboard() {
                     </CardContent>
                   </Card>
                 </TabsContent>
+
                 <ApplicationsTab
                   applicationDetails={applicationDetails}
                   getStatusColor={getStatusColor}
@@ -389,7 +391,7 @@ export default function FranchisorDashboard() {
             </div>
           </div>
 
-          <AddBusinessModal
+          <AddFranchiseModal
             isOpen={isAddBusinessModalOpen}
             onClose={() => setIsAddBusinessModalOpen(false)}
           />

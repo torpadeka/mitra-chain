@@ -54,18 +54,15 @@ import {
   type FrontendCategory,
 } from "@/handler/CategoryHandler";
 import { toast } from "sonner";
+import { useUser } from "@/context/AuthContext";
 
 interface AddFranchiseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  actor: ActorSubclass<_SERVICE>;
 }
 
-export function AddFranchiseModal({
-  isOpen,
-  onClose,
-  actor,
-}: AddFranchiseModalProps) {
+export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
+  const { actor } = useUser();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [selectedSupport, setSelectedSupport] = useState<string[]>([]);
@@ -149,6 +146,7 @@ export function AddFranchiseModal({
   ];
 
   useEffect(() => {
+    if (!actor) return;
     const fetchCategories = async () => {
       const categoryHandler = new CategoryHandler(actor);
       const fetchedCategories = await categoryHandler.listCategories();
@@ -245,6 +243,7 @@ export function AddFranchiseModal({
     e.preventDefault();
     setLoading(true);
     setError(null);
+    if (!actor) return;
 
     try {
       const franchiseHandler = new FranchiseHandler(actor);
