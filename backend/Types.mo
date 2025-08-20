@@ -5,6 +5,7 @@ import List "mo:base/List";
 import Float "mo:base/Float";
 import Time "mo:base/Time";
 import Blob "mo:base/Blob";
+import Nat64 "mo:base/Nat64";
 
 module {
   public type Role = {
@@ -18,6 +19,7 @@ module {
     #InReview;
     #Approved;
     #Rejected;
+    #Completed; // New: After payment and NFT mint
   };
 
   public type LicenseDuration = {
@@ -38,6 +40,44 @@ module {
   };
 
   public type MetadataEntry = (Text, Value);
+
+  // ICRC-37 Approval
+  public type Approval = {
+    tokenId : Nat;
+    spender : Account;
+    expiresAt : ?Nat64;
+    memo : ?Blob;
+    fromSubaccount : ?Blob;
+    createdAtTime : ?Nat64;
+  };
+
+  // ICRC-2 for payments (subset for transfer_from)
+  public type TransferFromArgs = {
+    spender_subaccount : ?Blob;
+    from : Account;
+    to : Account;
+    amount : Nat;
+    fee : ?Nat;
+    memo : ?Blob;
+    created_at_time : ?Nat64;
+  };
+
+  public type TransferFromError = {
+    #BadFee : { expected_fee : Nat };
+    #BadBurn : { min_burn_amount : Nat };
+    #InsufficientFunds : { balance : Nat };
+    #InsufficientAllowance : { allowance : Nat };
+    #TooOld;
+    #CreatedInFuture : { ledger_time : Nat64 };
+    #Duplicate : { duplicate_of : Nat };
+    #TemporarilyUnavailable;
+    #GenericError : { error_code : Nat; message : Text };
+  };
+
+  public type TransferFromResult = {
+    #Ok : Nat;
+    #Err : TransferFromError;
+  };
 
   public type User = {
     principal : Principal;

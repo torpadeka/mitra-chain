@@ -16,6 +16,12 @@ import Hash "mo:base/Hash";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
 
+// ICP Ledger canister for ICRC-1/2 payments
+let ledger : actor {
+  icrc2_transfer_from : shared Types.TransferFromArgs -> async Types.TransferFromResult;
+  icrc1_balance_of : query Types.Account -> async Nat;
+} = actor "ryjl3-tyaaa-aaaaa-aaaba-cai";
+
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
     Text.hash(Nat.toText(n));
@@ -39,6 +45,7 @@ persistent actor {
   var transactionsEntries : [(Nat, Types.Transaction)] = [];
   var conversationsEntries : [(Nat, Types.Conversation)] = [];
   var messagesEntries : [(Nat, Types.Message)] = [];
+  var approvalsEntries : [(Nat, [Types.Approval])] = []; // For ICRC-37
 
   // HashMaps for data
   transient var users = HashMap.HashMap<Principal, Types.User>(0, Principal.equal, Principal.hash);
@@ -49,6 +56,7 @@ persistent actor {
   transient var transactions = HashMap.HashMap<Nat, Types.Transaction>(0, Nat.equal, natHash);
   transient var conversations = HashMap.HashMap<Nat, Types.Conversation>(0, Nat.equal, natHash);
   transient var messages = HashMap.HashMap<Nat, Types.Message>(0, Nat.equal, natHash);
+  transient var approvals = HashMap.HashMap<Nat, List.List<Types.Approval>>(0, Nat.equal, natHash);
 
   // Upgrade hooks
   system func preupgrade() {
@@ -60,6 +68,10 @@ persistent actor {
     transactionsEntries := Iter.toArray(transactions.entries());
     conversationsEntries := Iter.toArray(conversations.entries());
     messagesEntries := Iter.toArray(messages.entries());
+    approvalsEntries := Array.map<(Nat, List.List<Types.Approval>), (Nat, [Types.Approval])>(
+      Iter.toArray(approvals.entries()),
+      func ((k, v)) { (k, List.toArray(v)) }
+    );
   };
 
   system func postupgrade() {
@@ -71,6 +83,15 @@ persistent actor {
     transactions := HashMap.fromIter<Nat, Types.Transaction>(transactionsEntries.vals(), transactionsEntries.size(), Nat.equal, natHash);
     conversations := HashMap.fromIter<Nat, Types.Conversation>(conversationsEntries.vals(), conversationsEntries.size(), Nat.equal, natHash);
     messages := HashMap.fromIter<Nat, Types.Message>(messagesEntries.vals(), messagesEntries.size(), Nat.equal, natHash);
+    approvals := HashMap.fromIter<Nat, List.List<Types.Approval>>(
+      Array.map<(Nat, [Types.Approval]), (Nat, List.List<Types.Approval>)>(
+        approvalsEntries,
+        func ((k, v)) { (k, List.fromArray(v)) }
+      ).vals(),
+      approvalsEntries.size(),
+      Nat.equal,
+      natHash
+    );
   };
 
   // User functions
@@ -350,82 +371,45 @@ persistent actor {
     Buffer.toArray(results);
   };
 
-  // Admin approves application and mints NFT license
-  public shared (msg) func approveApplication(applicationId : Nat) : async Nat {
+  public shared (msg) func approveApplication(applicationId : Nat) : async () {
     let caller = msg.caller;
     let ?user = users.get(caller) else throw Error.reject("User not registered");
-    if (user.role != #Admin) { throw Error.reject("Only admins can approve") };
+    if (user.role != #Franchisor) { throw Error.reject("Only franchisors can approve"); };
     let ?app = applications.get(applicationId) else throw Error.reject("Application not found");
-    if (app.status != #Submitted) {
-      throw Error.reject("Application not submittable");
-    };
+    let ?franchise = franchises.get(app.franchiseId) else throw Error.reject("Franchise not found");
+    if (franchise.owner != caller) { throw Error.reject("Not the franchise owner"); };
+    if (app.status != #Submitted) { throw Error.reject("Invalid status"); };
     let updatedApp = { app with status = #Approved; updatedAt = Time.now() };
     applications.put(applicationId, updatedApp);
-
-    // Mint NFT
-    let tokenId = nextTokenId;
-    nextTokenId += 1;
-    let ?franchise = franchises.get(app.franchiseId) else throw Error.reject("Franchise not found");
-    let issuer : Types.Account = { owner = franchise.owner; subaccount = null };
-    let owner : Types.Account = {
-      owner = app.applicantPrincipal;
-      subaccount = null;
-    };
-    let expiry : ?Time.Time = switch (franchise.licenseDuration) {
-      case (#OneTime) null;
-      case (#Years years) ?(Time.now() + (years * 365 * 24 * 60 * 60 * 1_000_000_000)); // Rough ns calculation
-    };
-    let metadata : [Types.MetadataEntry] = [
-      ("franchise_name", #Text(franchise.name)),
-      ("franchise_id", #Nat(app.franchiseId)),
-      ("license_type", #Text("Franchise License")),
-    ];
-    let nft : Types.NFTLicense = {
-      tokenId;
-      franchiseId = app.franchiseId;
-      owner;
-      issuer;
-      issueDate = Time.now();
-      expiryDate = expiry;
-      metadata;
-      transferHistory = List.nil();
-    };
-    nfts.put(tokenId, nft);
-
-    // Record transaction (e.g., mint)
-    let txId = nextTransactionId;
-    nextTransactionId += 1;
-    let tx : Types.Transaction = {
-      id = txId;
-      from = franchise.owner;
-      to = app.applicantPrincipal;
-      amount = 0; // NFT, so no amount; adjust if payments added
-      timestamp = Time.now();
-      purpose = "NFT Mint for Franchise License";
-      relatedNftId = ?tokenId;
-      relatedApplicationId = ?applicationId;
-    };
-    transactions.put(txId, tx);
-
-    tokenId;
   };
+
 
   public shared (msg) func rejectApplication(applicationId : Nat, reason : Text) : async Bool {
     let caller = msg.caller;
     let ?user = users.get(caller) else return false;
-    if (user.role != #Admin) { return false };
+    if (user.role != #Franchisor) { return false };
     let ?app = applications.get(applicationId) else return false;
+    let ?franchise = franchises.get(app.franchiseId) else return false;
+    if (franchise.owner != caller) { return false };
     if (app.status != #Submitted) { return false };
-    let updatedApp = {
-      app with status = #Rejected;
-      updatedAt = Time.now();
-      rejectionReason = ?reason;
-    };
+    let updatedApp = { app with status = #Rejected; updatedAt = Time.now(); rejectionReason = ?reason };
     applications.put(applicationId, updatedApp);
     true;
   };
 
-  // Basic NFT functions (extend for full ICRC-7)
+  // NFT functions
+  public query func icrc7_symbol() : async Text { "FLIC" };
+  public query func icrc7_name() : async Text { "Franchise NFT Licenses" };
+  public query func icrc7_description() : async ?Text { ?"NFTs for franchise licenses" };
+  public query func icrc7_logo() : async ?Text { ?"https://example.com/logo.png" };
+  public query func icrc7_total_supply() : async Nat { nfts.size() };
+  public query func icrc7_max_memo_size() : async ?Nat { ?1024 };
+  public query func icrc7_max_query_batch_size() : async ?Nat { ?100 };
+  public query func icrc7_max_update_batch_size() : async ?Nat { ?50 };
+  public query func icrc7_tx_window() : async ?Nat64 { ?(24 * 60 * 60 * 1_000_000_000) };
+  public query func icrc7_max_take() : async ?Nat { ?100 };
+  public query func icrc7_atomic_batch_transfers() : async ?Bool { ?true };
+
   public query func getNFT(tokenId : Nat) : async ?Types.NFTLicense {
     nfts.get(tokenId);
   };
@@ -493,10 +477,6 @@ persistent actor {
       };
     };
     Array.freeze(results);
-  };
-
-  public query func icrc7_total_supply() : async Nat {
-    nfts.size();
   };
 
   public query func getTransaction(id : Nat) : async ?Types.Transaction {
