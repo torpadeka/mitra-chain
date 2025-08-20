@@ -39,7 +39,7 @@ export function FranchiseDetails({ franchise }: FranchiseDetailsProps) {
         </CardHeader>
         <CardContent>
           <p className="text-gray-700 leading-relaxed">
-            {franchise.licenseDuration.years} years
+            {franchise.licenseDuration.Years} years
           </p>
         </CardContent>
       </Card>
