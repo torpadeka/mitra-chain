@@ -272,7 +272,7 @@ persistent actor {
   public query func listCategories() : async [Types.Category] {
     Iter.toArray(categories.vals());
   };
-  
+
   public shared (msg) func createCategory(name : Text, description : Text) : async Nat {
     let caller = msg.caller;
     let ?user = users.get(caller) else throw Error.reject("User not registered");
@@ -354,7 +354,9 @@ persistent actor {
   public shared (msg) func approveApplication(applicationId : Nat) : async Nat {
     let caller = msg.caller;
     let ?user = users.get(caller) else throw Error.reject("User not registered");
-    if (user.role != #Admin) { throw Error.reject("Only admins can approve") };
+    if (user.role != #Admin and user.role != #Franchisor) {
+      throw Error.reject("Only admins and franchisors can approve");
+    };
     let ?app = applications.get(applicationId) else throw Error.reject("Application not found");
     if (app.status != #Submitted) {
       throw Error.reject("Application not submittable");
@@ -560,7 +562,7 @@ persistent actor {
     let caller = msg.caller;
     let ?user = users.get(caller) else throw Error.reject("User not registered");
     let ?conversation = conversations.get(conversationId) else throw Error.reject("Conversation not found");
-    
+
     // Verify sender and recipient are in the conversation
     if (not List.some(conversation.participants, func(p : Principal) : Bool { Principal.equal(p, caller) })) {
       throw Error.reject("Sender not a participant in this conversation");
