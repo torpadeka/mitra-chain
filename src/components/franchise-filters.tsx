@@ -38,7 +38,6 @@ interface FranchiseFiltersProps {
     features: boolean;
   }) => void;
   industries: Industry[];
-  locations: Location[];
 }
 
 export function FranchiseFilters({
@@ -51,7 +50,6 @@ export function FranchiseFilters({
   expandedSections,
   setExpandedSections,
   industries,
-  locations,
 }: FranchiseFiltersProps) {
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections({
@@ -79,7 +77,7 @@ export function FranchiseFilters({
   };
 
   const clearAllFilters = () => {
-    setInvestmentRange([50000, 500000]);
+    setInvestmentRange([1, 500000]);
     setSelectedIndustries([]);
     setSelectedLocations([]);
   };
@@ -124,23 +122,6 @@ export function FranchiseFilters({
                   </span>
                 );
               })}
-              {selectedLocations.map((locationId) => {
-                const location = locations.find((l) => l.id === locationId);
-                return (
-                  <span
-                    key={locationId}
-                    className="inline-flex items-center bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
-                  >
-                    {location?.label}
-                    <button
-                      onClick={() => handleLocationChange(locationId, false)}
-                      className="ml-1 hover:text-blue-600"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                );
-              })}
             </div>
           </CardContent>
         </Card>
@@ -170,8 +151,8 @@ export function FranchiseFilters({
                 value={investmentRange}
                 onValueChange={setInvestmentRange}
                 max={1000000}
-                min={10000}
-                step={10000}
+                min={1}
+                step={100}
                 className="w-full"
               />
               <div className="flex justify-between text-sm text-gray-600">
@@ -231,55 +212,7 @@ export function FranchiseFilters({
         )}
       </Card>
 
-      {/* Location */}
-      <Card>
-        <CardHeader className="pb-3">
-          <button
-            onClick={() => toggleSection("location")}
-            className="flex items-center justify-between w-full text-left"
-          >
-            <CardTitle className="text-sm font-medium">Location</CardTitle>
-            {expandedSections.location ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </button>
-        </CardHeader>
-        {expandedSections.location && (
-          <CardContent className="pt-0">
-            <div className="space-y-3">
-              {locations.map((location) => (
-                <div
-                  key={location.id}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id={location.id}
-                      checked={selectedLocations.includes(location.id)}
-                      onCheckedChange={(checked) =>
-                        handleLocationChange(location.id, checked as boolean)
-                      }
-                    />
-                    <label
-                      htmlFor={location.id}
-                      className="text-sm text-gray-700 cursor-pointer"
-                    >
-                      {location.label}
-                    </label>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    ({location.count})
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        )}
-      </Card>
-
-      {/* Features */}
+      {/* Features
       <Card>
         <CardHeader className="pb-3">
           <button
@@ -336,7 +269,7 @@ export function FranchiseFilters({
             </div>
           </CardContent>
         )}
-      </Card>
+      </Card> */}
     </div>
   );
 }

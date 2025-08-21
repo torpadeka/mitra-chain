@@ -25,9 +25,19 @@ export function FranchiseDetails({ franchise }: FranchiseDetailsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-700 leading-relaxed">
-            {franchise.description}
-          </p>
+          <div
+            className="text-gray-700 leading-relaxed"
+            style={{ whiteSpace: "pre-line" }}
+          >
+            <p
+              className=""
+              dangerouslySetInnerHTML={
+                franchise.description
+                  ? { __html: franchise.description }
+                  : { __html: "" }
+              }
+            ></p>
+          </div>
         </CardContent>
       </Card>
       <Card>

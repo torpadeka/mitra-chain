@@ -29,6 +29,7 @@ import { useState } from "react";
 import { FranchiseHandler } from "@/handler/FranchiseHandler";
 import { ApplicationHandler } from "@/handler/ApplicationHandler";
 import { TabsContent } from "./ui/tabs";
+import { Input } from "./ui/input";
 
 interface FrontendFranchise {
   id: number;
@@ -83,6 +84,7 @@ export function ApplicationsTab({
   const [selectedApplication, setSelectedApplication] =
     useState<Application | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [price, setPrice] = useState<number>();
   const [error, setError] = useState<string | null>(null);
 
   const handleReviewOpen = (
@@ -111,7 +113,10 @@ export function ApplicationsTab({
     if (!selectedApplication || !actor) return;
     try {
       const applicationHandler = new ApplicationHandler(actor);
-      await applicationHandler.approveApplication(selectedApplication.id);
+      await applicationHandler.approveApplication(
+        selectedApplication.id,
+        price!
+      );
       setIsReviewOpen(false);
       setSelectedApplication(null);
       alert("Application approved successfully!");
@@ -222,6 +227,18 @@ export function ApplicationsTab({
                           <p className="text-sm">
                             {application.application.coverLetter}
                           </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Approved Price:
+                          </p>
+                          <Input
+                            type="number"
+                            min={0}
+                            placeholder="Enter the approved price."
+                            value={price}
+                            onChange={(e) => setPrice(Number(e.target.value))}
+                          />
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground mb-2">

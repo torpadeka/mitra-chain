@@ -75,14 +75,14 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
     name: "",
     categoryIds: [],
     description: "",
-    startingPrice: 0, // Franchise fee
+    startingPrice: 0,
     foundedIn: new Date(),
     totalOutlets: 0,
-    legalEntity: "", // Financing options
-    minGrossProfit: 0, // Min investment
-    maxGrossProfit: 0, // Max investment
-    minNetProfit: 0, // Marketing fee
-    maxNetProfit: 0, // Liquid capital
+    legalEntity: "",
+    minGrossProfit: 0,
+    maxGrossProfit: 0,
+    minNetProfit: 0,
+    maxNetProfit: 0,
     isDepositRequired: false,
     royaltyFee: undefined,
     licenseDuration: { OneTime: true },
@@ -164,20 +164,37 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
       case 1:
         if (!formData.name?.trim()) errors.name = "Franchise name is required";
         if (!formData.categoryIds?.length)
-          errors.category = "Please select a category";
+          errors.categoryIds = "Please select a category";
         if (!formData.description?.trim())
           errors.description = "Description is required";
         if (!formData.contactNumber?.trim())
           errors.contactNumber = "Contact phone is required";
+        if (
+          formData.contactEmail &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)
+        )
+          errors.contactEmail = "Invalid email format";
+        if (
+          formData.coverImageUrl &&
+          !/^https?:\/\/[^\s$.?#].[^\s]*$/.test(formData.coverImageUrl)
+        )
+          errors.coverImageUrl = "Invalid URL format";
         break;
       case 2:
         if (!formData.startingPrice || formData.startingPrice <= 0)
-          errors.startingPrice = "Franchise fee is required";
-        if (!formData.royaltyFee) errors.royaltyFee = "Royalty fee is required";
+          errors.startingPrice = "Franchise fee must be greater than 0";
+        if (!formData.royaltyFee || Number(formData.royaltyFee) <= 0)
+          errors.royaltyFee = "Royalty fee must be greater than 0";
         if (!formData.minGrossProfit || formData.minGrossProfit <= 0)
-          errors.minGrossProfit = "Minimum investment is required";
+          errors.minGrossProfit = "Minimum investment must be greater than 0";
         if (!formData.maxGrossProfit || formData.maxGrossProfit <= 0)
-          errors.maxGrossProfit = "Maximum investment is required";
+          errors.maxGrossProfit = "Maximum investment must be greater than 0";
+        if (!formData.legalEntity?.trim())
+          errors.legalEntity = "Financing options are required";
+        if (!formData.totalOutlets || formData.totalOutlets <= 0)
+          errors.totalOutlets = "Total outlets must be greater than 0";
+        if (!formData.licenseDuration)
+          errors.licenseDuration = "License duration is required";
         if (
           formData.minGrossProfit &&
           formData.maxGrossProfit &&
@@ -186,6 +203,26 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
           errors.maxGrossProfit =
             "Maximum investment must be greater than minimum";
         }
+        if (formData.minNetProfit && formData.minNetProfit < 0)
+          errors.minNetProfit = "Marketing fee cannot be negative";
+        if (formData.maxNetProfit && formData.maxNetProfit < 0)
+          errors.maxNetProfit = "Liquid capital cannot be negative";
+        break;
+      case 3:
+        if (selectedFeatures.length === 0)
+          errors.features = "At least one feature must be selected";
+        if (selectedSupport.length === 0)
+          errors.support = "At least one support type must be selected";
+        break;
+      case 4:
+        if (!formData.description?.trim())
+          errors.description = "Franchisee requirements are required";
+        if (!formData.productGallery?.length)
+          errors.productGallery = "At least one image is required";
+        if (!formData.locations?.length)
+          errors.locations = "At least one territory is required";
+        if (!formData.totalOutlets || formData.totalOutlets <= 0)
+          errors.totalOutlets = "Target units must be greater than 0";
         break;
     }
 
@@ -199,6 +236,9 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
         ? prev.filter((f) => f !== feature)
         : [...prev, feature]
     );
+    if (fieldErrors.features) {
+      setFieldErrors((prev) => ({ ...prev, features: "" }));
+    }
   };
 
   const handleSupportToggle = (support: string) => {
@@ -207,21 +247,40 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
         ? prev.filter((s) => s !== support)
         : [...prev, support]
     );
+    if (fieldErrors.support) {
+      setFieldErrors((prev) => ({ ...prev, support: "" }));
+    }
   };
 
   const handleInputChange = (field: keyof FrontendFranchise, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear field error when user starts typing
     if (fieldErrors[field]) {
       setFieldErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  // Placeholder function for file upload (replace with actual implementation)
   const uploadFile = async (file: File): Promise<string> => {
-    // Simulate uploading file to a service and getting a URL
-    // Replace with actual upload logic (e.g., to AWS S3, IPFS, or backend endpoint)
-    return `https://example.com/uploads/${file.name}`;
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "mitra-chain");
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/dsl9fmscw/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      if (data.secure_url) {
+        return data.secure_url;
+      }
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+    return "";
   };
 
   const handleFileUpload = async (
@@ -235,12 +294,17 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
       setFormData((prev) => ({
         ...prev,
         productGallery: [...(prev.productGallery || []), ...uploadedUrls],
+        coverImageUrl: uploadedUrls[0] || prev.coverImageUrl,
       }));
+      if (fieldErrors.productGallery) {
+        setFieldErrors((prev) => ({ ...prev, productGallery: "" }));
+      }
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateStep(currentStep)) return;
     setLoading(true);
     setError(null);
     if (!actor) return;
@@ -248,14 +312,17 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
     try {
       const franchiseHandler = new FranchiseHandler(actor);
 
-      // Map categories to categoryIds (now fetched from backend)
-      const categoryIds = formData.categoryIds || [];
-      // Combine features and support into description or metadata if needed
-      const description = `${formData.description}\n\nKey Features: ${selectedFeatures.join(", ")}\nSupport Provided: ${selectedSupport.join(", ")}`;
+      let description = formData.description || "";
+      if (selectedFeatures.length > 0) {
+        description += `<br><br>Key Features: ${selectedFeatures.join(", ")}`;
+      }
+      if (selectedSupport.length > 0) {
+        description += `<br><br>Support Provided: ${selectedSupport.join(", ")}`;
+      }
 
       const franchiseId = await franchiseHandler.createFranchise(
         formData.name || "",
-        categoryIds,
+        formData.categoryIds || [],
         description,
         formData.startingPrice || 0,
         formData.foundedIn || new Date(),
@@ -294,6 +361,7 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
   };
 
   const nextStep = () => {
+    if (!actor) return;
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 4));
     }
@@ -425,7 +493,9 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                         >
                           <SelectTrigger
                             className={
-                              fieldErrors.category ? "border-destructive" : ""
+                              fieldErrors.categoryIds
+                                ? "border-destructive"
+                                : ""
                             }
                           >
                             <SelectValue placeholder="Select category" />
@@ -441,9 +511,9 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             ))}
                           </SelectContent>
                         </Select>
-                        {fieldErrors.category && (
+                        {fieldErrors.categoryIds && (
                           <p className="text-sm text-destructive">
-                            {fieldErrors.category}
+                            {fieldErrors.categoryIds}
                           </p>
                         )}
                       </div>
@@ -483,7 +553,17 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                           onChange={(e) =>
                             handleInputChange("coverImageUrl", e.target.value)
                           }
+                          className={
+                            fieldErrors.coverImageUrl
+                              ? "border-destructive"
+                              : ""
+                          }
                         />
+                        {fieldErrors.coverImageUrl && (
+                          <p className="text-sm text-destructive">
+                            {fieldErrors.coverImageUrl}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -523,7 +603,15 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                         onChange={(e) =>
                           handleInputChange("contactEmail", e.target.value)
                         }
+                        className={
+                          fieldErrors.contactEmail ? "border-destructive" : ""
+                        }
                       />
+                      {fieldErrors.contactEmail && (
+                        <p className="text-sm text-destructive">
+                          {fieldErrors.contactEmail}
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -588,7 +676,10 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                           }
                           value={formData.royaltyFee || ""}
                           onChange={(e) =>
-                            handleInputChange("royaltyFee", e.target.value)
+                            handleInputChange(
+                              "royaltyFee",
+                              Number(e.target.value)
+                            )
                           }
                         />
                         {fieldErrors.royaltyFee && (
@@ -669,6 +760,9 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                           min="0"
                           max="100"
                           step="0.1"
+                          className={
+                            fieldErrors.minNetProfit ? "border-destructive" : ""
+                          }
                           value={formData.minNetProfit || ""}
                           onChange={(e) =>
                             handleInputChange(
@@ -677,6 +771,11 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             )
                           }
                         />
+                        {fieldErrors.minNetProfit && (
+                          <p className="text-sm text-destructive">
+                            {fieldErrors.minNetProfit}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -689,7 +788,7 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             id="liquidCapital"
                             type="number"
                             placeholder="75000"
-                            className="pl-10"
+                            className={`pl-10 ${fieldErrors.maxNetProfit ? "border-destructive" : ""}`}
                             value={formData.maxNetProfit || ""}
                             onChange={(e) =>
                               handleInputChange(
@@ -699,22 +798,33 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             }
                           />
                         </div>
+                        {fieldErrors.maxNetProfit && (
+                          <p className="text-sm text-destructive">
+                            {fieldErrors.maxNetProfit}
+                          </p>
+                        )}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="financingOptions">
-                        Financing Options
+                        Financing Options{" "}
+                        <span className="text-destructive">*</span>
                       </Label>
                       <Textarea
                         id="financingOptions"
                         placeholder="Describe available financing options, partnerships with lenders, or in-house financing..."
-                        className="min-h-[100px]"
+                        className={`min-h-[100px] ${fieldErrors.legalEntity ? "border-destructive" : ""}`}
                         value={formData.legalEntity || ""}
                         onChange={(e) =>
                           handleInputChange("legalEntity", e.target.value)
                         }
                       />
+                      {fieldErrors.legalEntity && (
+                        <p className="text-sm text-destructive">
+                          {fieldErrors.legalEntity}
+                        </p>
+                      )}
                     </div>
 
                     <Separator />
@@ -736,11 +846,22 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                               new Date(e.target.value)
                             )
                           }
+                          className={
+                            fieldErrors.foundedIn ? "border-destructive" : ""
+                          }
                         />
+                        {fieldErrors.foundedIn && (
+                          <p className="text-sm text-destructive">
+                            {fieldErrors.foundedIn}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="totalOutlets">Total Outlets</Label>
+                        <Label htmlFor="totalOutlets">
+                          Total Outlets{" "}
+                          <span className="text-destructive">*</span>
+                        </Label>
                         <Input
                           id="totalOutlets"
                           type="number"
@@ -752,12 +873,21 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                               Number(e.target.value)
                             )
                           }
+                          className={
+                            fieldErrors.totalOutlets ? "border-destructive" : ""
+                          }
                         />
+                        {fieldErrors.totalOutlets && (
+                          <p className="text-sm text-destructive">
+                            {fieldErrors.totalOutlets}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
                         <Label htmlFor="licenseDuration">
-                          License Duration
+                          License Duration{" "}
+                          <span className="text-destructive">*</span>
                         </Label>
                         <Select
                           onValueChange={(value) =>
@@ -769,7 +899,13 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             )
                           }
                         >
-                          <SelectTrigger>
+                          <SelectTrigger
+                            className={
+                              fieldErrors.licenseDuration
+                                ? "border-destructive"
+                                : ""
+                            }
+                          >
                             <SelectValue placeholder="Select duration" />
                           </SelectTrigger>
                           <SelectContent>
@@ -780,6 +916,11 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             <SelectItem value="10">10 Years</SelectItem>
                           </SelectContent>
                         </Select>
+                        {fieldErrors.licenseDuration && (
+                          <p className="text-sm text-destructive">
+                            {fieldErrors.licenseDuration}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -819,7 +960,8 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                     <div className="space-y-4">
                       <div>
                         <Label className="text-base font-semibold">
-                          Key Features
+                          Key Features{" "}
+                          <span className="text-destructive">*</span>
                         </Label>
                         <p className="text-sm text-muted-foreground mt-1 mb-4">
                           Select the key features that make your franchise
@@ -850,32 +992,10 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             </div>
                           ))}
                         </div>
-
-                        {selectedFeatures.length > 0 && (
-                          <div className="mt-4">
-                            <p className="text-sm font-medium mb-2">
-                              Selected Features:
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {selectedFeatures.map((feature) => (
-                                <Badge
-                                  key={feature}
-                                  variant="secondary"
-                                  className="text-xs px-3 py-1"
-                                >
-                                  {feature}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-auto p-0 ml-2 hover:bg-transparent"
-                                    onClick={() => handleFeatureToggle(feature)}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
+                        {fieldErrors.features && (
+                          <p className="text-sm text-destructive mt-2">
+                            {fieldErrors.features}
+                          </p>
                         )}
                       </div>
 
@@ -883,7 +1003,8 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
 
                       <div>
                         <Label className="text-base font-semibold">
-                          Support Provided
+                          Support Provided{" "}
+                          <span className="text-destructive">*</span>
                         </Label>
                         <p className="text-sm text-muted-foreground mt-1 mb-4">
                           Select the types of support you provide to franchisees
@@ -913,32 +1034,10 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                             </div>
                           ))}
                         </div>
-
-                        {selectedSupport.length > 0 && (
-                          <div className="mt-4">
-                            <p className="text-sm font-medium mb-2">
-                              Selected Support:
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {selectedSupport.map((support) => (
-                                <Badge
-                                  key={support}
-                                  variant="secondary"
-                                  className="text-xs px-3 py-1"
-                                >
-                                  {support}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-auto p-0 ml-2 hover:bg-transparent"
-                                    onClick={() => handleSupportToggle(support)}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
+                        {fieldErrors.support && (
+                          <p className="text-sm text-destructive mt-2">
+                            {fieldErrors.support}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -961,7 +1060,8 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
                       <Label className="text-base font-semibold">
-                        Franchise Images
+                        Franchise Images{" "}
+                        <span className="text-destructive">*</span>
                       </Label>
                       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-muted-foreground/50 transition-colors">
                         <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -995,6 +1095,11 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                           </Button>
                         </label>
                       </div>
+                      {fieldErrors.productGallery && (
+                        <p className="text-sm text-destructive">
+                          {fieldErrors.productGallery}
+                        </p>
+                      )}
 
                       {formData.productGallery &&
                         formData.productGallery.length > 0 && (
@@ -1042,23 +1147,30 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                           htmlFor="requirements"
                           className="text-base font-semibold"
                         >
-                          Franchisee Requirements
+                          Franchisee Requirements{" "}
+                          <span className="text-destructive">*</span>
                         </Label>
                         <Textarea
                           id="requirements"
                           placeholder="Describe the ideal franchisee profile, experience requirements, financial qualifications, and any other criteria..."
-                          className="min-h-[120px]"
+                          className={`min-h-[120px] ${fieldErrors.description ? "border-destructive" : ""}`}
                           value={formData.description || ""}
                           onChange={(e) =>
                             handleInputChange("description", e.target.value)
                           }
                         />
+                        {fieldErrors.description && (
+                          <p className="text-sm text-destructive">
+                            {fieldErrors.description}
+                          </p>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <Label htmlFor="territories">
-                            Available Territories
+                            Available Territories{" "}
+                            <span className="text-destructive">*</span>
                           </Label>
                           <Input
                             id="territories"
@@ -1070,14 +1182,25 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                                 e.target.value.split(", ").filter(Boolean)
                               )
                             }
+                            className={
+                              fieldErrors.locations ? "border-destructive" : ""
+                            }
                           />
                           <p className="text-xs text-muted-foreground">
                             Separate multiple territories with commas
                           </p>
+                          {fieldErrors.locations && (
+                            <p className="text-sm text-destructive">
+                              {fieldErrors.locations}
+                            </p>
+                          )}
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="units">Target Units</Label>
+                          <Label htmlFor="units">
+                            Target Units{" "}
+                            <span className="text-destructive">*</span>
+                          </Label>
                           <Input
                             id="units"
                             type="number"
@@ -1089,10 +1212,20 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                                 Number(e.target.value)
                               )
                             }
+                            className={
+                              fieldErrors.totalOutlets
+                                ? "border-destructive"
+                                : ""
+                            }
                           />
                           <p className="text-xs text-muted-foreground">
                             How many units do you plan to franchise?
                           </p>
+                          {fieldErrors.totalOutlets && (
+                            <p className="text-sm text-destructive">
+                              {fieldErrors.totalOutlets}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>

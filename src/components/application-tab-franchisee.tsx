@@ -30,6 +30,7 @@ import {
   Eye,
   DollarSign,
   MessageSquare,
+  Coins,
 } from "lucide-react";
 import { TabsContent } from "./ui/tabs";
 import { DialogTrigger } from "@radix-ui/react-dialog";
@@ -82,6 +83,19 @@ export function ApplicationsTab({
     setSelectedFranchise(franchise);
     setIsViewOpen(true);
     setError(null);
+  };
+
+  const handlePay = async (id: number) => {
+    if (!user || !actor) return;
+    const applicationHandler = new ApplicationHandler(actor);
+    try {
+      await applicationHandler.payApplication(id);
+      alert("Payment successful!");
+      navigate("/dashboard/franchisee");
+    } catch (err) {
+      console.error("Payment error:", err);
+      setError("Failed to process payment. Please try again later.");
+    }
   };
 
   const handleContact = async (franchise: FrontendFranchise | null) => {
@@ -276,6 +290,15 @@ export function ApplicationsTab({
                 >
                   <MessageSquare className="w-4 h-4 mr-1" />
                   Contact
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hover:cursor-pointer"
+                  onClick={() => handlePay(detail.application.id)}
+                >
+                  <Coins className="w-4 h-4 mr-1" />
+                  Pay
                 </Button>
               </div>
             </div>

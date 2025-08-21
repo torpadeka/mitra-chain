@@ -94,7 +94,10 @@ export function RelatedFranchises({
                 </div>
               </div>
 
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              <p
+                className="text-gray-600 text-sm mb-4 line-clamp-2"
+                style={{ whiteSpace: "pre-line" }}
+              >
                 {franchise.description}
               </p>
 

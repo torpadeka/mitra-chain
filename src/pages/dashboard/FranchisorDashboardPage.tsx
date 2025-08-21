@@ -129,6 +129,10 @@ export default function FranchisorDashboard() {
         return "bg-green-100 text-green-800";
       case "Pending Documents":
         return "bg-orange-100 text-orange-800";
+      case "Pending Payment":
+        return "bg-yellow-100 text-yellow-700";
+      case "Completed":
+        return "bg-green-100 text-green-800";
       default:
         return "bg-gray-100 text-gray-800";
     }

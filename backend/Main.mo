@@ -301,9 +301,9 @@ persistent actor {
   public shared (msg) func createCategory(name : Text, description : Text) : async Nat {
     let caller = msg.caller;
     let ?user = users.get(caller) else throw Error.reject("User not registered");
-    if (user.role != #Admin) {
-      throw Error.reject("Only admins can create categories");
-    };
+    // if (user.role != #Admin) {
+    //   throw Error.reject("Only admins can create categories");
+    // };
     let id = nextCategoryId;
     nextCategoryId += 1;
     let category : Types.Category = { id; name; description };

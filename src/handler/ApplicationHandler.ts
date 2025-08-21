@@ -11,11 +11,13 @@ export interface FrontendApplication {
   id: number;
   franchiseId: number;
   applicantPrincipal: string;
-  status: "Submitted" | "InReview" | "Approved" | "Rejected";
+  status: "Submitted" | "InReview" | "Approved" | "Rejected" | "Pending Payment" | "Completed";
   coverLetter: string;
   createdAt: Date;
   updatedAt: Date;
   rejectionReason?: string;
+  price: number;
+  completedAt?: Date; 
 }
 
 export class ApplicationHandler {
@@ -34,6 +36,8 @@ export class ApplicationHandler {
       InReview: "InReview",
       Approved: "Approved",
       Rejected: "Rejected",
+      PendingPayment: "Pending Payment",
+      Completed: "Completed",
     };
     return {
       id: Number(application.id),
@@ -45,6 +49,10 @@ export class ApplicationHandler {
       createdAt: timeToDate(application.createdAt),
       updatedAt: timeToDate(application.updatedAt),
       rejectionReason: optionalToUndefined(application.rejectionReason),
+      price: Number(application.price),
+      completedAt: optionalToUndefined(application.completedAt)
+        ? timeToDate(optionalToUndefined(application.completedAt)!)
+        : undefined,
     };
   }
 
@@ -71,6 +79,10 @@ export class ApplicationHandler {
     const result = await this.actor.getApplicationsByOwner(principal);
     return result.map(this.mapApplication);
   }
+  
+  async payApplication(id: number){
+    const result = await this.actor.payApplication(BigInt(id));
+  }
 
   async getApplicationsByApplicant(
     applicant: string
@@ -80,8 +92,8 @@ export class ApplicationHandler {
     return result.map(this.mapApplication);
   }
 
-  async approveApplication(applicationId: number): Promise<number> {
-    const result = await this.actor.approveApplication(BigInt(applicationId));
+  async approveApplication(applicationId: number, price: number): Promise<number> {
+    const result = await this.actor.approveApplication(BigInt(applicationId), BigInt(price));
     return Number(result);
   }
 

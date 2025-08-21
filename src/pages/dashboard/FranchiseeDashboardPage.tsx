@@ -89,8 +89,13 @@ export default function FranchiseeDashboard() {
 
         console.log("All Applications:", allApps);
 
-        const approvedApps = allApps.filter((app) => app.status === "Approved");
-        const pendingApps = allApps.filter((app) => app.status === "Submitted");
+        const approvedApps = allApps.filter(
+          (app) => app.status === "Approved" || app.status === "Completed"
+        );
+        const pendingApps = allApps.filter(
+          (app) =>
+            app.status === "Submitted" || app.status === "Pending Payment"
+        );
         setApplications(approvedApps);
         setPendingApplications(pendingApps);
 
@@ -149,6 +154,10 @@ export default function FranchiseeDashboard() {
         return "bg-red-100 text-red-700";
       case "Pending":
         return "bg-yellow-100 text-yellow-700";
+      case "Pending Payment":
+        return "bg-yellow-100 text-yellow-700";
+      case "Completed":
+        return "bg-green-100 text-green-800";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -245,7 +254,7 @@ export default function FranchiseeDashboard() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {franchises.map((franchise) => (
-                      <FranchiseCard franchise={franchise} />
+                      <FranchiseCard franchise={franchise} key={franchise.id} />
                     ))}
                   </div>
                 </div>

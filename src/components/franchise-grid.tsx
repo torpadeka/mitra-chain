@@ -115,7 +115,10 @@ export function FranchiseGrid({
               <h3 className="font-semibold text-lg">{franchise.name}</h3>
               <p className="text-sm text-gray-500">{franchise.legalEntity}</p>
 
-              <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+              <p
+                className="text-sm text-gray-600 mt-2 line-clamp-2"
+                style={{ whiteSpace: "pre-line" }}
+              >
                 {franchise.description}
               </p>
 

@@ -85,7 +85,9 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
       setError(null);
       alert("Application submitted successfully!");
     } catch (err: any) {
-      setError("Failed to submit application: " + err.message);
+      const rejectMessage =
+        err?.message?.match(/"Reject message": "([^"]+)"/)?.[1] || err.message;
+      setError("Failed to submit application: " + rejectMessage);
     }
   };
 
@@ -180,7 +182,10 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
               </div>
             </div>
 
-            <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+            <p
+              className="text-xl text-gray-700 mb-8 leading-relaxed"
+              style={{ whiteSpace: "pre-line" }}
+            >
               {franchise.description}
             </p>
 

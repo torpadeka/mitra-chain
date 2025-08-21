@@ -9,6 +9,7 @@ import { useUser } from "@/context/AuthContext";
 import { FranchiseFilters } from "@/components/franchise-filters";
 import { FranchiseSearch } from "@/components/franchise-search";
 import { FranchiseGrid } from "@/components/franchise-grid";
+import { CategoryHandler } from "@/handler/CategoryHandler";
 
 export default function FranchisesPage() {
   // State from FranchiseSearch
@@ -16,7 +17,7 @@ export default function FranchisesPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // State from FranchiseFilters
-  const [investmentRange, setInvestmentRange] = useState([50000, 500000]);
+  const [investmentRange, setInvestmentRange] = useState([1, 500000]);
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [expandedSections, setExpandedSections] = useState({
@@ -30,6 +31,9 @@ export default function FranchisesPage() {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState("featured");
   const [franchises, setFranchises] = useState<FrontendFranchise[]>([]);
+  const [industries, setIndustries] = useState<
+    { id: string; label: string; count: number }[]
+  >([]);
 
   const { actor, principal } = useUser();
 
@@ -48,6 +52,7 @@ export default function FranchisesPage() {
       }
       try {
         const result = await franchiseHandler.listFranchises();
+        console.log("Fetched franchises:", result);
         if (isMounted) setFranchises(result || []);
       } catch (err) {
         console.error("Failed to fetch franchises:", err);
@@ -128,23 +133,29 @@ export default function FranchisesPage() {
     sortBy,
   ]);
 
-  // Map categoryIds to industry IDs (assuming categoryIds correspond to industries)
-  const industries = [
-    { id: "category-1", label: "Food & Beverage", count: 45 },
-    { id: "category-4", label: "Health & Fitness", count: 32 },
-    { id: "category-3", label: "Education", count: 28 },
-    { id: "category-5", label: "Automotive", count: 19 },
-    { id: "category-6", label: "Home Services", count: 24 },
-    { id: "category-7", label: "Retail", count: 18 },
-  ];
+  useEffect(() => {
+    if (!actor) return;
+    const categoryHandler = new CategoryHandler(actor);
 
-  // Define locations (aligned with franchise locations)
-  const locations = [
-    { id: "north-america", label: "North America", count: 89 },
-    { id: "europe", label: "Europe", count: 34 },
-    { id: "asia-pacific", label: "Asia Pacific", count: 28 },
-    { id: "latin-america", label: "Latin America", count: 15 },
-  ];
+    async function fetchIndustries() {
+      try {
+        const categories = await categoryHandler.listCategories();
+
+        // Map backend categories into industries format
+        const mapped = categories.map((category: any) => ({
+          id: `category-${category.id}`,
+          label: category.name,
+          count: Math.floor(Math.random() * 100) + 1,
+        }));
+
+        setIndustries(mapped);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    }
+
+    fetchIndustries();
+  }, [actor, franchises]);
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
@@ -173,7 +184,6 @@ export default function FranchisesPage() {
             expandedSections={expandedSections}
             setExpandedSections={setExpandedSections}
             industries={industries}
-            locations={locations}
           />
         </div>
 
