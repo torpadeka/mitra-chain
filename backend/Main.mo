@@ -16,16 +16,17 @@ import Hash "mo:base/Hash";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
 
-// ICP Ledger canister for ICRC-1/2 payments
-let ledger : actor {
-  icrc2_transfer_from : shared Types.TransferFromArgs -> async Types.TransferFromResult;
-  icrc1_balance_of : query Types.Account -> async Nat;
-} = actor "ryjl3-tyaaa-aaaaa-aaaba-cai";
-
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
     Text.hash(Nat.toText(n));
   };
+
+  // ICP Ledger canister for ICRC-1/2 payments
+  let ledger : actor {
+  icrc2_transfer_from : shared Types.TransferFromArgs -> async Types.TransferFromResult;
+  icrc1_balance_of : query Types.Account -> async Nat;
+} = actor "ryjl3-tyaaa-aaaaa-aaaba-cai";
+
 
   // Stable counters
   var nextFranchiseId : Nat = 0;
@@ -35,6 +36,7 @@ persistent actor {
   var nextTransactionId : Nat = 0;
   var nextConversationId : Nat = 0;
   var nextMessageId : Nat = 0;
+  var nextEventId : Nat = 0;
 
   // Stable storage arrays for upgrades
   var usersEntries : [(Principal, Types.User)] = [];
@@ -46,6 +48,7 @@ persistent actor {
   var conversationsEntries : [(Nat, Types.Conversation)] = [];
   var messagesEntries : [(Nat, Types.Message)] = [];
   var approvalsEntries : [(Nat, [Types.Approval])] = []; // For ICRC-37
+  var eventsEntries : [(Nat, Types.Event)] = [];
 
   // HashMaps for data
   transient var users = HashMap.HashMap<Principal, Types.User>(0, Principal.equal, Principal.hash);
@@ -57,6 +60,7 @@ persistent actor {
   transient var conversations = HashMap.HashMap<Nat, Types.Conversation>(0, Nat.equal, natHash);
   transient var messages = HashMap.HashMap<Nat, Types.Message>(0, Nat.equal, natHash);
   transient var approvals = HashMap.HashMap<Nat, List.List<Types.Approval>>(0, Nat.equal, natHash);
+  transient var events = HashMap.HashMap<Nat, Types.Event>(0, Nat.equal, natHash);
 
   // Upgrade hooks
   system func preupgrade() {
@@ -72,6 +76,7 @@ persistent actor {
       Iter.toArray(approvals.entries()),
       func ((k, v)) { (k, List.toArray(v)) }
     );
+    eventsEntries := Iter.toArray(events.entries());
   };
 
   system func postupgrade() {
@@ -92,6 +97,7 @@ persistent actor {
       Nat.equal,
       natHash
     );
+    events := HashMap.fromIter<Nat, Types.Event>(eventsEntries.vals(), eventsEntries.size(), Nat.equal, natHash);
   };
 
   // User functions
@@ -563,5 +569,110 @@ persistent actor {
     };
     messages.put(messageId, message);
     messageId;
+  };
+
+  public shared (msg) func createNewEvent(
+    title : Text,
+    category : Types.EventCategory,
+    description : Text,
+    startTime : Nat,
+    endTime : Nat,
+    location : Types.EventLocation,
+    imageUrl : Text,
+    featuredFranchises : [Nat],
+    registrationMode : Types.RegistrationMode
+  ) : async Nat {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    if (user.role != #Franchisor and user.role != #Franchisee) {
+      throw Error.reject("Only franchisors and franchisees can create events");
+    };
+    
+    // Validate featured franchises exist
+    for (franchiseId in featuredFranchises.vals()) {
+      let ?_ = franchises.get(franchiseId) else throw Error.reject("Invalid franchise ID: " # Nat.toText(franchiseId));
+    };
+
+    let id = nextEventId;
+    nextEventId += 1;
+    let event : Types.Event = {
+      id;
+      organizerPrincipal = caller;
+      title;
+      category;
+      description;
+      startTime;
+      endTime;
+      location;
+      imageUrl;
+      featuredFranchises;
+      attendees = [];
+      registrationMode;
+      createdAt = Time.now();
+    };
+    events.put(id, event);
+    id;
+  };
+
+  public query func getAllEvents() : async [Types.Event] {
+    Iter.toArray(events.vals());
+  };
+
+  public query func getEventDetails(id : Nat) : async ?Types.Event {
+    events.get(id);
+  };
+
+  public shared (msg) func registerInEvents(eventId : Nat) : async Bool {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else return false;
+    let ?event = events.get(eventId) else return false;
+
+    // Check if user is already registered
+    for (attendee in event.attendees.vals()) {
+      if (Principal.equal(attendee, caller)) {
+        return false; // Already registered
+      };
+    };
+
+    // Check registration mode and permissions
+    switch (event.registrationMode) {
+      case (#InviteOnly) {
+        if (event.organizerPrincipal != caller) {
+          return false; // Only organizer can invite for invite-only events
+        };
+      };
+      case (#Open) {
+        // Allow registration for open events
+      };
+    };
+
+    // Add user to attendees
+    let updatedAttendees = Array.append(event.attendees, [caller]);
+    let updatedEvent = { event with attendees = updatedAttendees };
+    events.put(eventId, updatedEvent);
+    true;
+  };
+
+  public query func isAttendee(eventId : Nat, principal : Principal) : async Bool {
+    switch (events.get(eventId)) {
+      case (?event) {
+        for (attendee in event.attendees.vals()) {
+          if (Principal.equal(attendee, principal)) {
+            return true;
+          };
+        };
+        false;
+      };
+      case null { false };
+    };
+  };
+
+  public query func isOrganizer(eventId : Nat, principal : Principal) : async Bool {
+    switch (events.get(eventId)) {
+      case (?event) {
+        Principal.equal(event.organizerPrincipal, principal);
+      };
+      case null { false };
+    };
   };
 };

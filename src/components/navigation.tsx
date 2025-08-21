@@ -31,6 +31,7 @@ export function Navigation() {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/franchises", label: "Browse Franchises" },
+    { href: "/events", label: "Events" },
     { href: "/how-it-works", label: "How It Works" },
     { href: "/about", label: "About Us" },
     ...(dashboardPath ? [{ href: dashboardPath, label: "Dashboard" }] : []),
