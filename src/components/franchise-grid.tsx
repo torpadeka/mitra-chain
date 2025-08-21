@@ -73,7 +73,7 @@ export function FranchiseGrid({
               }
             >
               <img
-                src={franchise.coverImageUrl}
+                src={franchise.coverImageUrl || "https://picsum.photos/300/200"}
                 alt={franchise.name}
                 className={
                   viewMode === "grid"

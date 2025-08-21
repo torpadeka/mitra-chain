@@ -16,6 +16,7 @@ import RegisterPage from "./pages/RegisterPage";
 import TestPage from "./pages/TestPage";
 import EventsPage from "./pages/events/EventsPage";
 import CreateEventPage from "./pages/events/CreateEventPage";
+import EventDetailPage from "./pages/events/EventDetailPage";
 
 const App: React.FC = () => {
   const {
@@ -87,7 +88,8 @@ const App: React.FC = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/events" element={<EventsPage />} />
-          <Route path="/create-event" element={<CreateEventPage />} />
+          <Route path="/events/create" element={<CreateEventPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
         </Routes>
       </div>
     </Router>

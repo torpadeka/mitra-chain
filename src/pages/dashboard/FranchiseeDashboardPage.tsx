@@ -258,51 +258,6 @@ export default function FranchiseeDashboard() {
                     ))}
                   </div>
                 </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                    <CardDescription>
-                      Common tasks and resources
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <a href="/franchises">
-                        <Button
-                          variant="outline"
-                          className="h-20 flex-col bg-transparent w-full"
-                        >
-                          <Plus className="w-6 h-6 mb-2" />
-                          <span className="text-sm">Browse Franchises</span>
-                        </Button>
-                      </a>
-                      <Button
-                        variant="outline"
-                        className="h-20 flex-col bg-transparent"
-                      >
-                        <Calendar className="w-6 h-6 mb-2" />
-                        <span className="text-sm">Schedule Training</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="h-20 flex-col bg-transparent"
-                      >
-                        <MessageSquare className="w-6 h-6 mb-2" />
-                        <span className="text-sm">Contact Support</span>
-                      </Button>
-                      <a href="/profile">
-                        <Button
-                          variant="outline"
-                          className="h-20 flex-col bg-transparent w-full"
-                        >
-                          <Store className="w-6 h-6 mb-2" />
-                          <span className="text-sm">My Profile</span>
-                        </Button>
-                      </a>
-                    </div>
-                  </CardContent>
-                </Card>
               </TabsContent>
 
               <TabsContent value="pending" className="space-y-6">
