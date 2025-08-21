@@ -16,16 +16,16 @@ import Hash "mo:base/Hash";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
 
-// ICP Ledger canister for ICRC-1/2 payments
-let ledger : actor {
-  icrc2_transfer_from : shared Types.TransferFromArgs -> async Types.TransferFromResult;
-  icrc1_balance_of : query Types.Account -> async Nat;
-} = actor "ryjl3-tyaaa-aaaaa-aaaba-cai";
-
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
     Text.hash(Nat.toText(n));
   };
+
+  // ICP Ledger canister for ICRC-1/2 payments
+  let ledger : actor {
+    icrc2_transfer_from : shared Types.TransferFromArgs -> async Types.TransferFromResult;
+    icrc1_balance_of : query Types.Account -> async Nat;
+  } = actor "ryjl3-tyaaa-aaaaa-aaaba-cai";
 
   // Stable counters
   var nextFranchiseId : Nat = 0;
@@ -70,7 +70,7 @@ persistent actor {
     messagesEntries := Iter.toArray(messages.entries());
     approvalsEntries := Array.map<(Nat, List.List<Types.Approval>), (Nat, [Types.Approval])>(
       Iter.toArray(approvals.entries()),
-      func ((k, v)) { (k, List.toArray(v)) }
+      func((k, v)) { (k, List.toArray(v)) },
     );
   };
 
@@ -86,11 +86,11 @@ persistent actor {
     approvals := HashMap.fromIter<Nat, List.List<Types.Approval>>(
       Array.map<(Nat, [Types.Approval]), (Nat, List.List<Types.Approval>)>(
         approvalsEntries,
-        func ((k, v)) { (k, List.fromArray(v)) }
+        func((k, v)) { (k, List.fromArray(v)) },
       ).vals(),
       approvalsEntries.size(),
       Nat.equal,
-      natHash
+      natHash,
     );
   };
 
@@ -289,7 +289,6 @@ persistent actor {
     Buffer.toArray(results);
   };
 
-  // Category functions (admin only, for simplicity)
   public query func listCategories() : async [Types.Category] {
     Iter.toArray(categories.vals());
   };
@@ -314,13 +313,27 @@ persistent actor {
   // Application functions
   public shared (msg) func applyForFranchise(franchiseId : Nat, coverLetter : Text) : async Nat {
     let caller = msg.caller;
+
+    // Check user exists
     let ?user = users.get(caller) else throw Error.reject("User not registered");
     if (user.role != #Franchisee) {
       throw Error.reject("Only franchisees can apply");
     };
+
+    // Check franchise exists
     let ?_ = franchises.get(franchiseId) else throw Error.reject("Franchise not found");
+
+    // Check if caller already applied to this franchise
+    for ((_, app) in applications.entries()) {
+      if (app.franchiseId == franchiseId and app.applicantPrincipal == caller) {
+        throw Error.reject("You have already submitted an application for this franchise");
+      };
+    };
+
+    // Create new application
     let id = nextApplicationId;
     nextApplicationId += 1;
+
     let application : Types.Application = {
       id;
       franchiseId;
@@ -330,7 +343,10 @@ persistent actor {
       createdAt = Time.now();
       updatedAt = Time.now();
       rejectionReason = null;
+      completedAt = null;
+      price = 0;
     };
+
     applications.put(id, application);
     id;
   };
@@ -371,7 +387,7 @@ persistent actor {
     Buffer.toArray(results);
   };
 
-  public shared (msg) func approveApplication(applicationId : Nat) : async () {
+  public shared (msg) func approveApplication(applicationId : Nat, priceh : Nat) : async () {
     let caller = msg.caller;
     let ?user = users.get(caller) else throw Error.reject("User not registered");
     if (user.role != #Admin and user.role != #Franchisor) {
@@ -379,12 +395,34 @@ persistent actor {
     };
     let ?app = applications.get(applicationId) else throw Error.reject("Application not found");
     let ?franchise = franchises.get(app.franchiseId) else throw Error.reject("Franchise not found");
-    if (franchise.owner != caller) { throw Error.reject("Not the franchise owner"); };
-    if (app.status != #Submitted) { throw Error.reject("Invalid status"); };
-    let updatedApp = { app with status = #Approved; updatedAt = Time.now() };
+    if (franchise.owner != caller) {
+      throw Error.reject("Not the franchise owner");
+    };
+    if (app.status != #Submitted) { throw Error.reject("Invalid status") };
+    let updatedApp = {
+      app with status = #PendingPayment;
+      price = priceh;
+      updatedAt = Time.now();
+    };
     applications.put(applicationId, updatedApp);
   };
 
+  public shared (msg) func payApplication(applicationId : Nat) : async () {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    if (user.role != #Admin and user.role != #Franchisee) {
+      throw Error.reject("Only admins and franchisee can pay");
+    };
+    let ?app = applications.get(applicationId) else throw Error.reject("Application not found");
+    let ?franchise = franchises.get(app.franchiseId) else throw Error.reject("Franchise not found");
+    if (app.status != #PendingPayment) { throw Error.reject("Invalid status") };
+    let updatedApp = {
+      app with status = #Completed;
+      completedAt = ?Time.now();
+      updatedAt = Time.now();
+    };
+    applications.put(applicationId, updatedApp);
+  };
 
   public shared (msg) func rejectApplication(applicationId : Nat, reason : Text) : async Bool {
     let caller = msg.caller;
@@ -394,7 +432,11 @@ persistent actor {
     let ?franchise = franchises.get(app.franchiseId) else return false;
     if (franchise.owner != caller) { return false };
     if (app.status != #Submitted) { return false };
-    let updatedApp = { app with status = #Rejected; updatedAt = Time.now(); rejectionReason = ?reason };
+    let updatedApp = {
+      app with status = #Rejected;
+      updatedAt = Time.now();
+      rejectionReason = ?reason;
+    };
     applications.put(applicationId, updatedApp);
     true;
   };
@@ -402,13 +444,19 @@ persistent actor {
   // NFT functions
   public query func icrc7_symbol() : async Text { "FLIC" };
   public query func icrc7_name() : async Text { "Franchise NFT Licenses" };
-  public query func icrc7_description() : async ?Text { ?"NFTs for franchise licenses" };
-  public query func icrc7_logo() : async ?Text { ?"https://example.com/logo.png" };
+  public query func icrc7_description() : async ?Text {
+    ?"NFTs for franchise licenses";
+  };
+  public query func icrc7_logo() : async ?Text {
+    ?"https://example.com/logo.png";
+  };
   public query func icrc7_total_supply() : async Nat { nfts.size() };
   public query func icrc7_max_memo_size() : async ?Nat { ?1024 };
   public query func icrc7_max_query_batch_size() : async ?Nat { ?100 };
   public query func icrc7_max_update_batch_size() : async ?Nat { ?50 };
-  public query func icrc7_tx_window() : async ?Nat64 { ?(24 * 60 * 60 * 1_000_000_000) };
+  public query func icrc7_tx_window() : async ?Nat64 {
+    ?(24 * 60 * 60 * 1_000_000_000);
+  };
   public query func icrc7_max_take() : async ?Nat { ?100 };
   public query func icrc7_atomic_batch_transfers() : async ?Bool { ?true };
 

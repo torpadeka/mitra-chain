@@ -17,9 +17,10 @@ module {
   public type ApplicationStatus = {
     #Submitted;
     #InReview;
+    #PendingPayment;
     #Approved;
     #Rejected;
-    #Completed; // New: After payment and NFT mint
+    #Completed;
   };
 
   public type LicenseDuration = {
@@ -131,6 +132,8 @@ module {
     createdAt : Time.Time;
     updatedAt : Time.Time;
     rejectionReason : ?Text;
+    price : Nat;
+    completedAt : ?Time.Time;
   };
 
   public type NFTLicense = {
