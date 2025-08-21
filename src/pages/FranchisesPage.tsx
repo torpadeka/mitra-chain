@@ -53,6 +53,7 @@ export default function FranchisesPage() {
         console.error("Failed to fetch franchises:", err);
       }
     }
+    console.log(actor);
     fetchFranchises();
     return () => {
       isMounted = false;

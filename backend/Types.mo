@@ -171,4 +171,39 @@ module {
     conversationId : Nat;
     participants : List.List<Principal>;
   };
+
+  public type EventCategory = {
+    #Expo;
+    #Webinar;
+    #Workshop;
+    #Networking;
+    #Bazaar;
+    #DiscoveryDay;
+  };
+
+  public type EventLocation = {
+    #Online : Text;
+    #Physical : { address : Text; city : Text };
+  };
+
+  public type RegistrationMode = {
+    #Open;
+    #InviteOnly;
+  };
+
+  public type Event = {
+    id : Nat;
+    organizerPrincipal : Principal;
+    title : Text;
+    category : EventCategory;
+    description : Text;
+    startTime : Nat;
+    endTime : Nat;
+    location : EventLocation;
+    imageUrl : Text;
+    featuredFranchises : [Nat];
+    attendees : [Principal];
+    registrationMode : RegistrationMode;
+    createdAt : Time.Time;
+  };
 };

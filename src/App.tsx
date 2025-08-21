@@ -9,12 +9,13 @@ import FranchiseDetailsPage from "./pages/Franchise";
 import FranchiseeDashboard from "./pages/dashboard/FranchiseeDashboardPage";
 import FranchisorDashboard from "./pages/dashboard/FranchisorDashboardPage";
 import ProfilePage from "./pages/ProfilePage";
-import FranchiseDetailPage from "./pages/dashboard/FranchiseeDetailPage";
 import FranchiseeDetailPage from "./pages/dashboard/FranchiseeDetailPage";
 import FranchisorFranchiseDetailPage from "./pages/dashboard/FranchisorDetailPage";
 import { Navigation } from "./components/navigation";
 import RegisterPage from "./pages/RegisterPage";
 import TestPage from "./pages/TestPage";
+import EventsPage from "./pages/events/EventsPage";
+import CreateEventPage from "./pages/events/CreateEventPage";
 
 const App: React.FC = () => {
   const {
@@ -50,7 +51,7 @@ const App: React.FC = () => {
     };
 
     restoreUser();
-  }, [actor, principal, isAuthenticated, setUser]); // Removed 'user' from dependencies
+  }, [actor, principal, isAuthenticated, setUser]);
 
   return (
     <Router>
@@ -85,6 +86,8 @@ const App: React.FC = () => {
           />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/create-event" element={<CreateEventPage />} />
         </Routes>
       </div>
     </Router>
