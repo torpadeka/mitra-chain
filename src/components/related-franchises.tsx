@@ -67,10 +67,7 @@ export function RelatedFranchises({
           >
             <div className="relative">
               <img
-                src={
-                  franchise.image ||
-                  "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
-                }
+                src={"https://picsum.photos/seed/" + franchise.id + "/300/200/"}
                 alt={franchise.name}
                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
               />

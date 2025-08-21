@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone, Mail, MapPin, Clock, Shield } from "lucide-react";
+import { toast } from "sonner";
 
 interface FranchiseContactProps {
   franchise: Franchise;
@@ -24,6 +25,9 @@ export function FranchiseContact({ franchise }: FranchiseContactProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    toast("Success", {
+      description: `Successfully requested information for ${franchise.name}.`,
+    });
   };
 
   return (
@@ -76,9 +80,7 @@ export function FranchiseContact({ franchise }: FranchiseContactProps) {
               }
               rows={4}
             />
-            <Button type="submit" className="w-full btn-primary">
-              Request Information
-            </Button>
+            <Button className="w-full btn-primary">Request Information</Button>
           </form>
         </CardContent>
       </Card>
@@ -104,11 +106,6 @@ export function FranchiseContact({ franchise }: FranchiseContactProps) {
                 </span>
               </div>
             )}
-            <div className="pt-3 border-t border-gray-200">
-              <Button className="w-full btn-secondary">
-                Download Brochure
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>

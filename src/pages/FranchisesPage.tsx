@@ -10,10 +10,13 @@ import { FranchiseFilters } from "@/components/franchise-filters";
 import { FranchiseSearch } from "@/components/franchise-search";
 import { FranchiseGrid } from "@/components/franchise-grid";
 import { CategoryHandler } from "@/handler/CategoryHandler";
+import { useSearchParams } from "react-router";
 
 export default function FranchisesPage() {
   // State from FranchiseSearch
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get("q");
+  const [searchQuery, setSearchQuery] = useState(q || "");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // State from FranchiseFilters

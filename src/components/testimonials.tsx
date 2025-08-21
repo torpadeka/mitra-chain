@@ -63,8 +63,9 @@ export function Testimonials() {
                 <div className="flex items-center">
                   <img
                     src={
-                      testimonial.image ||
-                      "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                      "https://picsum.photos/seed/" +
+                      testimonial.name.length +
+                      "/300/200"
                     }
                     alt={testimonial.name}
                     className="w-12 h-12 rounded-full mr-4"

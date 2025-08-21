@@ -17,6 +17,7 @@ import TestPage from "./pages/TestPage";
 import EventsPage from "./pages/events/EventsPage";
 import CreateEventPage from "./pages/events/CreateEventPage";
 import EventDetailPage from "./pages/events/EventDetailPage";
+import { Toaster } from "sonner";
 
 const App: React.FC = () => {
   const {
@@ -99,5 +100,6 @@ const App: React.FC = () => {
 export default () => (
   <UserProvider>
     <App />
+    <Toaster />
   </UserProvider>
 );

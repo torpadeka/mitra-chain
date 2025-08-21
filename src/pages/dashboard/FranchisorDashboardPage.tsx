@@ -166,11 +166,10 @@ export default function FranchisorDashboard() {
               </div>
 
               <Tabs defaultValue="franchises" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="franchises">My Franchises</TabsTrigger>
                   <TabsTrigger value="applications">Applications</TabsTrigger>
                   <TabsTrigger value="chat">Messages</TabsTrigger>
-                  <TabsTrigger value="settings">Settings</TabsTrigger>
                 </TabsList>
                 <TabsContent value="franchises" className="space-y-6">
                   <Card>
@@ -213,7 +212,9 @@ export default function FranchisorDashboard() {
                                   <img
                                     src={
                                       franchise.coverImageUrl ||
-                                      "https://picsum.photos/300/200"
+                                      "https://picsum.photos/seed/" +
+                                        franchise.id +
+                                        "/300/200"
                                     }
                                     alt={franchise.name}
                                     className="w-full h-full object-cover"
@@ -279,46 +280,6 @@ export default function FranchisorDashboard() {
                 />
                 <TabsContent value="chat" className="space-y-6">
                   <ChatSystem userType="franchisor" />
-                </TabsContent>
-                <TabsContent value="settings" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Franchise Settings</CardTitle>
-                      <CardDescription>
-                        Manage your franchise network preferences
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start bg-transparent"
-                      >
-                        <Building2 className="w-4 h-4 mr-2" />
-                        Franchise Terms & Conditions
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start bg-transparent"
-                      >
-                        <Users className="w-4 h-4 mr-2" />
-                        Franchisee Requirements
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start bg-transparent"
-                      >
-                        <MapPin className="w-4 h-4 mr-2" />
-                        Territory Management
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start bg-transparent"
-                      >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Document Templates
-                      </Button>
-                    </CardContent>
-                  </Card>
                 </TabsContent>
               </Tabs>
             </div>

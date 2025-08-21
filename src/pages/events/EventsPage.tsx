@@ -270,7 +270,7 @@ export default function EventsPage() {
                 <a href={`/events/${event.id}`}>
                   <div className="aspect-video relative overflow-hidden rounded-t-lg">
                     <img
-                      src={event.imageUrl || "/placeholder.svg"}
+                      src={event.imageUrl || "https://picsum.photos/300/200"}
                       alt={event.title}
                       className="w-full h-full object-cover"
                     />

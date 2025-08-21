@@ -52,6 +52,12 @@ export function Hero() {
                   placeholder="Search franchises by industry, investment level, or location..."
                   className="text-foreground bg-background w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
                   value={inputValue}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      navigate(`/franchises?q=${inputValue}`);
+                      setInputValue("");
+                    }
+                  }}
                   onChange={handleInputChange}
                 />
                 <Button

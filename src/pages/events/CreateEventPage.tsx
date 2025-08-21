@@ -403,7 +403,7 @@ export default function CreateEventPage() {
                 {formData.imageUrl && (
                   <div className="mt-4">
                     <img
-                      src={formData.imageUrl || "/placeholder.svg"}
+                      src={formData.imageUrl || "https://picsum.photos/300/200"}
                       alt="Event preview"
                       className="w-full max-w-md h-48 object-cover rounded-lg border"
                     />

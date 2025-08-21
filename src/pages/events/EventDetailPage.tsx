@@ -260,7 +260,7 @@ export default function EventDetailPage() {
         <div className="mb-8">
           <div className="aspect-video relative overflow-hidden rounded-lg mb-6">
             <img
-              src={event.imageUrl || "/placeholder.svg"}
+              src={event.imageUrl || "https://picsum.photos/300/200"}
               alt={event.title}
               className="w-full h-full object-cover"
             />
