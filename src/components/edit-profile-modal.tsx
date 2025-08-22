@@ -18,9 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, User } from "lucide-react";
 
 interface UserProfile {
-  id: string;
   firstName: string;
-  lastName: string;
   email: string;
   phone: string;
   address: string;
@@ -46,7 +44,6 @@ export function EditProfileModal({
 }: EditProfileModalProps) {
   const [formData, setFormData] = useState({
     firstName: userProfile.firstName,
-    lastName: userProfile.lastName,
     email: userProfile.email,
     phone: userProfile.phone,
     address: userProfile.address,
@@ -169,17 +166,6 @@ export function EditProfileModal({
                     handleInputChange("firstName", e.target.value)
                   }
                   placeholder="Enter your first name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    handleInputChange("lastName", e.target.value)
-                  }
-                  placeholder="Enter your last name"
                 />
               </div>
             </div>

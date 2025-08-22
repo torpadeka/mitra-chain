@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { ProtectedRoute } from "@/components/protected-route";
 // import { useAuth } from "@/contexts/auth-context";
 import {
@@ -29,6 +29,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
+import { useNavigate } from "react-router";
 
 export default function ProfilePage() {
   //   const { user } = useAuth();
@@ -41,6 +42,7 @@ export default function ProfilePage() {
   // };
   const { user } = useUser();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Mock user data - replace with actual API calls
   const userProfile = {
@@ -48,7 +50,7 @@ export default function ProfilePage() {
     email: user?.email || "john.doe@example.com",
     phone: "+1 (555) 123-4567",
     address: "123 Business Ave, Seattle, WA 98101",
-    userType: user?.role || "franchisee",
+    userType: typeof user?.role === "string" ? user.role : "franchisee",
     joinDate: "January 15, 2024",
     profilePicture: user?.profilePicUrl,
     bio: user?.bio,
@@ -111,13 +113,13 @@ export default function ProfilePage() {
                   Manage your account information and preferences
                 </p>
               </div>
-              <Button
+              {/* <Button
                 onClick={() => setIsEditModalOpen(true)}
                 className="bg-brand-600 hover:bg-brand-700"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
-              </Button>
+              </Button> */}
             </div>
           </div>
 
@@ -176,7 +178,15 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="mt-10">
-                    <Button>Go to Dashboard</Button>
+                    <Button
+                      onClick={() =>
+                        navigate("/dashboard/" + userProfile.userType)
+                      }
+                      className="!bg-brand-500 hover:!bg-brand-400 w-full hover:cursor-pointer"
+                      variant="default"
+                    >
+                      Go to Dashboard
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -271,13 +281,13 @@ export default function ProfilePage() {
                       <div>
                         <p className="text-sm font-medium">LinkedIn</p>
                         <p className="text-xs text-muted-foreground">
-                          {userProfile.linkedIn}
+                          linkedin.com/in/{userProfile.firstName.toLowerCase()}
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    {/* <Button variant="outline" size="sm">
                       Edit
-                    </Button>
+                    </Button> */}
                   </div>
 
                   <div className="flex items-center justify-between p-3 border rounded-lg">
@@ -288,13 +298,13 @@ export default function ProfilePage() {
                       <div>
                         <p className="text-sm font-medium">Twitter</p>
                         <p className="text-xs text-muted-foreground">
-                          {userProfile.twitter}
+                          @{userProfile.firstName.toLowerCase()}
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    {/* <Button variant="outline" size="sm">
                       Edit
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardContent>
               </Card>

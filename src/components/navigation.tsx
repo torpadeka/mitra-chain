@@ -63,7 +63,15 @@ export function Navigation() {
               <a
                 key={item.href}
                 href={item.href}
-                className="text-secondary hover:text-brand font-medium transition-colors"
+                className="
+                  relative font-medium !text-foreground 
+                  transition-colors 
+                  after:absolute after:left-0 after:bottom-0 
+                  after:h-[2px] after:w-full after:origin-left 
+                  after:scale-x-0 after:bg-brand-900 
+                  after:transition-transform after:duration-300 
+                  hover:!text-brand-900 hover:after:scale-x-100
+                "
               >
                 {item.label}
               </a>

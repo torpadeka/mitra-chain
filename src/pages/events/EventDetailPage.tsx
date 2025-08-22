@@ -53,7 +53,7 @@ const categoryColors = {
 export default function EventDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, actor } = useUser();
+  const { user, actor, login } = useUser();
   const [event, setEvent] = useState<FrontendEvent | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -390,8 +390,11 @@ export default function EventDetailPage() {
                       <p className="text-secondary mb-4">
                         Sign in to register for this event
                       </p>
-                      <Button asChild className="w-full btn-primary">
-                        <a href="/auth/login">Sign In</a>
+                      <Button
+                        asChild
+                        className="w-full btn-primary hover:cursor-pointer"
+                      >
+                        <a onClick={login}>Sign In</a>
                       </Button>
                     </div>
                   )}
