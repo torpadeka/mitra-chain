@@ -66,10 +66,7 @@ export function TeamSection() {
             >
               <CardContent className="p-6">
                 <img
-                  src={
-                    member.image ||
-                    "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
-                  }
+                  src={"https://picsum.photos/seed/" + index + "/200/200/"}
                   alt={member.name}
                   className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                 />

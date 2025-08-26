@@ -58,12 +58,13 @@ export function FranchiseContact({ franchise }: FranchiseContactProps) {
             />
             <Input
               type="tel"
-              placeholder="Phone Number"
+              placeholder="Phone"
               value={formData.phone}
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
               required
+              autoComplete="off"
             />
             <Input
               placeholder="Available Investment"

@@ -185,8 +185,9 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
             <p
               className="text-xl text-gray-700 mb-8 leading-relaxed"
               style={{ whiteSpace: "pre-line" }}
+              dangerouslySetInnerHTML={{ __html: franchise.description }}
             >
-              {franchise.description}
+              {/* {franchise.description} */}
             </p>
 
             <div className="flex items-center gap-4 mb-8">
