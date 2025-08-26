@@ -291,15 +291,17 @@ export function ApplicationsTab({
                   <MessageSquare className="w-4 h-4 mr-1" />
                   Contact
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hover:cursor-pointer"
-                  onClick={() => handlePay(detail.application.id)}
-                >
-                  <Coins className="w-4 h-4 mr-1" />
-                  Pay
-                </Button>
+                {detail.application.status === "Pending Payment" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hover:cursor-pointer"
+                    onClick={() => handlePay(detail.application.id)}
+                  >
+                    <Coins className="w-4 h-4 mr-1" />
+                    Pay
+                  </Button>
+                )}
               </div>
             </div>
           ))}

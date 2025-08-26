@@ -231,11 +231,13 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
   };
 
   const handleFeatureToggle = (feature: string) => {
-    setSelectedFeatures((prev) =>
-      prev.includes(feature)
+    setSelectedFeatures((prev) => {
+      const newFeatures = prev.includes(feature)
         ? prev.filter((f) => f !== feature)
-        : [...prev, feature]
-    );
+        : [...prev, feature];
+      console.log("Updated selectedFeatures:", newFeatures);
+      return newFeatures;
+    });
     if (fieldErrors.features) {
       setFieldErrors((prev) => ({ ...prev, features: "" }));
     }
@@ -320,7 +322,10 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
         description += `<br><br>Support Provided: ${selectedSupport.join(", ")}`;
       }
 
-      const franchiseId = await franchiseHandler.createFranchise(
+      console.log("Final description:", description);
+
+      console.log(
+        "Franchise created with ID:",
         formData.name || "",
         formData.categoryIds || [],
         description,
@@ -342,6 +347,28 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
         formData.locations || []
       );
 
+      const franchiseId = await franchiseHandler.createFranchise(
+        formData.name || "",
+        formData.categoryIds || [],
+        description,
+        formData.startingPrice || 0,
+        formData.foundedIn || new Date(),
+        formData.totalOutlets || 0,
+        formData.legalEntity || "",
+        formData.minGrossProfit,
+        formData.maxGrossProfit,
+        formData.minNetProfit,
+        formData.maxNetProfit,
+        formData.isDepositRequired || false,
+        String(formData.royaltyFee),
+        formData.licenseDuration || { OneTime: true },
+        formData.coverImageUrl || "",
+        formData.productGallery || [],
+        formData.contactNumber,
+        formData.contactEmail,
+        formData.locations || []
+      );
+
       toast("Success", {
         description: `Franchise created with ID: ${franchiseId}`,
       });
@@ -352,6 +379,7 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
       setSelectedSupport([]);
     } catch (err) {
       setError("Failed to create franchise. Please try again.");
+      console.log(err);
       toast("Error", {
         description: "Failed to create franchise. Please try again.",
       });
@@ -976,12 +1004,14 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                                   ? "bg-primary/5 border-primary"
                                   : "border-border"
                               }`}
-                              onClick={() => handleFeatureToggle(feature)}
+                              // onClick={() => handleFeatureToggle(feature)}
                             >
                               <Checkbox
                                 id={feature}
                                 checked={selectedFeatures.includes(feature)}
-                                onChange={() => handleFeatureToggle(feature)}
+                                onCheckedChange={() =>
+                                  handleFeatureToggle(feature)
+                                }
                               />
                               <Label
                                 htmlFor={feature}
@@ -1018,12 +1048,14 @@ export function AddFranchiseModal({ isOpen, onClose }: AddFranchiseModalProps) {
                                   ? "bg-primary/5 border-primary"
                                   : "border-border"
                               }`}
-                              onClick={() => handleSupportToggle(support)}
+                              // onClick={() => handleSupportToggle(support)}
                             >
                               <Checkbox
                                 id={support}
                                 checked={selectedSupport.includes(support)}
-                                onChange={() => handleSupportToggle(support)}
+                                onCheckedChange={() =>
+                                  handleSupportToggle(support)
+                                }
                               />
                               <Label
                                 htmlFor={support}
