@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// import { ProtectedRoute } from "@/components/protected-route";
-// import { useAuth } from "@/contexts/auth-context";
 import {
   Card,
   CardContent,
@@ -12,24 +10,16 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EditProfileModal } from "@/components/edit-profile-modal";
 import {
   User,
   Mail,
   Phone,
   MapPin,
   Calendar,
-  Building2,
-  Edit,
-  Shield,
-  Bell,
-  CreditCard,
-  FileText,
-  Settings,
 } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
+import NoPP from '../assets/no_pp.webp'
 
 export default function ProfilePage() {
   //   const { user } = useAuth();
@@ -132,8 +122,7 @@ export default function ProfilePage() {
                     <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gray-100">
                       <img
                         src={
-                          userProfile.profilePicture ||
-                          "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                          userProfile.profilePicture || NoPP
                         }
                         alt={`${userProfile.firstName} `}
                         className="w-full h-full object-cover"

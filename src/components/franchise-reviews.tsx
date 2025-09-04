@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, MessageSquare, ThumbsUp } from "lucide-react";
+import NoPP from '../assets/no_pp.webp'
 
 const reviews = [
   {
@@ -104,8 +105,7 @@ export function FranchiseReviews({ franchiseId }: FranchiseReviewsProps) {
                 <div className="flex items-start gap-4">
                   <img
                     src={
-                      review.avatar ||
-                      "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                      review.avatar || NoPP
                     }
                     alt={review.author}
                     className="w-10 h-10 rounded-full"

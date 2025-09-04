@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Upload, User } from "lucide-react";
+import NoPP from '../assets/no_pp.webp'
 
 interface UserProfile {
   firstName: string;
@@ -109,8 +110,7 @@ export function EditProfileModal({
               <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300">
                 <img
                   src={
-                    profileImagePreview ||
-                    "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                    profileImagePreview || NoPP
                   }
                   alt="Profile"
                   className="w-full h-full object-cover"

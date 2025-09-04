@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import NoPP from '../assets/no_pp.webp'
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -91,8 +92,7 @@ export function Navigation() {
                   <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
                     <img
                       src={
-                        user?.profilePicUrl ||
-                        "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                        user?.profilePicUrl || NoPP
                       }
                       alt="Profile"
                       className="w-full h-full object-cover"
@@ -156,8 +156,7 @@ export function Navigation() {
                       <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
                         <img
                           src={
-                            user?.profilePicUrl ||
-                            "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                            user?.profilePicUrl || NoPP
                           }
                           alt="Profile"
                           className="w-full h-full object-cover"

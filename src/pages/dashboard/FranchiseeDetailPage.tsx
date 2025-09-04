@@ -1,29 +1,18 @@
 import { useParams } from "react-router";
-import { Principal } from "@dfinity/principal";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   DollarSign,
   Briefcase,
-  CalendarArrowDown,
   ImageIcon,
   ChevronLeft,
   ChevronRight,
   Store,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { useUser } from "@/context/AuthContext";
 import { FranchiseHandler } from "@/handler/FranchiseHandler";
+import NoPP from '../assets/no_pp.webp'
 
 type FrontendFranchise = {
   id: number;
@@ -382,8 +371,7 @@ export default function FranchiseDashboard() {
                 <div className="relative">
                   <img
                     src={
-                      franchise.data.productGallery[currentImage] ||
-                      "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                      franchise.data.productGallery[currentImage] || NoPP
                     }
                     alt={`Gallery image ${currentImage + 1}`}
                     className="w-full h-80 object-cover rounded-lg"
@@ -425,8 +413,7 @@ export default function FranchiseDashboard() {
                       >
                         <img
                           src={
-                            image ||
-                            "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                            image || NoPP
                           }
                           alt={`Thumbnail ${index + 1}`}
                           className="w-full h-20 object-cover hover:scale-105 transition-transform"

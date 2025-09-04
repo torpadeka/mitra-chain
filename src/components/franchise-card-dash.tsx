@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Briefcase, DollarSign } from "lucide-react";
 import { FrontendFranchise } from "@/handler/FranchiseHandler";
+import NoPP from '../assets/no_pp.webp'
 
 interface FranchiseCardProps {
   franchise: FrontendFranchise;
@@ -42,8 +43,7 @@ export function FranchiseCard({ franchise }: FranchiseCardProps) {
         <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
           <img
             src={
-              franchise.coverImageUrl ||
-              "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+              franchise.coverImageUrl || NoPP
             }
             alt={franchise.name}
             className="w-full h-full object-cover"

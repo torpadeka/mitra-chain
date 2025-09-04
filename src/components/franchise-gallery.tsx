@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
+import NoPP from '../assets/no_pp.webp'
 
 interface FranchiseGalleryProps {
   images: string[];
@@ -34,8 +35,7 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
           <div className="relative">
             <img
               src={
-                images[currentImage] ||
-                "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                images[currentImage] || NoPP
               }
               alt={`Gallery image ${currentImage + 1}`}
               className="w-full h-80 object-cover rounded-lg"
@@ -77,8 +77,7 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
               >
                 <img
                   src={
-                    image ||
-                    "https://res.cloudinary.com/dqvlnzw9f/image/upload/v1755615357/no_pp_gjtf75.jpg"
+                    image || NoPP
                   }
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-20 object-cover hover:scale-105 transition-transform"

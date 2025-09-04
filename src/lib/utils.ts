@@ -49,3 +49,11 @@ export const optionalToUndefined = <T>(opt: [] | [T]): T | undefined => {
 export const principalToString = (principal: Principal): string => {
   return principal.toText();
 };
+
+export function toBaseUnits(amount: number, decimals: number): bigint {
+  return BigInt(Math.round(amount * 10 ** decimals));
+}
+
+export function toMainUnit(amount: bigint, decimals: number): number {
+  return Number(amount) / 10 ** decimals;
+}
