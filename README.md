@@ -63,7 +63,7 @@ MitraChain is a decentralized platform that **streamlines** franchise discovery,
 MitraChain combines a modern frontend with a robust decentralized backend. Below is the high-level architecture diagram:
 
 <p align="center">
-<img src="./src/public/dummy.jpg" alt="MitraChain Architecture Diagram" width="800"/>
+<img src="./src/public/architecture_diagram.png" alt="MitraChain Architecture Diagram" width="800"/>
 </p>
 
 - **Frontend**: Built with **React**, **Vite**, **TypeScript**, and **TailwindCSS** for a responsive and intuitive UI.
@@ -77,7 +77,7 @@ MitraChain combines a modern frontend with a robust decentralized backend. Below
 The diagram below outlines the user journey on MitraChain, from registration to franchise application and management.
 
 <p align="center">
-<img src="./src/public/dummy.jpg" alt="MitraChain User Flow Diagram" width="800"/>
+<img src="./src/public/user_flow.jpg" alt="MitraChain User Flow Diagram" width="800"/>
 </p>
 
 ---
@@ -91,36 +91,68 @@ Below are mockups showcasing MitraChain’s user interface.
 <br>
 <table>
 <tr>
-<td><img src="./src/public/dummy.jpg" alt="Home Page" width="400"/></td>
-<td><img src="./src/public/dummy.jpg" alt="Franchisor Dashboard" width="400"/></td>
+<td><img src="./src/public/home.png" alt="Home Page" height="300"/></td>
+<td><img src="./src/public/about.png" alt="About Page" height="300"/></td>
 </tr>
 <tr>
 <td align="center"><em>Home Page</em></td>
-<td align="center"><em>Franchisor Dashboard</em></td>
+<td align="center"><em>About Page</em></td>
 </tr>
 <tr>
-<td><img src="./src/public/dummy.jpg" alt="Franchisee Dashboard" width="400"/></td>
-<td><img src="./src/public/dummy.jpg" alt="Franchise Listing" width="400"/></td>
+<td><img src="./src/public/franchises.png" alt="Browse Franchises Page" height="300"/></td>
+<td><img src="./src/public/franchise_details.png" alt="Franchise Details Page" height="300"/></td>
 </tr>
 <tr>
-<td align="center"><em>Franchisee Dashboard</em></td>
-<td align="center"><em>Franchise Listing</em></td>
+<td align="center"><em>Browse Franchises Page</em></td>
+<td align="center"><em>Franchise Details Page</em></td>
 </tr>
 <tr>
-<td><img src="./src/public/dummy.jpg" alt="Search Page" width="400"/></td>
-<td><img src="./src/public/dummy.jpg" alt="Application Form" width="400"/></td>
+<td><img src="./src/public/franchisee_dashboard_1.png" alt="Franchisee Dashboard 1" height="300"/></td>
+<td><img src="./src/public/franchisee_dashboard_2.png" alt="Franchisee Dashboard 2" height="300"/></td>
 </tr>
 <tr>
-<td align="center"><em>Search Page</em></td>
-<td align="center"><em>Application Form</em></td>
+<td align="center"><em>Franchisee Dashboard 1</em></td>
+<td align="center"><em>Franchisee Dashboard 2</em></td>
 </tr>
 <tr>
-<td><img src="./src/public/dummy.jpg" alt="Messaging Interface" width="400"/></td>
-<td><img src="./src/public/dummy.jpg" alt="Login Page" width="400"/></td>
+<td><img src="./src/public/franchisor_dashboard_1.png" alt="Franchisor Dashboard 1" height="300"/></td>
+<td><img src="./src/public/franchisor_dashboard_2.png" alt="Franchisor Dashboard 2" height="300"/></td>
 </tr>
 <tr>
-<td align="center"><em>Messaging Interface</em></td>
-<td align="center"><em>Login Page</em></td>
+<td align="center"><em>Franchisor Dashboard 1</em></td>
+<td align="center"><em>Franchisor Dashboard 2</em></td>
+</tr>
+<tr>
+<td><img src="./src/public/franchisee_chat.png" alt="Franchisee Chat" height="300"/></td>
+<td><img src="./src/public/franchisor_chat.png" alt="Franchisor Chat" height="300"/></td>
+</tr>
+<tr>
+<td align="center"><em>Franchisee Chat</em></td>
+<td align="center"><em>Franchisor Chat</em></td>
+</tr>
+<tr>
+<td><img src="./src/public/how_it_works.png" alt="How It Works Page" height="300"/></td>
+<td><img src="./src/public/profile.png" alt="Profile Page" height="300"/></td>
+</tr>
+<tr>
+<td align="center"><em>How It Works Page</em></td>
+<td align="center"><em>Profile Page</em></td>
+</tr>
+<tr>
+<td><img src="./src/public/events.png" alt="Events Page" height="300"/></td>
+<td><img src="./src/public/event_details.png" alt="Event Detail Page" height="300"/></td>
+</tr>
+<tr>
+<td align="center"><em>Events Page</em></td>
+<td align="center"><em>Event Detail Page</em></td>
+</tr>
+<tr>
+<td><img src="./src/public/create_event.png" alt="Create Event Page" height="300"/></td>
+<td><img src="./src/public/register.png" alt="Register Page" height="300"/></td>
+</tr>
+<tr>
+<td align="center"><em>Create Event Page</em></td>
+<td align="center"><em>Register Page</em></td>
 </tr>
 </table>
 </details>
@@ -134,16 +166,32 @@ Here is an overview of MitraChain’s project structure:
 ```
 MitraChain/
 ├── mitrachain-backend/
-│   ├── src/
-│   │   ├── main.mo         # Core canister logic
-│   │   └── Types.mo        # Data models and type definitions
-│
-├── mitrachain-frontend/
-│   ├── src/
-│   │   ├── public/         # Static assets (logos, images)
-│   │   └── ...             # React components, pages, and logic
-│
-└── README.md               # This file
+│   ├── main.mo         # Core canister logic
+│   └── Types.mo        # Data models and type definitions
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── context/
+│   ├── declarations/
+│   ├── handler/
+│   ├── lib/
+│   ├── pages/
+│   └── public/
+├── .env
+├── .gitignore
+├── .prettierrc
+├── components.json
+├── dfx.json
+├── jsconfig.json
+├── jsrepojson
+├── mitra-chain-guidance.md
+├── mops.toml
+├── package-lock.json
+├── package.json
+├── README.md
+├── tsconfig.json
+├── vite-env.d.ts
+├── vite.config.ts
 ```
 
 ---
@@ -152,53 +200,59 @@ MitraChain/
 
 To run MitraChain locally, follow these steps:
 
-1. **Deploy the Backend Canister (ICP):**
-   - Navigate to the backend directory:
+1. **Install Dependencies:**
+   - Run the following command:
      ```bash
-     cd mitrachain-backend
+     npm i vite
      ```
+
+2. **Within WSL:**
    - Start a local ICP network:
+     ```bash
+     dfx start --background
+     ```
+     or
      ```bash
      dfx start --clean --background
      ```
-   - Generate canister declarations:
+   - Run the setup script:
      ```bash
-     dfx generate backend
-     ```
-   - Deploy the Motoko canister:
-     ```bash
-     dfx deploy
+     npm run setup
      ```
 
-2. **Launch the Frontend Application:**
-   - Navigate to the frontend directory:
+3. **Outside WSL:**
+   - Launch the frontend application:
      ```bash
-     cd mitrachain-frontend
-     ```
-   - Install dependencies:
-     ```bash
-     npm install
-     ```
-   - Start the development server:
-     ```bash
-     npm run dev
+     npm run frontend
      ```
 
-3. **Configure Authentication:**
+4. **Canister Updates:**
+   - To deploy updates to a canister:
+     ```bash
+     dfx deploy <nama-canister>
+     ```
+
+5. **Canister Management:**
+   - To stop all canisters:
+     ```bash
+     dfx canister stop --all
+     ```
+   - To delete all canisters:
+     ```bash
+     dfx canister delete --all
+     ```
+   - To start all canisters:
+     ```bash
+     dfx canister start --all
+     ```
+
+6. **Configure Authentication:**
    - Ensure **Internet Identity** is set up for local development. Update the frontend configuration to point to the local canister ID:
      ```javascript
-     // mitrachain-frontend/src/config.js
+     // src/config.js
      export const canisterId =
        process.env.CANISTER_ID_BACKEND || process.env.VITE_BACKEND_CANISTER_ID;
      ```
-
-   <details open>
-   <summary>Click to see screenshot of the configuration</summary>
-   <br>
-   <b>Frontend Configuration</b>
-   <br>
-   <img src="/public/dummy.png" alt="Frontend Config" width="500"/>
-   </details>
 
 ---
 
@@ -208,7 +262,7 @@ To run MitraChain locally, follow these steps:
 
 - **Canister Development in Motoko**: Implements secure backend logic and data storage.
 - **Persistent Storage**: Stores franchise listings, user profiles, and applications on-chain.
-- **Authentication**: Integrates **Internet Identity**, **NFID**, and **Plug Wallet** for secure user authentication.
+- **Authentication**: Integrates **Internet Identity** for secure user authentication.
 
 ### 🛠️ Frontend Features
 
