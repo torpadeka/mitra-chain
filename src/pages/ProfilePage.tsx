@@ -10,16 +10,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-} from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
-import NoPP from '../assets/no_pp.webp'
+import NoPP from "../assets/no_pp.webp";
 
 export default function ProfilePage() {
   //   const { user } = useAuth();
@@ -121,9 +115,7 @@ export default function ProfilePage() {
                   <div className="flex flex-col items-center text-center">
                     <div className="w-24 h-24 rounded-full overflow-hidden mb-4 bg-gray-100">
                       <img
-                        src={
-                          userProfile.profilePicture || NoPP
-                        }
+                        src={userProfile.profilePicture || NoPP}
                         alt={`${userProfile.firstName} `}
                         className="w-full h-full object-cover"
                       />

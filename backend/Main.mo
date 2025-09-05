@@ -21,18 +21,10 @@ persistent actor {
     Text.hash(Nat.toText(n));
   };
 
-  // ICP Ledger canister for ICRC-1/2 payments
-  let ledger : actor {
-    icrc2_transfer_from : shared Types.TransferFromArgs -> async Types.TransferFromResult;
-    icrc1_balance_of : query Types.Account -> async Nat;
-  } = actor "ryjl3-tyaaa-aaaaa-aaaba-cai";
-
   // Stable counters
   var nextFranchiseId : Nat = 0;
   var nextCategoryId : Nat = 0;
   var nextApplicationId : Nat = 0;
-  var nextTokenId : Nat = 0;
-  var nextTransactionId : Nat = 0;
   var nextConversationId : Nat = 0;
   var nextMessageId : Nat = 0;
   var nextEventId : Nat = 0;
@@ -46,7 +38,6 @@ persistent actor {
   var transactionsEntries : [(Nat, Types.Transaction)] = [];
   var conversationsEntries : [(Nat, Types.Conversation)] = [];
   var messagesEntries : [(Nat, Types.Message)] = [];
-  var approvalsEntries : [(Nat, [Types.Approval])] = []; // For ICRC-37
   var eventsEntries : [(Nat, Types.Event)] = [];
 
   // HashMaps for data
@@ -58,7 +49,6 @@ persistent actor {
   transient var transactions = HashMap.HashMap<Nat, Types.Transaction>(0, Nat.equal, natHash);
   transient var conversations = HashMap.HashMap<Nat, Types.Conversation>(0, Nat.equal, natHash);
   transient var messages = HashMap.HashMap<Nat, Types.Message>(0, Nat.equal, natHash);
-  transient var approvals = HashMap.HashMap<Nat, List.List<Types.Approval>>(0, Nat.equal, natHash);
   transient var events = HashMap.HashMap<Nat, Types.Event>(0, Nat.equal, natHash);
 
   // Upgrade hooks
@@ -71,10 +61,6 @@ persistent actor {
     transactionsEntries := Iter.toArray(transactions.entries());
     conversationsEntries := Iter.toArray(conversations.entries());
     messagesEntries := Iter.toArray(messages.entries());
-    approvalsEntries := Array.map<(Nat, List.List<Types.Approval>), (Nat, [Types.Approval])>(
-      Iter.toArray(approvals.entries()),
-      func((k, v)) { (k, List.toArray(v)) },
-    );
     eventsEntries := Iter.toArray(events.entries());
   };
 
@@ -87,15 +73,6 @@ persistent actor {
     transactions := HashMap.fromIter<Nat, Types.Transaction>(transactionsEntries.vals(), transactionsEntries.size(), Nat.equal, natHash);
     conversations := HashMap.fromIter<Nat, Types.Conversation>(conversationsEntries.vals(), conversationsEntries.size(), Nat.equal, natHash);
     messages := HashMap.fromIter<Nat, Types.Message>(messagesEntries.vals(), messagesEntries.size(), Nat.equal, natHash);
-    approvals := HashMap.fromIter<Nat, List.List<Types.Approval>>(
-      Array.map<(Nat, [Types.Approval]), (Nat, List.List<Types.Approval>)>(
-        approvalsEntries,
-        func((k, v)) { (k, List.fromArray(v)) },
-      ).vals(),
-      approvalsEntries.size(),
-      Nat.equal,
-      natHash,
-    );
     events := HashMap.fromIter<Nat, Types.Event>(eventsEntries.vals(), eventsEntries.size(), Nat.equal, natHash);
   };
 
@@ -444,94 +421,6 @@ persistent actor {
     };
     applications.put(applicationId, updatedApp);
     true;
-  };
-
-  // NFT functions
-  public query func icrc7_symbol() : async Text { "FLIC" };
-  public query func icrc7_name() : async Text { "Franchise NFT Licenses" };
-  public query func icrc7_description() : async ?Text {
-    ?"NFTs for franchise licenses";
-  };
-  public query func icrc7_logo() : async ?Text {
-    ?"https://example.com/logo.png";
-  };
-  public query func icrc7_total_supply() : async Nat { nfts.size() };
-  public query func icrc7_max_memo_size() : async ?Nat { ?1024 };
-  public query func icrc7_max_query_batch_size() : async ?Nat { ?100 };
-  public query func icrc7_max_update_batch_size() : async ?Nat { ?50 };
-  public query func icrc7_tx_window() : async ?Nat64 {
-    ?(24 * 60 * 60 * 1_000_000_000);
-  };
-  public query func icrc7_max_take() : async ?Nat { ?100 };
-  public query func icrc7_atomic_batch_transfers() : async ?Bool { ?true };
-
-  public query func getNFT(tokenId : Nat) : async ?Types.NFTLicense {
-    nfts.get(tokenId);
-  };
-
-  // ICRC-7 compliant transfer (basic; add approvals/memos/created_at_time for full spec)
-  public shared (msg) func icrc7_transfer(tokenIds : [Nat], to : Types.Account, memo : ?Blob, createdAtTime : ?Time.Time) : async [?Nat] {
-    let caller = msg.caller;
-    var results : [var ?Nat] = Array.init(tokenIds.size(), null);
-    for (i in Iter.range(0, tokenIds.size() - 1)) {
-      let tokenId = tokenIds[i];
-      switch (nfts.get(tokenId)) {
-        case (?nft) {
-          // Assume transfers are from default subaccount (null)
-          if (nft.owner.owner != caller or not Option.isNull(nft.owner.subaccount)) {
-            results[i] := null; // Not owner
-          } else {
-            let from = nft.owner;
-            let updatedNft = {
-              nft with
-              owner = to;
-              transferHistory = List.push({ from; to; timestamp = Time.now() }, nft.transferHistory);
-            };
-            nfts.put(tokenId, updatedNft);
-            results[i] := ?tokenId; // Success
-          };
-        };
-        case null { results[i] := null };
-      };
-    };
-    Array.freeze(results);
-  };
-
-  public query func icrc7_balance_of(account : Types.Account) : async Nat {
-    var count : Nat = 0;
-    for (nft in nfts.vals()) {
-      if (Principal.equal(nft.owner.owner, account.owner) and subaccountsEqual(nft.owner.subaccount, account.subaccount)) {
-        count += 1;
-      };
-    };
-    count;
-  };
-
-  // Helper function to compare optional subaccounts
-  private func subaccountsEqual(sub1 : ?Blob, sub2 : ?Blob) : Bool {
-    switch (sub1, sub2) {
-      case (null, null) { true }; // Both are null
-      case (?b1, ?b2) { Blob.equal(b1, b2) }; // Both are blobs, compare them
-      case _ { false }; // One is null, the other is not
-    };
-  };
-
-  public query func icrc7_owner_of(tokenId : Nat) : async ?Types.Account {
-    switch (nfts.get(tokenId)) {
-      case (?nft) ?nft.owner;
-      case null null;
-    };
-  };
-
-  public query func icrc7_token_metadata(tokenIds : [Nat]) : async [?[(Text, Types.Value)]] {
-    var results : [var ?[(Text, Types.Value)]] = Array.init(tokenIds.size(), null);
-    for (i in Iter.range(0, tokenIds.size() - 1)) {
-      switch (nfts.get(tokenIds[i])) {
-        case (?nft) { results[i] := ?nft.metadata };
-        case null {};
-      };
-    };
-    Array.freeze(results);
   };
 
   public query func getTransaction(id : Nat) : async ?Types.Transaction {

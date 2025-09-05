@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Wallet } from "lucide-react";
+import { Menu, X, Wallet, ChevronDown } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
 import {
@@ -47,33 +47,34 @@ export function Navigation() {
   };
 
   return (
-    <nav className="bg-surface-primary shadow-sm border-b border-primary sticky top-0 z-50">
+    <nav className="bg-surface-primary shadow-lg border-b border-brand-200 sticky top-0 z-50 backdrop-blur-md bg-opacity-95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <a href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 from-brand-500 to-brand-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
+        <div className="flex justify-between items-center h-20">
+          <a href="/" className="flex items-center space-x-3 group">
+            <div className="relative w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <img
+                src="/MitraChainTextLogo.png"
+                alt="MitraChain Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
             </div>
-            <span className="font-serif font-bold text-xl text-primary">
-              MitraChain
-            </span>
           </a>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
                 className="
-                  relative font-medium !text-foreground 
-                  transition-colors 
-                  after:absolute after:left-0 after:bottom-0 
-                  after:h-[2px] after:w-full after:origin-left 
-                  after:scale-x-0 after:bg-brand-900 
-                  after:transition-transform after:duration-300 
-                  hover:!text-brand-900 hover:after:scale-x-100
+                  relative px-4 py-2 font-medium text-foreground rounded-lg
+                  transition-all duration-300 ease-in-out
+                  hover:text-brand-600 hover:bg-brand-50
+                  after:absolute after:left-1/2 after:bottom-0 
+                  after:h-0.5 after:w-0 after:bg-brand-600 
+                  after:transition-all after:duration-300 after:transform after:-translate-x-1/2
+                  hover:after:w-3/4
                 "
               >
                 {item.label}
@@ -81,32 +82,39 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             {user == null ? (
-              <Button className="btn-primary" onClick={login}>
+              <Button
+                className="bg-brand-600 hover:bg-brand-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                onClick={login}
+              >
                 <Wallet className="w-4 h-4 mr-2" />
                 Login
               </Button>
             ) : (
-              <div className="flex-row gap-4">
+              <div className="flex items-center gap-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
-                      <img
-                        src={user?.profilePicUrl || NoPP}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
+                    <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-brand-50 transition-colors duration-200">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-200 hover:border-brand-400 transition-colors">
+                        <img
+                          src={user?.profilePicUrl || NoPP}
+                          alt="Profile"
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-neutral-500" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => navigate("/profile")}>
                       Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="text-red-500"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       Logout
                     </DropdownMenuItem>
@@ -114,7 +122,11 @@ export function Navigation() {
                 </DropdownMenu>
 
                 <Button
-                  className="btn-primary"
+                  className={`font-medium px-4 py-2.5 rounded-lg transition-all duration-300 ${
+                    isConnected
+                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      : "bg-brand-600 hover:bg-brand-700 text-white"
+                  }`}
                   onClick={isConnected ? disconnect : connect}
                 >
                   {isConnected ? "Disconnect OISY" : "Connect OISY"}
@@ -123,72 +135,105 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
+          <div className="lg:hidden flex items-center">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-lg hover:bg-brand-50 transition-colors duration-200"
             >
               {isMenuOpen ? (
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6 text-neutral-700" />
               ) : (
-                <Menu className="w-5 h-5" />
+                <Menu className="w-6 h-6 text-neutral-700" />
               )}
             </Button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-primary">
-            <div className="flex flex-col space-y-4">
-              {navItems.map((item) => (
+          <div className="lg:hidden border-t border-brand-200 bg-surface-primary">
+            <div className="px-2 pt-4 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-300">
+              {navItems.map((item, index) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="text-secondary hover:text-brand font-medium transition-colors px-2 py-1"
+                  className="block px-4 py-3 text-base font-medium text-foreground hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-all duration-200"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   {item.label}
                 </a>
               ))}
-              <div className="flex flex-col space-y-2 pt-4 border-t border-primary">
+
+              <div className="pt-4 mt-4 border-t border-brand-200 space-y-3">
                 {user == null ? (
-                  <Button className="btn-primary" onClick={login}>
+                  <Button
+                    className="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 rounded-lg shadow-md transition-all duration-300"
+                    onClick={() => {
+                      login();
+                      setIsMenuOpen(false);
+                    }}
+                  >
                     <Wallet className="w-4 h-4 mr-2" />
                     Login
                   </Button>
                 ) : (
-                  <div className="flex-row gap-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
-                          <img
-                            src={user?.profilePicUrl || NoPP}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem onClick={() => navigate("/profile")}>
-                          Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={handleLogout}
-                          className="text-red-500"
-                        >
-                          Logout
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 px-4 py-3 bg-brand-50 rounded-lg">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-200">
+                        <img
+                          src={user?.profilePicUrl || NoPP}
+                          alt="Profile"
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-neutral-900">
+                          User Profile
+                        </p>
+                        <p className="text-xs text-neutral-600">
+                          Manage your account
+                        </p>
+                      </div>
+                    </div>
 
                     <Button
-                      className="btn-primary"
-                      onClick={isConnected ? disconnect : connect}
+                      variant="outline"
+                      className="w-full border-brand-200 text-brand-600 hover:bg-brand-50 py-3 bg-transparent"
+                      onClick={() => {
+                        navigate("/profile");
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      View Profile
+                    </Button>
+
+                    <Button
+                      className={`w-full font-medium py-3 rounded-lg transition-all duration-300 ${
+                        isConnected
+                          ? "bg-red-600 hover:bg-red-700 text-white"
+                          : "bg-brand-600 hover:bg-brand-700 text-white"
+                      }`}
+                      onClick={() => {
+                        isConnected ? disconnect() : connect();
+                        setIsMenuOpen(false);
+                      }}
                     >
                       {isConnected ? "Disconnect OISY" : "Connect OISY"}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 py-3"
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Logout
                     </Button>
                   </div>
                 )}
