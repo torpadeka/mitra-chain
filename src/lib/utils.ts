@@ -1,7 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Principal } from "@dfinity/principal";
-import { Account, Time } from "@/declarations/backend/backend.did";
+import { Time } from "@/declarations/backend/backend.did";
+import { Account } from "@dfinity/ledger-icp";
 
 // Define List types to match backend.did.d.ts
 export type List = [] | [[bigint, List]];
@@ -48,6 +49,14 @@ export const optionalToUndefined = <T>(opt: [] | [T]): T | undefined => {
 
 export const principalToString = (principal: Principal): string => {
   return principal.toText();
+};
+
+export const stringToPrincipal = (principalText: string): Principal => {
+  try {
+    return Principal.fromText(principalText);
+  } catch (error) {
+    throw new Error(`Invalid Principal string: ${principalText}`);
+  }
 };
 
 export function toBaseUnits(amount: number, decimals: number): bigint {

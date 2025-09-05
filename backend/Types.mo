@@ -5,6 +5,7 @@ import List "mo:base/List";
 import Float "mo:base/Float";
 import Time "mo:base/Time";
 import Blob "mo:base/Blob";
+import Nat64 "mo:base/Nat64";
 
 module {
   public type Role = {
@@ -49,6 +50,11 @@ module {
     role : Role;
     createdAt : Time.Time;
     profilePicUrl : Text;
+    linkedin : ?Text;
+    instagram : ?Text;
+    twitter : ?Text;
+    address : ?Text;
+    phoneNumber : ?Text;
   };
 
   public type Franchise = {
@@ -166,5 +172,11 @@ module {
     attendees : [Principal];
     registrationMode : RegistrationMode;
     createdAt : Time.Time;
+  };
+
+  public type Comment = {
+    commenter : Principal;
+    text : Text;
+    timestamp : Time.Time;
   };
 };

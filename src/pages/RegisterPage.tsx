@@ -23,34 +23,43 @@ import {
   X,
   AlertCircle,
   CheckCircle2,
+  Shield,
 } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import type { Role } from "@/declarations/backend/backend.did";
 import NoPP from "../assets/no_pp.webp";
+import { useNavigate } from "react-router";
 
 interface FormData {
   name: string;
   email: string;
   bio: string;
+  address: string;
+  phoneNumber: string;
 }
 
 interface FormErrors {
   name?: string;
   email?: string;
   terms?: string;
+  address?: string;
+  phoneNumber?: string;
 }
 
 interface FieldValidation {
   name: boolean;
   email: boolean;
   terms: boolean;
+  address: boolean;
+  phoneNumber: boolean;
 }
 
 export default function RegisterPage() {
   const { actor, createUser, login, whoami, user } = useUser();
-  const [userType, setUserType] = useState<"franchisee" | "franchisor">(
-    "franchisee"
-  );
+  const navigate = useNavigate();
+  const [userType, setUserType] = useState<
+    "franchisee" | "franchisor" | "admin"
+  >("franchisee");
   const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
   const [profilePicUrl, setProfilePicUrl] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -58,12 +67,16 @@ export default function RegisterPage() {
     name: "",
     email: "",
     bio: "",
+    address: "",
+    phoneNumber: "",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [fieldValidation, setFieldValidation] = useState<FieldValidation>({
     name: false,
     email: false,
     terms: false,
+    address: false,
+    phoneNumber: false,
   });
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const [whoamiResult, setWhoamiResult] = useState<string>("Loading...");
@@ -88,7 +101,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      window.location.href = "/";
+      // navigate("/");
     }
   }, [user]);
 
@@ -116,6 +129,24 @@ export default function RegisterPage() {
           return "You must agree to the Terms of Service and Privacy Policy";
         }
         return undefined;
+      case "address":
+        if (
+          userType === "franchisor" &&
+          typeof value === "string" &&
+          !value.trim()
+        ) {
+          return "Address is required for Franchisors";
+        }
+        return undefined;
+      case "phoneNumber":
+        if (
+          userType === "franchisor" &&
+          typeof value === "string" &&
+          !value.trim()
+        ) {
+          return "Phone Number is required for Franchisors";
+        }
+        return undefined;
       default:
         return undefined;
     }
@@ -133,6 +164,12 @@ export default function RegisterPage() {
     const termsError = validateField("terms", acceptTerms);
     if (termsError) errors.terms = termsError;
 
+    const addressError = validateField("address", formData.address);
+    if (addressError) errors.address = addressError;
+
+    const phoneNumberError = validateField("phoneNumber", formData.phoneNumber);
+    if (phoneNumberError) errors.phoneNumber = phoneNumberError;
+
     return errors;
   };
 
@@ -142,14 +179,11 @@ export default function RegisterPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Mark field as touched
     setTouchedFields((prev) => new Set(prev).add(name));
 
-    // Real-time validation
     const error = validateField(name, value);
     setFormErrors((prev) => ({ ...prev, [name]: error }));
 
-    // Update field validation status
     setFieldValidation((prev) => ({
       ...prev,
       [name]: !error,
@@ -217,8 +251,11 @@ export default function RegisterPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all fields as touched for final validation
-    setTouchedFields(new Set(["name", "email", "terms"]));
+    const fieldsToValidate = ["name", "email", "terms"];
+    if (userType === "franchisor") {
+      fieldsToValidate.push("address", "phoneNumber");
+    }
+    setTouchedFields(new Set(fieldsToValidate));
 
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
@@ -227,7 +264,11 @@ export default function RegisterPage() {
     }
 
     const roleVariant: Role =
-      userType === "franchisee" ? { Franchisee: null } : { Franchisor: null };
+      userType === "franchisee"
+        ? { Franchisee: null }
+        : userType === "franchisor"
+          ? { Franchisor: null }
+          : { Admin: null };
 
     const userData = {
       name: formData.name,
@@ -242,7 +283,12 @@ export default function RegisterPage() {
       userData.email,
       userData.bio,
       roleVariant,
-      userData.profilePicUrl
+      userData.profilePicUrl,
+      undefined, // linkedin
+      undefined, // instagram
+      undefined, // twitter
+      userType === "franchisor" ? formData.address : undefined,
+      userType === "franchisor" ? formData.phoneNumber : undefined
     );
 
     window.location.href = "/";
@@ -277,11 +323,11 @@ export default function RegisterPage() {
           <Tabs
             value={userType}
             onValueChange={(value) =>
-              setUserType(value as "franchisee" | "franchisor")
+              setUserType(value as "franchisee" | "franchisor" | "admin")
             }
             className="mb-6"
           >
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger
                 value="franchisee"
                 className="flex items-center gap-2"
@@ -295,6 +341,10 @@ export default function RegisterPage() {
               >
                 <Building2 className="h-4 w-4" />
                 Franchisor
+              </TabsTrigger>
+              <TabsTrigger value="admin" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Admin
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -426,6 +476,83 @@ export default function RegisterPage() {
               />
             </div>
 
+            {userType === "franchisor" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="address">
+                    Address <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="address"
+                      name="address"
+                      placeholder="123 Business Street, City, State, ZIP"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur("address")}
+                      required
+                      aria-required="true"
+                      className={`pr-10 ${
+                        touchedFields.has("address") && formErrors.address
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : touchedFields.has("address") &&
+                              fieldValidation.address
+                            ? "border-green-500 focus-visible:ring-green-500"
+                            : ""
+                      }`}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {getFieldStatusIcon("address")}
+                    </div>
+                  </div>
+                  {touchedFields.has("address") && formErrors.address && (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      {formErrors.address}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phoneNumber">
+                    Phone Number <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      onBlur={() => handleFieldBlur("phoneNumber")}
+                      required
+                      aria-required="true"
+                      className={`pr-10 ${
+                        touchedFields.has("phoneNumber") &&
+                        formErrors.phoneNumber
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : touchedFields.has("phoneNumber") &&
+                              fieldValidation.phoneNumber
+                            ? "border-green-500 focus-visible:ring-green-500"
+                            : ""
+                      }`}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {getFieldStatusIcon("phoneNumber")}
+                    </div>
+                  </div>
+                  {touchedFields.has("phoneNumber") &&
+                    formErrors.phoneNumber && (
+                      <div className="flex items-center gap-2 text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        {formErrors.phoneNumber}
+                      </div>
+                    )}
+                </div>
+              </>
+            )}
+
             <div className="space-y-2">
               <div className="flex items-start space-x-2">
                 <Checkbox
@@ -470,7 +597,12 @@ export default function RegisterPage() {
               className="w-full"
               disabled={!acceptTerms || isUploading}
             >
-              Create {userType === "franchisee" ? "Franchisee" : "Franchisor"}{" "}
+              Create{" "}
+              {userType === "franchisee"
+                ? "Franchisee"
+                : userType === "franchisor"
+                  ? "Franchisor"
+                  : "Admin"}{" "}
               Account
             </Button>
           </form>

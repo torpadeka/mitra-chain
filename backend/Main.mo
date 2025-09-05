@@ -30,7 +30,7 @@ persistent actor {
   var nextEventId : Nat = 0;
 
   // Stable storage arrays for upgrades
-  var usersEntries : [(Principal, Types.User)] = [];
+   var usersEntries : [(Principal, Types.User)] = [];
   var franchisesEntries : [(Nat, Types.Franchise)] = [];
   var categoriesEntries : [(Nat, Types.Category)] = [];
   var applicationsEntries : [(Nat, Types.Application)] = [];
@@ -39,6 +39,8 @@ persistent actor {
   var conversationsEntries : [(Nat, Types.Conversation)] = [];
   var messagesEntries : [(Nat, Types.Message)] = [];
   var eventsEntries : [(Nat, Types.Event)] = [];
+  var franchisorRatingsEntries : [(Principal, [(Principal, Nat)])] = [];
+  var franchisorCommentsEntries : [(Principal, [Types.Comment])] = [];
 
   // HashMaps for data
   transient var users = HashMap.HashMap<Principal, Types.User>(0, Principal.equal, Principal.hash);
@@ -50,10 +52,12 @@ persistent actor {
   transient var conversations = HashMap.HashMap<Nat, Types.Conversation>(0, Nat.equal, natHash);
   transient var messages = HashMap.HashMap<Nat, Types.Message>(0, Nat.equal, natHash);
   transient var events = HashMap.HashMap<Nat, Types.Event>(0, Nat.equal, natHash);
+  transient var franchisorRatings = HashMap.HashMap<Principal, HashMap.HashMap<Principal, Nat>>(0, Principal.equal, Principal.hash);
+  transient var franchisorComments = HashMap.HashMap<Principal, List.List<Types.Comment>>(0, Principal.equal, Principal.hash);
 
   // Upgrade hooks
   system func preupgrade() {
-    usersEntries := Iter.toArray(users.entries());
+    users := HashMap.fromIter<Principal, Types.User>(usersEntries.vals(), usersEntries.size(), Principal.equal, Principal.hash);
     franchisesEntries := Iter.toArray(franchises.entries());
     categoriesEntries := Iter.toArray(categories.entries());
     applicationsEntries := Iter.toArray(applications.entries());
@@ -62,6 +66,14 @@ persistent actor {
     conversationsEntries := Iter.toArray(conversations.entries());
     messagesEntries := Iter.toArray(messages.entries());
     eventsEntries := Iter.toArray(events.entries());
+    franchisorRatingsEntries := Iter.toArray(Iter.map<(Principal, HashMap.HashMap<Principal, Nat>), (Principal, [(Principal, Nat)])>(franchisorRatings.entries(), func(tuple) {
+      let (f, r) = tuple;
+      (f, Iter.toArray(r.entries()))
+    }));
+    franchisorCommentsEntries := Iter.toArray(Iter.map<(Principal, List.List<Types.Comment>), (Principal, [Types.Comment])>(franchisorComments.entries(), func(tuple) {
+      let (f, c) = tuple;
+      (f, List.toArray(c))
+    }));
   };
 
   system func postupgrade() {
@@ -74,6 +86,31 @@ persistent actor {
     conversations := HashMap.fromIter<Nat, Types.Conversation>(conversationsEntries.vals(), conversationsEntries.size(), Nat.equal, natHash);
     messages := HashMap.fromIter<Nat, Types.Message>(messagesEntries.vals(), messagesEntries.size(), Nat.equal, natHash);
     events := HashMap.fromIter<Nat, Types.Event>(eventsEntries.vals(), eventsEntries.size(), Nat.equal, natHash);
+    franchisorRatings := HashMap.HashMap<Principal, HashMap.HashMap<Principal, Nat>>(franchisorRatingsEntries.size(), Principal.equal, Principal.hash);
+    for ((f, innerEntries) in Iter.fromArray(franchisorRatingsEntries)) {
+      let innerMap = HashMap.fromIter<Principal, Nat>(Iter.fromArray(innerEntries), innerEntries.size(), Principal.equal, Principal.hash);
+      franchisorRatings.put(f, innerMap);
+    };
+    franchisorComments := HashMap.HashMap<Principal, List.List<Types.Comment>>(franchisorCommentsEntries.size(), Principal.equal, Principal.hash);
+    for ((f, innerArray) in Iter.fromArray(franchisorCommentsEntries)) {
+      franchisorComments.put(f, List.fromArray(innerArray));
+    };
+    // Seed categories if empty
+    if (categories.size() == 0) {
+      var id : Nat = nextCategoryId;
+      categories.put(id, { id; name = "Barber & Salon"; description = "Offers hair cutting, styling, and other personal grooming services." });
+      id += 1;
+      categories.put(id, { id; name = "Beverage"; description = "Includes places that sell drinks, like coffee shops, juice bars, or bubble tea stores." });
+      id += 1;
+      categories.put(id, { id; name = "Expedition & Delivery"; description = "Covers courier and logistics services for shipping packages and goods." });
+      id += 1;
+      categories.put(id, { id; name = "Entertainment"; description = "Features venues and services for leisure activities, such as movie theaters, arcades, or event organizers." });
+      id += 1;
+      categories.put(id, { id; name = "Restaurant"; description = "Describes establishments that serve meals, from casual diners to fine dining." });
+      id += 1;
+      categories.put(id, { id; name = "Food (Express)"; description = "Refers to businesses providing fast food or quick-service meals for takeout or delivery." });
+      nextCategoryId := id + 1;
+    };
   };
 
   // User functions
@@ -83,6 +120,11 @@ persistent actor {
     bio : Text,
     role : Types.Role,
     profilePicUrl : Text,
+    linkedin : ?Text,
+    instagram : ?Text,
+    twitter : ?Text,
+    address : ?Text,
+    phoneNumber : ?Text,
   ) : async ?Types.User {
     let caller = msg.caller;
 
@@ -91,6 +133,11 @@ persistent actor {
         return ?existingUser;
       };
       case null {
+        if (role == #Franchisor) {
+          if (address == null or phoneNumber == null) {
+            throw Error.reject("Address and phone number are required for franchisors");
+          };
+        };
         let newUser : Types.User = {
           principal = caller;
           name;
@@ -99,9 +146,72 @@ persistent actor {
           role;
           createdAt = Time.now();
           profilePicUrl;
+          linkedin;
+          instagram;
+          twitter;
+          address;
+          phoneNumber;
         };
         users.put(caller, newUser);
         return ?newUser;
+      };
+    };
+  };
+
+  public shared (msg) func updateFranchisorProfile(
+    bio : ?Text,
+    profilePicUrl : ?Text,
+    linkedin : ?Text,
+    instagram : ?Text,
+    twitter : ?Text,
+    address : ?Text,
+    phoneNumber : ?Text,
+  ) : async ?Types.User {
+    let caller = msg.caller;
+    switch (users.get(caller)) {
+      case (?user) {
+        if (user.role != #Franchisor) {
+          throw Error.reject("Only franchisors can use this update method");
+        };
+        let updatedUser : Types.User = {
+          user with
+          bio = switch (bio) { case null user.bio; case (?b) b };
+          profilePicUrl = switch (profilePicUrl) { case null user.profilePicUrl; case (?p) p };
+          linkedin = switch (linkedin) { case null user.linkedin; case (?l) ?l };
+          instagram = switch (instagram) { case null user.instagram; case (?i) ?i };
+          twitter = switch (twitter) { case null user.twitter; case (?t) ?t };
+          address = switch (address) { case null user.address; case (?a) ?a };
+          phoneNumber = switch (phoneNumber) { case null user.phoneNumber; case (?ph) ?ph };
+        };
+        users.put(caller, updatedUser);
+        ?updatedUser;
+      };
+      case null {
+        throw Error.reject("User not found");
+      };
+    };
+  };
+
+  public shared (msg) func updateFranchiseeProfile(
+    bio : ?Text,
+    profilePicUrl : ?Text,
+  ) : async ?Types.User {
+    let caller = msg.caller;
+    switch (users.get(caller)) {
+      case (?user) {
+        if (user.role != #Franchisee and user.role != #Admin) {
+          throw Error.reject("Only franchisees can use this update method");
+        };
+        let updatedUser : Types.User = {
+          user with
+          bio = switch (bio) { case null user.bio; case (?b) b };
+          profilePicUrl = switch (profilePicUrl) { case null user.profilePicUrl; case (?p) p };
+        };
+        users.put(caller, updatedUser);
+        ?updatedUser;
+      };
+      case null {
+        throw Error.reject("User not found");
       };
     };
   };
@@ -507,6 +617,7 @@ persistent actor {
     messageId;
   };
 
+  // Event functions
   public shared (msg) func createNewEvent(
     title : Text,
     category : Types.EventCategory,
@@ -609,6 +720,122 @@ persistent actor {
         Principal.equal(event.organizerPrincipal, principal);
       };
       case null { false };
+    };
+  };
+
+  // Rating and Comment functions
+  public query func getFranchisorRating(franchisor : Principal) : async ?Float {
+    switch (franchisorRatings.get(franchisor)) {
+      case (?raters) {
+        if (raters.size() == 0) {
+          ?0.0;
+        } else {
+          var sum : Nat = 0;
+          for (score in raters.vals()) {
+            sum += score;
+          };
+          ?(Float.fromInt(sum) / Float.fromInt(raters.size()));
+        };
+      };
+      case null {
+        null;
+      };
+    };
+  };
+
+  public query (msg) func checkRateState(franchisor : Principal) : async Bool {
+    let caller = msg.caller;
+    switch (franchisorRatings.get(franchisor)) {
+      case (?raters) {
+        switch (raters.get(caller)) {
+          case null false;
+          case _ true;
+        };
+      };
+      case null false;
+    };
+  };
+
+  public shared (msg) func rateFranchisor(franchisor : Principal, score : Nat) : async () {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    if (user.role != #Franchisee) {
+      throw Error.reject("Only franchisees can rate franchisors");
+    };
+    let ?franchisorUser = users.get(franchisor) else throw Error.reject("Franchisor not found");
+    if (franchisorUser.role != #Franchisor) {
+      throw Error.reject("Target is not a franchisor");
+    };
+    if (score > 5 or score < 0) {
+      throw Error.reject("Score must be between 0 and 5");
+    };
+    var raters = switch (franchisorRatings.get(franchisor)) {
+      case (?r) r;
+      case null {
+        let newRaters = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
+        franchisorRatings.put(franchisor, newRaters);
+        newRaters;
+      };
+    };
+    if (raters.get(caller) != null) {
+      throw Error.reject("You have already rated this franchisor. Use updateRate instead.");
+    };
+    raters.put(caller, score);
+  };
+
+  public shared (msg) func updateRate(franchisor : Principal, score : Nat) : async () {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    if (user.role != #Franchisee) {
+      throw Error.reject("Only franchisees can update ratings");
+    };
+    let ?franchisorUser = users.get(franchisor) else throw Error.reject("Franchisor not found");
+    if (franchisorUser.role != #Franchisor) {
+      throw Error.reject("Target is not a franchisor");
+    };
+    if (score > 5 or score < 0) {
+      throw Error.reject("Score must be between 0 and 5");
+    };
+    switch (franchisorRatings.get(franchisor)) {
+      case (?raters) {
+        if (raters.get(caller) == null) {
+          throw Error.reject("You have not rated this franchisor yet. Use rateFranchisor instead.");
+        };
+        raters.put(caller, score);
+      };
+      case null {
+        throw Error.reject("No ratings exist for this franchisor");
+      };
+    };
+  };
+
+  public shared (msg) func sendComments(franchisor : Principal, text : Text) : async () {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    if (user.role != #Franchisee) {
+      throw Error.reject("Only franchisees can send comments to franchisors");
+    };
+    let ?franchisorUser = users.get(franchisor) else throw Error.reject("Franchisor not found");
+    if (franchisorUser.role != #Franchisor) {
+      throw Error.reject("Target is not a franchisor");
+    };
+    var comments = switch (franchisorComments.get(franchisor)) {
+      case (?c) c;
+      case null List.nil<Types.Comment>();
+    };
+    let newComment : Types.Comment = {
+      commenter = caller;
+      text;
+      timestamp = Time.now();
+    };
+    comments := List.push(newComment, comments);
+    franchisorComments.put(franchisor, comments);
+  };
+
+  public query func getAllComments(franchisor : Principal) : async [Types.Comment] {
+    switch (franchisorComments.get(franchisor)) {
+      case (?comments) List.toArray(comments);
+      case null [];
     };
   };
 };

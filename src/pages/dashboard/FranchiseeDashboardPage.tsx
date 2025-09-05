@@ -73,7 +73,7 @@ export default function FranchiseeDashboard() {
     const session = loadFromSession();
     if (!session.user) {
       window.location.href = "/";
-    } else if (!("Franchisee" in session.user.role)) {
+    } else if (!("Franchisee" === session.user.role)) {
       window.location.href = "/";
     }
 

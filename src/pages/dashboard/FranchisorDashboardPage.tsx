@@ -40,6 +40,7 @@ import { ApplicationsTab } from "@/components/application-tab";
 import { protectedPage } from "@/context/ProtectedRoutes";
 import { useNavigate } from "react-router";
 import { AddFranchiseModal } from "@/components/add-franchise-modal";
+import { stringToPrincipal } from "@/lib/utils";
 
 interface ApplicationDetails {
   application: FrontendApplication;
@@ -64,7 +65,7 @@ export default function FranchisorDashboard() {
   console.log("Session:", session);
   if (!session.user) {
     window.location.href = "/";
-  } else if (!("Franchisor" in session.user.role)) {
+  } else if (!("Franchisor" === session.user.role)) {
     window.location.href = "/";
   }
 
@@ -78,7 +79,9 @@ export default function FranchisorDashboard() {
       setFranchises((prev) => ({ ...prev, loading: true }));
       try {
         const franchiseHandler = new FranchiseHandler(actor);
-        const franchise = await franchiseHandler.getFranchiseByOwner(principal);
+        const franchise = await franchiseHandler.getFranchiseByOwner(
+          stringToPrincipal(principal)
+        );
         setFranchises(franchise);
         const applicationHandler = new ApplicationHandler(actor);
         const applications = await applicationHandler.getApplicationsByOwner(

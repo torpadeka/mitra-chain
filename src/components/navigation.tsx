@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Wallet, ChevronDown } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
@@ -16,7 +16,8 @@ import { useOisyWallet } from "@/hooks/useOisyWallet";
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, login, isAuthenticated, principal, logout } = useUser();
+  const { user, login, isAuthenticated, isInitializing, principal, logout } =
+    useUser();
   const navigate = useNavigate();
   const { connect, disconnect, isConnected } = useOisyWallet();
 
@@ -45,6 +46,31 @@ export function Navigation() {
       window.location.reload();
     });
   };
+
+  if (isInitializing) {
+    return (
+      <nav className="bg-surface-primary shadow-lg border-b border-brand-200 sticky top-0 z-50 backdrop-blur-md bg-opacity-95">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <a href="/" className="flex items-center space-x-3 group">
+              <div className="relative w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <img
+                  src="/MitraChainTextLogo.png"
+                  alt="MitraChain Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                />
+              </div>
+            </a>
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-full bg-muted animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-surface-primary shadow-lg border-b border-brand-200 sticky top-0 z-50 backdrop-blur-md bg-opacity-95">
