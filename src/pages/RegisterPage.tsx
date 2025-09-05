@@ -1,209 +1,233 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Textarea } from "@/components/ui/textarea"
-import { Building2, Store, Upload, X, AlertCircle, CheckCircle2 } from "lucide-react"
-import { useUser } from "@/context/AuthContext"
-import type { Role } from "@/declarations/backend/backend.did"
-import NoPP from '../assets/no_pp.webp'
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Building2,
+  Store,
+  Upload,
+  X,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { useUser } from "@/context/AuthContext";
+import type { Role } from "@/declarations/backend/backend.did";
+import NoPP from "../assets/no_pp.webp";
 
 interface FormData {
-  name: string
-  email: string
-  bio: string
+  name: string;
+  email: string;
+  bio: string;
 }
 
 interface FormErrors {
-  name?: string
-  email?: string
-  terms?: string
+  name?: string;
+  email?: string;
+  terms?: string;
 }
 
 interface FieldValidation {
-  name: boolean
-  email: boolean
-  terms: boolean
+  name: boolean;
+  email: boolean;
+  terms: boolean;
 }
 
 export default function RegisterPage() {
-  const { actor, createUser, login, whoami, user } = useUser()
-  const [userType, setUserType] = useState<"franchisee" | "franchisor">("franchisee")
-  const [acceptTerms, setAcceptTerms] = useState<boolean>(false)
-  const [profilePicUrl, setProfilePicUrl] = useState<string>("")
-  const [isUploading, setIsUploading] = useState<boolean>(false)
+  const { actor, createUser, login, whoami, user } = useUser();
+  const [userType, setUserType] = useState<"franchisee" | "franchisor">(
+    "franchisee"
+  );
+  const [acceptTerms, setAcceptTerms] = useState<boolean>(false);
+  const [profilePicUrl, setProfilePicUrl] = useState<string>("");
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     bio: "",
-  })
-  const [formErrors, setFormErrors] = useState<FormErrors>({})
+  });
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [fieldValidation, setFieldValidation] = useState<FieldValidation>({
     name: false,
     email: false,
     terms: false,
-  })
-  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set())
-  const [whoamiResult, setWhoamiResult] = useState<string>("Loading...")
+  });
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  const [whoamiResult, setWhoamiResult] = useState<string>("Loading...");
 
   useEffect(() => {
     const fetchWhoami = async () => {
       if (!actor) {
-        setWhoamiResult("Actor not available")
-        return
+        setWhoamiResult("Actor not available");
+        return;
       }
       try {
-        const result = await whoami()
-        setWhoamiResult(result)
+        const result = await whoami();
+        setWhoamiResult(result);
       } catch (error) {
-        console.error("Whoami call failed:", error)
-        setWhoamiResult("Failed to fetch whoami")
+        console.error("Whoami call failed:", error);
+        setWhoamiResult("Failed to fetch whoami");
       }
-    }
+    };
 
-    fetchWhoami()
-  }, [actor, whoami])
+    fetchWhoami();
+  }, [actor, whoami]);
 
   useEffect(() => {
     if (user) {
-      window.location.href = "/"
+      window.location.href = "/";
     }
-  }, [user])
+  }, [user]);
 
-  const validateField = (fieldName: string, value: string | boolean): string | undefined => {
+  const validateField = (
+    fieldName: string,
+    value: string | boolean
+  ): string | undefined => {
     switch (fieldName) {
       case "name":
         if (typeof value === "string" && !value.trim()) {
-          return "Full Name is required"
+          return "Full Name is required";
         }
-        return undefined
+        return undefined;
       case "email":
         if (typeof value === "string") {
           if (!value.trim()) {
-            return "Email is required"
+            return "Email is required";
           } else if (!/\S+@\S+\.\S+/.test(value)) {
-            return "Please enter a valid email address"
+            return "Please enter a valid email address";
           }
         }
-        return undefined
+        return undefined;
       case "terms":
         if (typeof value === "boolean" && !value) {
-          return "You must agree to the Terms of Service and Privacy Policy"
+          return "You must agree to the Terms of Service and Privacy Policy";
         }
-        return undefined
+        return undefined;
       default:
-        return undefined
+        return undefined;
     }
-  }
+  };
 
   const validateForm = (): FormErrors => {
-    const errors: FormErrors = {}
+    const errors: FormErrors = {};
 
-    const nameError = validateField("name", formData.name)
-    if (nameError) errors.name = nameError
+    const nameError = validateField("name", formData.name);
+    if (nameError) errors.name = nameError;
 
-    const emailError = validateField("email", formData.email)
-    if (emailError) errors.email = emailError
+    const emailError = validateField("email", formData.email);
+    if (emailError) errors.email = emailError;
 
-    const termsError = validateField("terms", acceptTerms)
-    if (termsError) errors.terms = termsError
+    const termsError = validateField("terms", acceptTerms);
+    if (termsError) errors.terms = termsError;
 
-    return errors
-  }
+    return errors;
+  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Mark field as touched
-    setTouchedFields((prev) => new Set(prev).add(name))
+    setTouchedFields((prev) => new Set(prev).add(name));
 
     // Real-time validation
-    const error = validateField(name, value)
-    setFormErrors((prev) => ({ ...prev, [name]: error }))
+    const error = validateField(name, value);
+    setFormErrors((prev) => ({ ...prev, [name]: error }));
 
     // Update field validation status
     setFieldValidation((prev) => ({
       ...prev,
       [name]: !error,
-    }))
-  }
+    }));
+  };
 
   const handleTermsChange = (checked: boolean) => {
-    setAcceptTerms(checked)
-    setTouchedFields((prev) => new Set(prev).add("terms"))
+    setAcceptTerms(checked);
+    setTouchedFields((prev) => new Set(prev).add("terms"));
 
-    const error = validateField("terms", checked)
-    setFormErrors((prev) => ({ ...prev, terms: error }))
-    setFieldValidation((prev) => ({ ...prev, terms: !error }))
-  }
+    const error = validateField("terms", checked);
+    setFormErrors((prev) => ({ ...prev, terms: error }));
+    setFieldValidation((prev) => ({ ...prev, terms: !error }));
+  };
 
   const handleFieldBlur = (fieldName: string) => {
-    setTouchedFields((prev) => new Set(prev).add(fieldName))
+    setTouchedFields((prev) => new Set(prev).add(fieldName));
 
-    let value: string | boolean
+    let value: string | boolean;
     if (fieldName === "terms") {
-      value = acceptTerms
+      value = acceptTerms;
     } else {
-      value = formData[fieldName as keyof FormData]
+      value = formData[fieldName as keyof FormData];
     }
 
-    const error = validateField(fieldName, value)
-    setFormErrors((prev) => ({ ...prev, [fieldName]: error }))
-    setFieldValidation((prev) => ({ ...prev, [fieldName]: !error }))
-  }
+    const error = validateField(fieldName, value);
+    setFormErrors((prev) => ({ ...prev, [fieldName]: error }));
+    setFieldValidation((prev) => ({ ...prev, [fieldName]: !error }));
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     try {
-      const uploadData = new FormData()
-      uploadData.append("file", file)
-      uploadData.append("upload_preset", "mitra-chain")
+      const uploadData = new FormData();
+      uploadData.append("file", file);
+      uploadData.append("upload_preset", "mitra-chain");
 
-      const response = await fetch(`https://api.cloudinary.com/v1_1/dsl9fmscw/image/upload`, {
-        method: "POST",
-        body: uploadData,
-      })
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/dsl9fmscw/image/upload`,
+        {
+          method: "POST",
+          body: uploadData,
+        }
+      );
 
-      const data = await response.json()
+      const data = await response.json();
       if (data.secure_url) {
-        setProfilePicUrl(data.secure_url)
+        setProfilePicUrl(data.secure_url);
       }
     } catch (error) {
-      console.error("Upload failed:", error)
+      console.error("Upload failed:", error);
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   const removeProfilePic = () => {
-    setProfilePicUrl("")
-  }
+    setProfilePicUrl("");
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Mark all fields as touched for final validation
-    setTouchedFields(new Set(["name", "email", "terms"]))
+    setTouchedFields(new Set(["name", "email", "terms"]));
 
-    const errors = validateForm()
+    const errors = validateForm();
     if (Object.keys(errors).length > 0) {
-      setFormErrors(errors)
-      return
+      setFormErrors(errors);
+      return;
     }
 
-    const roleVariant: Role = userType === "franchisee" ? { Franchisee: null } : { Franchisor: null }
+    const roleVariant: Role =
+      userType === "franchisee" ? { Franchisee: null } : { Franchisor: null };
 
     const userData = {
       name: formData.name,
@@ -211,46 +235,64 @@ export default function RegisterPage() {
       bio: formData.bio,
       role: userType,
       profilePicUrl: profilePicUrl || "",
-    }
+    };
 
-    await createUser(userData.name, userData.email, userData.bio, roleVariant, userData.profilePicUrl)
+    await createUser(
+      userData.name,
+      userData.email,
+      userData.bio,
+      roleVariant,
+      userData.profilePicUrl
+    );
 
-    window.location.href = "/"
-  }
+    window.location.href = "/";
+  };
 
   const getFieldStatusIcon = (fieldName: string) => {
-    if (!touchedFields.has(fieldName)) return null
+    if (!touchedFields.has(fieldName)) return null;
 
-    const hasError = formErrors[fieldName as keyof FormErrors]
-    const isValid = fieldValidation[fieldName as keyof FieldValidation]
+    const hasError = formErrors[fieldName as keyof FormErrors];
+    const isValid = fieldValidation[fieldName as keyof FieldValidation];
 
     if (hasError) {
-      return <AlertCircle className="h-4 w-4 text-destructive" />
+      return <AlertCircle className="h-4 w-4 text-destructive" />;
     } else if (isValid) {
-      return <CheckCircle2 className="h-4 w-4 text-green-500" />
+      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
     }
-    return null
-  }
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">Create Account</CardTitle>
-          <CardDescription>Join the MitraChain franchise marketplace</CardDescription>
+          <CardTitle className="text-2xl font-bold text-primary">
+            Create Account
+          </CardTitle>
+          <CardDescription>
+            Join the MitraChain franchise marketplace
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs
             value={userType}
-            onValueChange={(value) => setUserType(value as "franchisee" | "franchisor")}
+            onValueChange={(value) =>
+              setUserType(value as "franchisee" | "franchisor")
+            }
             className="mb-6"
           >
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="franchisee" className="flex items-center gap-2">
+              <TabsTrigger
+                value="franchisee"
+                className="flex items-center gap-2"
+              >
                 <Store className="h-4 w-4" />
                 Franchisee
               </TabsTrigger>
-              <TabsTrigger value="franchisor" className="flex items-center gap-2">
+              <TabsTrigger
+                value="franchisor"
+                className="flex items-center gap-2"
+              >
                 <Building2 className="h-4 w-4" />
                 Franchisor
               </TabsTrigger>
@@ -264,14 +306,11 @@ export default function RegisterPage() {
                 {profilePicUrl ? (
                   <div className="relative">
                     <img
-                      src={
-                        profilePicUrl ||
-                        NoPP
-                      }
+                      src={profilePicUrl || NoPP}
                       alt="Profile"
                       width={80}
                       height={80}
-                      className="rounded-full object-cover border-2 border-border"
+                      className="rounded-full object-cover border-2 border-border w-20 h-20"
                     />
                     <Button
                       type="button"
@@ -296,7 +335,11 @@ export default function RegisterPage() {
                     disabled={isUploading}
                     className="cursor-pointer"
                   />
-                  {isUploading && <p className="text-sm text-muted-foreground mt-1">Uploading...</p>}
+                  {isUploading && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Uploading...
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -323,7 +366,9 @@ export default function RegisterPage() {
                         : ""
                   }`}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">{getFieldStatusIcon("name")}</div>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {getFieldStatusIcon("name")}
+                </div>
               </div>
               {touchedFields.has("name") && formErrors.name && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
@@ -356,7 +401,9 @@ export default function RegisterPage() {
                         : ""
                   }`}
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">{getFieldStatusIcon("email")}</div>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {getFieldStatusIcon("email")}
+                </div>
               </div>
               {touchedFields.has("email") && formErrors.email && (
                 <div className="flex items-center gap-2 text-sm text-destructive">
@@ -423,14 +470,19 @@ export default function RegisterPage() {
               className="w-full"
               disabled={!acceptTerms || isUploading}
             >
-              Create {userType === "franchisee" ? "Franchisee" : "Franchisor"} Account
+              Create {userType === "franchisee" ? "Franchisee" : "Franchisor"}{" "}
+              Account
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Button variant="link" className="p-0 text-primary h-auto" onClick={login}>
+              <Button
+                variant="link"
+                className="p-0 text-primary h-auto"
+                onClick={login}
+              >
                 Sign in
               </Button>
             </p>
@@ -438,5 +490,5 @@ export default function RegisterPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

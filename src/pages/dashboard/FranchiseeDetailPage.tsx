@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { FranchiseHandler } from "@/handler/FranchiseHandler";
-import NoPP from '../assets/no_pp.webp'
+import NoPP from '../../assets/no_pp.webp'
 
 type FrontendFranchise = {
   id: number;

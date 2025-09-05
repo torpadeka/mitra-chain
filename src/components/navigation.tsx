@@ -11,12 +11,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import NoPP from '../assets/no_pp.webp'
+import NoPP from "../assets/no_pp.webp";
+import { useOisyWallet } from "@/hooks/useOisyWallet";
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, login, isAuthenticated, principal, logout } = useUser();
   const navigate = useNavigate();
+  const { connect, disconnect, isConnected } = useOisyWallet();
 
   // Determine dashboard path based on user role
   const getDashboardPath = () => {
@@ -87,30 +89,37 @@ export function Navigation() {
                 Login
               </Button>
             ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
-                    <img
-                      src={
-                        user?.profilePicUrl || NoPP
-                      }
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="text-red-500"
-                  >
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex-row gap-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
+                      <img
+                        src={user?.profilePicUrl || NoPP}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-500"
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button
+                  className="btn-primary"
+                  onClick={isConnected ? disconnect : connect}
+                >
+                  {isConnected ? "Disconnect OISY" : "Connect OISY"}
+                </Button>
+              </div>
             )}
           </div>
 
@@ -151,30 +160,37 @@ export function Navigation() {
                     Login
                   </Button>
                 ) : (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
-                        <img
-                          src={
-                            user?.profilePicUrl || NoPP
-                          }
-                          alt="Profile"
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuItem onClick={() => navigate("/profile")}>
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="text-red-500"
-                      >
-                        Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex-row gap-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="w-9 h-9 rounded-full overflow-hidden border border-primary focus:outline-none">
+                          <img
+                            src={user?.profilePicUrl || NoPP}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem onClick={() => navigate("/profile")}>
+                          Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={handleLogout}
+                          className="text-red-500"
+                        >
+                          Logout
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Button
+                      className="btn-primary"
+                      onClick={isConnected ? disconnect : connect}
+                    >
+                      {isConnected ? "Disconnect OISY" : "Connect OISY"}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
