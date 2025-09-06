@@ -9,14 +9,14 @@ import { Footer } from "@/components/footer";
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-surface-primary">
+    <div className="min-h-screen">
       <AboutHero />
       <MissionVision />
       <OurStory />
       <TeamSection />
-      <Values />
+      {/* <Values /> */}
       <Roadmap />
-      <JoinUs />
+      {/* <JoinUs /> */}
       <Footer />
     </div>
   );

@@ -56,7 +56,7 @@ const categories = [
 
 export function FeaturedCategories() {
   return (
-    <section className="min-h-screen py-20 bg-neutral-50 bg-gradient-to-b from-background/88 to-transparent">
+    <section className="min-h-screen py-20 bg-neutral-50 bg-gradient-to-b from-background to-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="font-sans font-bold text-3xl md:text-4xl text-neutral-900 mb-4 text-balance">

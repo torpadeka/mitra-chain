@@ -19,7 +19,7 @@ export function FranchiseSearch({
   totalFranchises,
 }: FranchiseSearchProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+    <div className="bg-background rounded-lg shadow-sm border border-neutral-200 p-6 mb-8">
       <div className="flex flex-col md:flex-row gap-4 items-center">
         {/* Search Input */}
         <div className="flex-1 relative">
@@ -36,12 +36,12 @@ export function FranchiseSearch({
         {/* Controls */}
         <div className="flex items-center gap-3">
           {/* View Toggle */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex bg-secondary rounded-lg p-1">
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === "grid"
-                  ? "bg-white shadow-sm text-green-600"
+                  ? "bg-brand-400 shadow-sm text-brand-800"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -66,19 +66,23 @@ export function FranchiseSearch({
           </Button>
 
           {/* Search Button */}
-          <Button className="btn-primary">Search</Button>
+          <Button variant={"primary"} className="shadow-sm">
+            Search
+          </Button>
         </div>
       </div>
 
       {/* Results Summary */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <p className="text-sm text-gray-600">
+      <div className="mt-4 pt-4 border-t border-neutral-200">
+        <p className="text-sm text-neutral-700">
           Showing{" "}
-          <span className="font-medium text-gray-900">
+          <span className="font-medium text-neutral-700">
             1-{Math.min(totalFranchises, 24)}
           </span>{" "}
           of{" "}
-          <span className="font-medium text-gray-900">{totalFranchises}</span>{" "}
+          <span className="font-medium text-neutral-700">
+            {totalFranchises}
+          </span>{" "}
           franchises
         </p>
       </div>

@@ -3,7 +3,7 @@ import { Linkedin, Twitter, Github } from "lucide-react";
 
 const team = [
   {
-    name: "Sarah Chen",
+    name: "Christopher Hardy Gunawan",
     role: "Co-Founder & CEO",
     bio: "Former franchise industry executive with 15+ years experience. Led digital transformation at major franchise brands.",
     image: "/team-sarah.jpg",
@@ -13,7 +13,7 @@ const team = [
     },
   },
   {
-    name: "Michael Rodriguez",
+    name: "David Christian",
     role: "Co-Founder & CTO",
     bio: "Blockchain architect and Internet Computer developer. Previously built DeFi protocols with $100M+ TVL.",
     image: "/team-michael.jpg",
@@ -23,7 +23,7 @@ const team = [
     },
   },
   {
-    name: "Emily Johnson",
+    name: "Farrel Tobias Saputro",
     role: "Head of Product",
     bio: "Product leader with expertise in marketplace platforms. Former PM at leading fintech and e-commerce companies.",
     image: "/team-emily.jpg",
@@ -33,36 +33,47 @@ const team = [
     },
   },
   {
-    name: "David Kim",
+    name: "Valentino Febrian Kencono",
     role: "Head of Business Development",
     bio: "Franchise industry veteran with extensive franchisor network. Expert in franchise operations and growth strategies.",
     image: "/team-david.jpg",
     social: {
       linkedin: "#",
+      twitter: "#",
+    },
+  },
+  {
+    name: "Darren Kent",
+    role: "Head of Business Development",
+    bio: "Franchise industry veteran with extensive franchisor network. Expert in franchise operations and growth strategies.",
+    image: "/team-david.jpg",
+    social: {
+      linkedin: "#",
+      twitter: "#",
     },
   },
 ];
 
 export function TeamSection() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-30 bg-gradient-to-b from-secondary to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900 mb-4">
+          <h2 className="font-sans font-bold text-3xl md:text-4xl text-primary mb-4">
             Meet Our Team
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-neutral-700 max-w-3xl mx-auto">
             We're a diverse team of franchise industry experts, blockchain
             developers, and product innovators united by our mission to
             revolutionize franchising.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-5 gap-4">
           {team.map((member, index) => (
             <Card
               key={index}
-              className="border-gray-200 hover:shadow-lg transition-shadow text-center"
+              className="border-neutral-200 hover:shadow-lg transition-shadow text-center shadow-neutral-200"
             >
               <CardContent className="p-6">
                 <img
@@ -70,11 +81,13 @@ export function TeamSection() {
                   alt={member.name}
                   className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                 />
-                <h3 className="font-serif font-bold text-lg text-gray-900 mb-1">
+                <h3 className="font-sans font-bold text-lg text-primary mb-1">
                   {member.name}
                 </h3>
-                <p className="text-green-600 font-medium mb-3">{member.role}</p>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                <p className="text-brand-600 text-md mb-3 font-jetbrains-mono">
+                  {member.role}
+                </p>
+                <p className="text-neutral-700 text-sm leading-relaxed mb-4">
                   {member.bio}
                 </p>
                 <div className="flex justify-center gap-3">
@@ -109,34 +122,21 @@ export function TeamSection() {
         </div>
 
         <div className="mt-16 text-center">
-          <Card className="max-w-2xl mx-auto border-blue-200 bg-blue-50">
+          <Card className="max-w-2xl mx-auto bg-background shadow-lg shadow-neutral-200">
             <CardContent className="p-8">
-              <h3 className="font-serif font-bold text-2xl text-gray-900 mb-4">
+              <h3 className="font-sans font-bold text-2xl text-primary mb-4">
                 Join Our Team
               </h3>
-              <p className="text-gray-700 leading-relaxed mb-6">
+              <p className="text-neutral-700 leading-relaxed mb-6">
                 We're always looking for talented individuals who share our
                 passion for innovation and transparency. Help us build the
                 future of franchising.
               </p>
               <a
                 href="#"
-                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="inline-flex items-center text-blue-400 hover:text-blue-500 font-medium transition-colors underline"
               >
                 View Open Positions
-                <svg
-                  className="w-4 h-4 ml-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
               </a>
             </CardContent>
           </Card>

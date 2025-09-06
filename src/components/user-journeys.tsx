@@ -106,13 +106,13 @@ export function UserJourneys() {
   const IconComponent = currentJourney.icon;
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="min-h-screen bg-gradient-to-b from-background to-secondary py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900 mb-4">
+          <h2 className="font-sans font-bold text-3xl md:text-4xl text-primary mb-4">
             Tailored for Your Role
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-neutral-700 max-w-2xl mx-auto">
             Whether you're looking to invest in a franchise or expand your
             brand, we've designed specific journeys for your needs.
           </p>
@@ -120,19 +120,19 @@ export function UserJourneys() {
 
         {/* Journey Selector */}
         <div className="flex justify-center mb-12">
-          <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-200 text-foreground">
+          <div className="px-4 flex flex-row gap-4 bg-background rounded-lg p-2 shadow-md shadow-neutral-200 border border-neutral-200 text-foreground">
             <Button
-              variant={activeJourney === "franchisee" ? "default" : "ghost"}
+              variant={activeJourney === "franchisee" ? "primary" : "ghost"}
               onClick={() => setActiveJourney("franchisee")}
-              className={`px-6 py-3 ${activeJourney === "franchisee" ? "btn-primary" : ""}`}
+              className={`px-6 py-3 shadow-sm ${activeJourney === "franchisee" ? "bg-brand-600" : ""}`}
             >
               <UserCheck className="w-4 h-4 mr-2" />
               For Franchisees
             </Button>
             <Button
-              variant={activeJourney === "franchisor" ? "default" : "ghost"}
+              variant={activeJourney === "franchisor" ? "primary" : "ghost"}
               onClick={() => setActiveJourney("franchisor")}
-              className={`px-6 py-3 ${activeJourney === "franchisor" ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+              className={`px-6 py-3 shadow-sm ${activeJourney === "franchisor" ? "bg-brand-600" : ""}`}
             >
               <Building2 className="w-4 h-4 mr-2" />
               For Franchisors
@@ -143,42 +143,36 @@ export function UserJourneys() {
         {/* Journey Content */}
         <Card className="max-w-4xl mx-auto">
           <CardHeader className="text-center pb-8">
-            <div
-              className={`w-16 h-16 ${currentJourney.color === "green" ? "bg-green-100" : "bg-blue-100"} rounded-full flex items-center justify-center mx-auto mb-4`}
-            >
-              <IconComponent
-                className={`w-8 h-8 ${currentJourney.color === "green" ? "text-green-600" : "text-blue-600"}`}
-              />
+            <div className="w-16 h-16 bg-brand-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <IconComponent className="w-8 h-8 text-brand-800" />
             </div>
-            <CardTitle className="text-2xl font-serif font-bold text-gray-900">
+            <CardTitle className="text-3xl font-jetbrains-mono font-bold text-primary">
               {currentJourney.title}
             </CardTitle>
-            <p className="text-gray-600">{currentJourney.subtitle}</p>
+            <p className="text-neutral-700">{currentJourney.subtitle}</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {currentJourney.steps.map((step, index) => (
                 <div key={index} className="flex items-start gap-4">
-                  <div
-                    className={`w-8 h-8 ${currentJourney.color === "green" ? "bg-green-600" : "bg-blue-600"} text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0`}
-                  >
+                  <div className="w-8 h-8 bg-brand-400 text-brand-800 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-lg text-gray-900">
+                      <h3 className="font-semibold text-lg text-primary font-jetbrains-mono">
                         {step.title}
                       </h3>
                       <Badge variant="secondary" className="text-xs">
                         {step.duration}
                       </Badge>
                     </div>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-neutral-700 leading-relaxed">
                       {step.description}
                     </p>
                   </div>
                   {index < currentJourney.steps.length - 1 && (
-                    <ArrowRight className="w-5 h-5 text-gray-300 mt-2" />
+                    <ArrowRight className="w-5 h-5 text-neutral-700 mt-2" />
                   )}
                 </div>
               ))}

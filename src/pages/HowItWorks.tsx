@@ -8,13 +8,13 @@ import { Footer } from "@/components/footer";
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="">
       <HowItWorksHero />
       <ProcessSteps />
       <UserJourneys />
       <BlockchainFeatures />
       <FAQ />
-      <GetStartedCTA />
+      {/* <GetStartedCTA /> */}
       <Footer />
     </div>
   );

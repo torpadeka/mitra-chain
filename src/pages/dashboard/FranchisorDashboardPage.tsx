@@ -161,7 +161,8 @@ export default function FranchisorDashboard() {
                 </div>
                 <Button
                   onClick={() => setIsAddBusinessModalOpen(true)}
-                  className="btn-primary"
+                  variant={"primary"}
+                  className="shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add New Business

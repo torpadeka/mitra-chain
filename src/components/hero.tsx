@@ -80,7 +80,8 @@ export function Hero() {
                   onChange={handleInputChange}
                 />
                 <Button
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 btn-primary"
+                  variant={"primary"}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2"
                   onClick={handleSearch}
                 >
                   Search
@@ -94,7 +95,7 @@ export function Hero() {
                 variant="primary"
                 size={"lg"}
                 onClick={handleBrowseClick}
-                className="bg-brand-600 text-primary-foreground shadow-lg hover:bg-brand-400 hover:cursor-pointer "
+                className=""
               >
                 Browse Franchises
               </Button>

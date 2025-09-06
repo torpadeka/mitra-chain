@@ -161,14 +161,14 @@ export default function FranchisesPage() {
   }, [actor, franchises]);
 
   return (
-    <div className="w-full min-h-screen p-10 bg-gray-50">
+    <div className="w-full min-h-screen p-10 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="font-serif font-bold text-3xl md:text-4xl text-gray-900 mb-4">
+          <h1 className="font-sans font-bold text-3xl md:text-4xl text-primary mb-4">
             Browse Franchises
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl">
+          <p className="text-xl text-neutral-700 max-w-2xl">
             Discover verified franchise opportunities across various industries.
             Filter by investment level, location, and more.
           </p>

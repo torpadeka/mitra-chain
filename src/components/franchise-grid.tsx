@@ -3,7 +3,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, MapPin, DollarSign } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Heart, MapPin, DollarSign, ChevronDown } from "lucide-react";
 import { FrontendFranchise } from "@/handler/FranchiseHandler";
 
 interface FranchiseGridProps {
@@ -36,17 +42,35 @@ export function FranchiseGrid({
       {/* Sort Controls */}
       <div className="flex items-center justify-between text-foreground">
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Sort by:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="text-sm border border-gray-300 rounded-md px-3 py-1"
-          >
-            <option value="featured">Featured</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="reviews">Most Reviews</option>
-          </select>
+          <span className="text-sm text-neutral-600">Sort by:</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="text-sm px-3 py-1">
+                {sortBy === "featured"
+                  ? "Featured"
+                  : sortBy === "price-low"
+                    ? "Price: Low to High"
+                    : sortBy === "price-high"
+                      ? "Price: High to Low"
+                      : "Most Reviews"}
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => setSortBy("featured")}>
+                Featured
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setSortBy("price-low")}>
+                Price: Low to High
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setSortBy("price-high")}>
+                Price: High to Low
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setSortBy("reviews")}>
+                Most Reviews
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

@@ -172,7 +172,7 @@ export default function EventsPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-serif font-bold text-primary">
+            <h1 className="text-3xl font-sans font-bold text-primary">
               Franchise Events
             </h1>
             <p className="text-secondary mt-2">

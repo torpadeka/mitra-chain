@@ -231,7 +231,7 @@ export function Navigation() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t border-brand-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+          <div className="lg:hidden border-t border-brand-400 bg-background">
             <div className="px-2 pt-4 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-300">
               {navItems.map((item, index) => (
                 <a

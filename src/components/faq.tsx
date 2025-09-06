@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const faqs = [
   {
-    question: "What makes MitraChain different from traditional franchise platforms?",
+    question:
+      "What makes MitraChain different from traditional franchise platforms?",
     answer:
       "MitraChain uses blockchain technology to provide complete transparency, NFT-based franchise licenses for verifiable ownership, and community governance through DAO voting. This eliminates intermediaries, reduces costs, and ensures all transactions are publicly auditable.",
   },
@@ -45,45 +46,59 @@ const faqs = [
     answer:
       "No! We've designed MitraChain to be user-friendly for everyone. Our wallet integration is simple, and we provide step-by-step guidance for all blockchain interactions. You can focus on finding the right franchise opportunity.",
   },
-]
+];
 
 export function FAQ() {
-  const [openItems, setOpenItems] = useState<number[]>([])
+  const [openItems, setOpenItems] = useState<number[]>([]);
 
   const toggleItem = (index: number) => {
-    setOpenItems((prev) => (prev.includes(index) ? prev.filter((item) => item !== index) : [...prev, index]))
-  }
+    setOpenItems((prev) =>
+      prev.includes(index)
+        ? prev.filter((item) => item !== index)
+        : [...prev, index]
+    );
+  };
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="min-h-screen bg-gradient-to-b from-background to-background py-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900 mb-4">Frequently Asked Questions</h2>
-          <p className="text-xl text-gray-600">
-            Get answers to common questions about MitraChain and blockchain-powered franchising.
+          <h2 className="font-sans font-bold text-3xl md:text-4xl text-primary mb-4">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-xl text-neutral-700">
+            Get answers to common questions about MitraChain and
+            blockchain-powered franchising.
           </p>
         </div>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <Card key={index} className="border-gray-200">
+            <Card
+              key={index}
+              className="border-neutral-200 hover:bg-secondary hover:shadow-lg shadow-neutral-200"
+            >
               <CardContent className="p-0">
                 <button
                   onClick={() => toggleItem(index)}
-                  className="w-full text-left p-6 hover:bg-gray-50 transition-colors"
+                  className="w-full text-left p-6 transition-colors"
                 >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg text-gray-900 pr-4">{faq.question}</h3>
+                    <h3 className="font-semibold font-jetbrains-mono text-lg text-primary pr-4">
+                      {faq.question}
+                    </h3>
                     {openItems.includes(index) ? (
-                      <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                      <ChevronUp className="w-5 h-5 text-neutral-700 flex-shrink-0" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                      <ChevronDown className="w-5 h-5 text-neutral-700 flex-shrink-0" />
                     )}
                   </div>
                 </button>
                 {openItems.includes(index) && (
                   <div className="px-6 pb-6">
-                    <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                    <p className="text-neutral-700 leading-relaxed">
+                      {faq.answer}
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -92,5 +107,5 @@ export function FAQ() {
         </div>
       </div>
     </section>
-  )
+  );
 }

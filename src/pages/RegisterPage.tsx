@@ -571,15 +571,20 @@ export default function RegisterPage() {
                   }`}
                 />
                 <div className="flex-1">
-                  <Label htmlFor="terms" className="text-sm leading-relaxed">
-                    I agree to the{" "}
-                    <a href="/terms" className="text-primary hover:underline">
-                      Terms of Service
-                    </a>{" "}
-                    and{" "}
-                    <a href="/privacy" className="text-primary hover:underline">
-                      Privacy Policy
-                    </a>
+                  <Label htmlFor="terms" className="text-sm">
+                    <span>
+                      I agree to the{" "}
+                      <a href="/terms" className="text-primary hover:underline">
+                        Terms of Service
+                      </a>{" "}
+                      and{" "}
+                      <a
+                        href="/privacy"
+                        className="text-primary hover:underline"
+                      >
+                        Privacy Policy
+                      </a>
+                    </span>
                     <span className="text-destructive"> *</span>
                   </Label>
                 </div>
