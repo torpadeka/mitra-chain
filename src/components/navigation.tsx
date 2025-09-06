@@ -24,10 +24,10 @@ export function Navigation() {
   // Determine dashboard path based on user role
   const getDashboardPath = () => {
     if (!user || !isAuthenticated) return null;
-    const roleKey = Object.keys(user.role)[0];
-    if (roleKey === "Franchisee") return "/dashboard/franchisee";
-    if (roleKey === "Franchisor") return "/dashboard/franchisor";
-    return null;
+    if (user.role === "Franchisee") return "/dashboard/franchisee";
+    if (user.role === "Franchisor") return "/dashboard/franchisor";
+    if (user.role === "Admin") return "/dashboard/admin";
+    return "/dashboard/franchisee";
   };
 
   const dashboardPath = getDashboardPath();
@@ -38,7 +38,6 @@ export function Navigation() {
     { href: "/events", label: "Events" },
     { href: "/how-it-works", label: "How It Works" },
     { href: "/about", label: "About Us" },
-    ...(dashboardPath ? [{ href: dashboardPath, label: "Dashboard" }] : []),
   ];
 
   const handleLogout = async () => {
@@ -88,6 +87,7 @@ export function Navigation() {
             </div>
           </a>
 
+          {/* Desktop nav items */}
           <div className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => (
               <a
@@ -108,6 +108,7 @@ export function Navigation() {
             ))}
           </div>
 
+          {/* Desktop user section */}
           <div className="hidden lg:flex items-center space-x-4">
             {user == null ? (
               <Button
@@ -138,6 +139,11 @@ export function Navigation() {
                     <DropdownMenuItem onClick={() => navigate("/profile")}>
                       Profile
                     </DropdownMenuItem>
+                    {dashboardPath && (
+                      <DropdownMenuItem onClick={() => navigate(dashboardPath)}>
+                        Dashboard
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem
                       onClick={handleLogout}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -161,6 +167,7 @@ export function Navigation() {
             )}
           </div>
 
+          {/* Mobile menu button */}
           <div className="lg:hidden flex items-center">
             <Button
               variant="ghost"
@@ -177,6 +184,7 @@ export function Navigation() {
           </div>
         </div>
 
+        {/* Mobile menu */}
         {isMenuOpen && (
           <div className="lg:hidden border-t border-brand-200 bg-surface-primary">
             <div className="px-2 pt-4 pb-6 space-y-2 animate-in slide-in-from-top-2 duration-300">
@@ -236,6 +244,19 @@ export function Navigation() {
                     >
                       View Profile
                     </Button>
+
+                    {dashboardPath && (
+                      <Button
+                        variant="outline"
+                        className="w-full border-brand-200 text-brand-600 hover:bg-brand-50 py-3 bg-transparent"
+                        onClick={() => {
+                          navigate(dashboardPath);
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        Dashboard
+                      </Button>
+                    )}
 
                     <Button
                       className={`w-full font-medium py-3 rounded-lg transition-all duration-300 ${

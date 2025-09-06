@@ -26,8 +26,14 @@ import {
 } from "lucide-react";
 
 export default function ProfilePage() {
-  const { user, updateFranchisorProfile, updateFranchiseeProfile, logout } =
-    useUser();
+  const {
+    user,
+    actor,
+    updateFranchisorProfile,
+    updateFranchiseeProfile,
+    logout,
+    isInitializing,
+  } = useUser();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -56,18 +62,18 @@ export default function ProfilePage() {
       setAddress(user.address || "");
       setPhoneNumber(user.phoneNumber || "");
     }
-    setLoading(user === null ? true : false);
-  }, [user, isEditing]);
+    setLoading(isInitializing || user === null);
+  }, [user, isEditing, isInitializing, actor]);
 
   useEffect(() => {
-    if (user === null) {
+    if (user === null && !isInitializing) {
       navigate("/");
     }
-  }, [user, loading, navigate]);
+  }, [user, isInitializing, navigate, actor]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Loading your profile...</p>
@@ -80,16 +86,14 @@ export default function ProfilePage() {
     return null; // Navigation will handle redirect
   }
 
-  // Prevent form submission on Enter key
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // Prevent form submission on Enter
+      e.preventDefault();
     }
   };
 
-  // Handle image upload to Cloudinary
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -122,12 +126,15 @@ export default function ProfilePage() {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("save");
     e.preventDefault();
+    console.log("Submitting form"); // Debug log
     setIsSubmitting(true);
     try {
+      if (!actor) {
+        console.error("Actor not initialized, cannot update profile");
+        return;
+      }
       let updatedUser: any;
       if (user?.role === "Franchisor") {
         if (!address || !phoneNumber) {
@@ -146,7 +153,6 @@ export default function ProfilePage() {
       } else if (user?.role === "Franchisee") {
         updatedUser = await updateFranchiseeProfile(bio, profilePicUrl);
       } else {
-        // Admin: only update bio and profile picture
         updatedUser = await updateFranchiseeProfile(bio, profilePicUrl);
       }
 
@@ -162,7 +168,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Handle logout
   const handleLogout = async () => {
     try {
       await logout(() => navigate("/login"));
@@ -239,56 +244,21 @@ export default function ProfilePage() {
                 {!isEditing ? (
                   <>
                     <Button
-                      onClick={() => {
-                        setIsEditing(true);
-                      }}
+                      onClick={() => setIsEditing(true)}
+                      type="button"
                       className="gap-2"
                     >
-                      <User className="h-4 w-4" />
-                      Edit Profile
+                      <User className="h-4 w-4" /> Edit Profile
                     </Button>
-                    <Button variant="outline" onClick={handleLogout}>
+                    <Button
+                      variant="outline"
+                      onClick={handleLogout}
+                      type="button"
+                    >
                       Logout
                     </Button>
                   </>
-                ) : (
-                  <>
-                    <Button
-                      type="submit"
-                      form="profile-form"
-                      disabled={isUploading || isSubmitting}
-                      className="gap-2"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        "Save Changes"
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setIsEditing(false);
-                        // Reset form fields
-                        setName(user.name || "");
-                        setEmail(user.email || "");
-                        setBio(user.bio || "");
-                        setProfilePicUrl(user.profilePicUrl || "");
-                        setLinkedin(user.linkedin || "");
-                        setInstagram(user.instagram || "");
-                        setTwitter(user.twitter || "");
-                        setAddress(user.address || "");
-                        setPhoneNumber(user.phoneNumber || "");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                )}
+                ) : null}
               </div>
             </div>
           </CardHeader>
@@ -302,8 +272,7 @@ export default function ProfilePage() {
               {isEditing && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Upload className="h-5 w-5" />
-                    Profile Picture
+                    <Upload className="h-5 w-5" /> Profile Picture
                   </h3>
                   <div className="flex items-center gap-4">
                     <Input
@@ -325,8 +294,7 @@ export default function ProfilePage() {
 
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Basic Information
+                  <User className="h-5 w-5" /> Basic Information
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -362,7 +330,7 @@ export default function ProfilePage() {
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      onKeyDown={handleKeyDown} // Add keydown handler
+                      onKeyDown={handleKeyDown}
                       disabled={!isEditing}
                       className={!isEditing ? "bg-muted" : ""}
                     />
@@ -377,7 +345,7 @@ export default function ProfilePage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      onKeyDown={handleKeyDown} // Add keydown handler
+                      onKeyDown={handleKeyDown}
                       disabled={!isEditing}
                       className={!isEditing ? "bg-muted" : ""}
                     />
@@ -392,7 +360,7 @@ export default function ProfilePage() {
                     id="bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    onKeyDown={handleKeyDown} // Add keydown handler
+                    onKeyDown={handleKeyDown}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-muted" : ""}
                     placeholder="Tell us about yourself..."
@@ -406,8 +374,7 @@ export default function ProfilePage() {
                   <Separator />
                   <div className="space-y-6">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <Phone className="h-5 w-5" />
-                      Contact Information
+                      <Phone className="h-5 w-5" /> Contact Information
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -426,7 +393,7 @@ export default function ProfilePage() {
                           id="address"
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          onKeyDown={handleKeyDown} // Add keydown handler
+                          onKeyDown={handleKeyDown}
                           disabled={!isEditing}
                           required={user.role === "Franchisor"}
                           className={!isEditing ? "bg-muted" : ""}
@@ -449,7 +416,7 @@ export default function ProfilePage() {
                           id="phoneNumber"
                           value={phoneNumber}
                           onChange={(e) => setPhoneNumber(e.target.value)}
-                          onKeyDown={handleKeyDown} // Add keydown handler
+                          onKeyDown={handleKeyDown}
                           disabled={!isEditing}
                           required={user.role === "Franchisor"}
                           className={!isEditing ? "bg-muted" : ""}
@@ -472,14 +439,13 @@ export default function ProfilePage() {
                           htmlFor="linkedin"
                           className="text-sm font-medium flex items-center gap-2"
                         >
-                          <Linkedin className="h-4 w-4" />
-                          LinkedIn
+                          <Linkedin className="h-4 w-4" /> LinkedIn
                         </Label>
                         <Input
                           id="linkedin"
                           value={linkedin}
                           onChange={(e) => setLinkedin(e.target.value)}
-                          onKeyDown={handleKeyDown} // Add keydown handler
+                          onKeyDown={handleKeyDown}
                           disabled={!isEditing}
                           className={!isEditing ? "bg-muted" : ""}
                           placeholder="LinkedIn profile URL"
@@ -491,14 +457,13 @@ export default function ProfilePage() {
                           htmlFor="instagram"
                           className="text-sm font-medium flex items-center gap-2"
                         >
-                          <Instagram className="h-4 w-4" />
-                          Instagram
+                          <Instagram className="h-4 w-4" /> Instagram
                         </Label>
                         <Input
                           id="instagram"
                           value={instagram}
                           onChange={(e) => setInstagram(e.target.value)}
-                          onKeyDown={handleKeyDown} // Add keydown handler
+                          onKeyDown={handleKeyDown}
                           disabled={!isEditing}
                           className={!isEditing ? "bg-muted" : ""}
                           placeholder="Instagram profile URL"
@@ -510,14 +475,13 @@ export default function ProfilePage() {
                           htmlFor="twitter"
                           className="text-sm font-medium flex items-center gap-2"
                         >
-                          <Twitter className="h-4 w-4" />
-                          Twitter
+                          <Twitter className="h-4 w-4" /> Twitter
                         </Label>
                         <Input
                           id="twitter"
                           value={twitter}
                           onChange={(e) => setTwitter(e.target.value)}
-                          onKeyDown={handleKeyDown} // Add keydown handler
+                          onKeyDown={handleKeyDown}
                           disabled={!isEditing}
                           className={!isEditing ? "bg-muted" : ""}
                           placeholder="Twitter profile URL"
@@ -526,6 +490,44 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </>
+              )}
+
+              {isEditing && (
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    type="submit"
+                    form="profile-form"
+                    disabled={isUploading || isSubmitting || isInitializing}
+                    className="gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setName(user.name || "");
+                      setEmail(user.email || "");
+                      setBio(user.bio || "");
+                      setProfilePicUrl(user.profilePicUrl || "");
+                      setLinkedin(user.linkedin || "");
+                      setInstagram(user.instagram || "");
+                      setTwitter(user.twitter || "");
+                      setAddress(user.address || "");
+                      setPhoneNumber(user.phoneNumber || "");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               )}
             </form>
           </CardContent>

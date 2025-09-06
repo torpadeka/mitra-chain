@@ -86,6 +86,7 @@ interface UserContextType {
     bio?: string,
     profilePicUrl?: string
   ) => Promise<FrontendUser | null>;
+  init: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -171,70 +172,79 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     sessionStorage.removeItem("auth_principal");
   };
 
-  useEffect(() => {
-    const init = async () => {
-      const client = await AuthClient.create();
-      setAuthClient(client);
-      try {
-        // Load session data first
-        const {
-          user: storedUser,
-          isAuthenticated: storedIsAuthenticated,
-          principal: storedPrincipal,
-        } = loadFromSession();
-        if (storedUser && storedIsAuthenticated && storedPrincipal) {
-          setUser(storedUser);
-          setIsAuthenticated(storedIsAuthenticated);
-          setPrincipal(storedPrincipal);
-          setIsInitializing(false); // Set to false if session data is loaded
-          return; // Skip further initialization if session data exists
+  const init = async () => {
+    const client = await AuthClient.create();
+    setAuthClient(client);
+    try {
+      const {
+        user: storedUser,
+        isAuthenticated: storedIsAuthenticated,
+        principal: storedPrincipal,
+      } = loadFromSession();
+
+      // Initialize agent and actor first
+      const identity = client.getIdentity();
+      const principalObj = identity.getPrincipal();
+      const principalStr = principalObj.toString();
+      const agent = new HttpAgent({
+        host: network === "local" ? `http://${wslIp}:4943` : "https://ic0.app",
+        identity,
+      });
+
+      if (network === "local") {
+        try {
+          await agent.fetchRootKey();
+        } catch (err) {
+          console.error("Failed to fetch root key:", err);
         }
-        const identity = client.getIdentity();
-        const principalObj = identity.getPrincipal();
-        const principalStr = principalObj.toString();
-        const agent = new HttpAgent({
-          host:
-            network === "local" ? `http://${wslIp}:4943` : "https://ic0.app",
-          identity,
-        });
-
-        if (network === "local") {
-          try {
-            await agent.fetchRootKey();
-          } catch (err) {
-            console.warn("Failed to fetch root key:", err);
-          }
-        }
-
-        const actor = createActor(canisterId, {
-          agentOptions: { identity },
-        });
-
-        setActor(actor);
-        setPrincipal(principalStr);
-        setIsAuthenticated(await client.isAuthenticated());
-
-        // Fetch user data if authenticated and no user is loaded from session
-        if ((await client.isAuthenticated()) && !storedUser && principalStr) {
-          try {
-            const fetchedUser = await getUser(principalStr);
-            if (fetchedUser && fetchedUser.name !== "") {
-              setUser(fetchedUser);
-              saveToSession(fetchedUser, true, principalStr);
-            } else {
-              console.error("Error fetching user on init");
-            }
-          } catch (err) {
-            console.error("Error fetching user on init:", err);
-          }
-        }
-      } finally {
-        setIsInitializing(false); // Always set to false when initialization completes
       }
-    };
 
+      const actor = createActor(canisterId, {
+        agentOptions: { identity },
+      });
+      if (!actor) {
+        console.error("Failed to create actor with canisterId:", canisterId);
+        setIsInitializing(false);
+        return;
+      }
+      setActor(actor);
+      setPrincipal(principalStr);
+
+      // Handle session data
+      if (storedUser && storedIsAuthenticated && storedPrincipal) {
+        setUser(storedUser);
+        setIsAuthenticated(storedIsAuthenticated);
+        setPrincipal(storedPrincipal);
+        setIsInitializing(false);
+        return;
+      }
+
+      // Fetch user data if authenticated and no session user
+      setIsAuthenticated(await client.isAuthenticated());
+      if ((await client.isAuthenticated()) && !storedUser && principalStr) {
+        try {
+          const fetchedUser = await getUser(principalStr);
+          if (fetchedUser && fetchedUser.name !== "") {
+            setUser(fetchedUser);
+            saveToSession(fetchedUser, true, principalStr);
+          } else {
+            console.warn("No user found for principal:", principalStr);
+          }
+        } catch (err) {
+          console.error("Error fetching user on init:", err);
+        }
+      }
+    } catch (err) {
+      console.error("Initialization failed:", err);
+    } finally {
+      console.log("Actor:", actor);
+      setIsInitializing(false);
+    }
+  };
+
+  useEffect(() => {
     init();
-  }, []); // Keep empty dependency array as per original
+  }, []);
 
   const login = async (): Promise<void> => {
     if (!authClient || !actor || !principal) return;
@@ -245,7 +255,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         try {
           const fetchedUser = await getUser(principal);
           if (!fetchedUser || fetchedUser.name === "") {
-            console.log("No user");
+            window.location.href = "/register";
           } else {
             setUser(fetchedUser);
             setIsAuthenticated(true);
@@ -253,19 +263,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           }
         } catch (err) {
           console.error("Error during login user fetch:", err);
+          window.location.href = "/register";
         } finally {
           setIsInitializing(false);
-          window.location.reload();
         }
       },
     });
   };
 
   const logout = async (onSuccess: () => void): Promise<void> => {
-    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAA");
-    console.log(authClient);
     if (!authClient) return;
-    console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
     setIsInitializing(true);
     await authClient.logout();
     setUser(null);
@@ -343,6 +350,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (!actor) throw new Error("Actor not initialized");
     setIsInitializing(true); // Set to true during profile update
     try {
+      console.log("try");
       const result = await actor.updateFranchisorProfile(
         bio ? [bio] : [],
         profilePicUrl ? [profilePicUrl] : [],
@@ -352,7 +360,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         address ? [address] : [],
         phoneNumber ? [phoneNumber] : []
       );
+      console.log(result);
       const user = optionalToUndefined(result);
+      console.log(user);
       if (user) {
         const mappedUser = mapUser(user);
         setUser(mappedUser); // Update context with new user data
@@ -409,6 +419,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         createUser,
         updateFranchisorProfile,
         updateFranchiseeProfile,
+        init,
       }}
     >
       {children}

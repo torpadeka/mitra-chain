@@ -36,6 +36,7 @@ const App: React.FC = () => {
         try {
           const fetchedUser = await getUser(principal);
           console.log("Restored user:", fetchedUser);
+          // console.log(actor);
           if (fetchedUser) {
             setUser(fetchedUser);
             saveToSession(fetchedUser, true, principal.toString());

@@ -101,7 +101,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      // navigate("/");
+      navigate("/");
     }
   }, [user]);
 
@@ -291,6 +291,7 @@ export default function RegisterPage() {
       userType === "franchisor" ? formData.phoneNumber : undefined
     );
 
+    window.location.reload();
     window.location.href = "/";
   };
 
