@@ -190,13 +190,13 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+    <div className="min-h-screen bg-secondary py-8 px-4">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-primary mb-2">
             Profile Settings
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-neutral-700">
             Manage your account information and preferences
           </p>
         </div>
@@ -205,7 +205,7 @@ export default function ProfilePage() {
           <CardHeader className="pb-6">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative">
-                <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+                <Avatar className="h-24 w-24 border-2 border-brand-400 shadow-lg">
                   <AvatarImage
                     src={profilePicUrl || "/default-profile.png"}
                     alt="Profile Picture"
@@ -223,17 +223,17 @@ export default function ProfilePage() {
 
               <div className="text-center sm:text-left flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-primary">
                     {user.name}
                   </h2>
                   <Badge className={getRoleColor(user.role)}>{user.role}</Badge>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 text-neutral-700">
                     <Mail className="h-4 w-4" />
                     {user.email}
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 text-neutral-700">
                     <CalendarDays className="h-4 w-4" />
                     Joined {user.createdAt.toLocaleDateString()}
                   </div>
@@ -251,7 +251,7 @@ export default function ProfilePage() {
                       <User className="h-4 w-4" /> Edit Profile
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="destructive"
                       onClick={handleLogout}
                       type="button"
                     >

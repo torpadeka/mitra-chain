@@ -1,43 +1,63 @@
+"use client";
+
+import type React from "react";
+
 import { Button } from "@/components/ui/button";
 import { Search, TrendingUp, Shield, Users } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 import Waves from "./backgrounds/Waves/Waves";
 
 export function Hero() {
-  const navigate = useNavigate();
   const [inputValue, setInputValue] = useState<string>("");
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
   };
+
+  const handleSearch = () => {
+    console.log("Searching for:", inputValue);
+    // You can replace this with your preferred navigation method
+    setInputValue("");
+  };
+
+  const handleBrowseClick = () => {
+    console.log("Navigate to franchises page");
+    // You can replace this with your preferred navigation method
+  };
+
+  const handleLearnMoreClick = () => {
+    console.log("Navigate to how-it-works page");
+    // You can replace this with your preferred navigation method
+  };
+
   return (
-    <section className="relative bg-gradient-to-br from-green-50 to-white py-20 overflow-hidden">
+    <section className="min-h-screen py-32 relative bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
           <div className="absolute inset-0 z-0 pointer-events-none">
             <Waves
-              lineColor="#00ff00"
-              backgroundColor="rgba(255, 255, 255, 0)"
+              lineColor="#18a54e"
+              backgroundColor="rgb(var(--background))"
               waveSpeedX={0.02}
               waveSpeedY={0.01}
               waveAmpX={40}
               waveAmpY={20}
-              friction={0.9}
+              friction={0.5}
               tension={0.01}
-              maxCursorMove={120}
+              maxCursorMove={240}
               xGap={24}
               yGap={36}
             />
-            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent" />
+            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-b from-transparent to-background/88" />
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="font-serif font-bold text-4xl md:text-6xl text-gray-900 mb-6">
+            <h1 className="font-sans font-extrabold text-4xl md:text-6xl text-primary dark:text-neutral-100 mb-6 text-balance">
               Discover Your Perfect
-              <span className="text-green-600 block">
+              <span className="text-brand-600 block font-jetbrains-mono">
                 Franchise Opportunity
               </span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+            <p className="text-xl text-primary/85 mb-8 leading-relaxed text-pretty">
               Join the future of franchising with blockchain transparency,
               NFT-based licenses, and community governance. Find, invest, and
               grow with MitraChain.
@@ -46,23 +66,22 @@ export function Hero() {
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto mb-8">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-500 dark:text-neutral-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search franchises by industry, investment level, or location..."
-                  className="text-foreground bg-background w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  placeholder="Search franchises..."
+                  className="bg-background text-primary w-full pl-12 pr-4 py-4 text-lg border border-border dark:border-neutral-600 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
                   value={inputValue}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      navigate(`/franchises?q=${inputValue}`);
-                      setInputValue("");
+                      handleSearch();
                     }
                   }}
                   onChange={handleInputChange}
                 />
                 <Button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 btn-primary"
-                  onClick={() => navigate(`/franchises?q=${inputValue}`)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 btn-primary"
+                  onClick={handleSearch}
                 >
                   Search
                 </Button>
@@ -72,14 +91,17 @@ export function Hero() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button
-                className="btn-primary text-lg px-8 py-4 hover:cursor-pointer"
-                onClick={() => navigate("/franchises")}
+                variant="primary"
+                size={"lg"}
+                onClick={handleBrowseClick}
+                className="bg-brand-600 text-primary-foreground shadow-lg hover:bg-brand-400 hover:cursor-pointer "
               >
                 Browse Franchises
               </Button>
               <Button
-                className="btn-secondary text-lg px-8 py-4 hover:cursor-pointer"
-                onClick={() => navigate("/how-it-works")}
+                variant={"primary_outline"}
+                size={"lg"}
+                onClick={handleLearnMoreClick}
               >
                 Learn How It Works
               </Button>
@@ -88,25 +110,37 @@ export function Hero() {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
               <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-brand-500 dark:bg-brand-900 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <TrendingUp className="w-6 h-6 text-brand-800 dark:text-brand-400" />
                 </div>
-                <div className="font-bold text-2xl text-gray-900">500+</div>
-                <div className="text-gray-600">Active Franchises</div>
+                <div className="font-bold text-2xl text-primary dark:text-neutral-100 font-jetbrains-mono">
+                  500+
+                </div>
+                <div className="text-primary dark:text-neutral-300">
+                  Active Franchises
+                </div>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <Shield className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-brand-500 dark:bg-brand-900 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Shield className="w-6 h-6 text-brand-800 dark:text-brand-400" />
                 </div>
-                <div className="font-bold text-2xl text-gray-900">100%</div>
-                <div className="text-gray-600">Blockchain Secured</div>
+                <div className="font-bold text-2xl text-primary dark:text-neutral-100 font-jetbrains-mono">
+                  100%
+                </div>
+                <div className="text-primary dark:text-neutral-300">
+                  Blockchain Secured
+                </div>
               </div>
               <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <Users className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-brand-500 dark:bg-brand-900 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Users className="w-6 h-6 text-brand-800 dark:text-brand-400" />
                 </div>
-                <div className="font-bold text-2xl text-gray-900">10K+</div>
-                <div className="text-gray-600">Community Members</div>
+                <div className="font-bold text-2xl text-primary dark:text-neutral-100 font-jetbrains-mono">
+                  10K+
+                </div>
+                <div className="text-primary dark:text-neutral-300">
+                  Community Members
+                </div>
               </div>
             </div>
           </div>

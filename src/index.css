@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap");
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 :root {
   --background: oklch(1 0 0);
@@ -10,7 +12,7 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.965 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -27,7 +29,7 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -104,7 +106,7 @@
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary: oklch(17.833% 0.01283 270.611);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
@@ -129,17 +131,18 @@
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
 
-  --brand-50: 5 46 22;
-  --brand-100: 20 83 45;
-  --brand-200: 22 101 52;
-  --brand-300: 21 128 61;
-  --brand-400: 22 163 74;
+  /* Fixed brand color scale - keeping proper order (50=lightest, 950=darkest) */
+  --brand-50: 240 253 244;
+  --brand-100: 220 252 231;
+  --brand-200: 187 247 208;
+  --brand-300: 134 239 172;
+  --brand-400: 74 222 128;
   --brand-500: 34 197 94;
-  --brand-600: 74 222 128;
-  --brand-700: 134 239 172;
-  --brand-800: 187 247 208;
-  --brand-900: 220 252 231;
-  --brand-950: 240 253 244;
+  --brand-600: 22 163 74;
+  --brand-700: 21 128 61;
+  --brand-800: 22 101 52;
+  --brand-900: 20 83 45;
+  --brand-950: 5 46 22;
 
   /* Neutral Colors (inverted for dark mode) */
   --neutral-50: 3 7 18;
@@ -170,17 +173,17 @@
   --surface-tertiary: 55 65 81;
   --surface-inverse: 255 255 255;
 
-  /* Text Colors (dark mode) */
+  /* Updated text colors to use appropriate brand shades for dark mode */
   --text-primary: 255 255 255;
   --text-secondary: 209 213 219;
   --text-tertiary: 156 163 175;
   --text-inverse: 17 24 39;
-  --text-brand: 74 222 128;
+  --text-brand: 134 239 172;
 
-  /* Border Colors (dark mode) */
+  /* Updated border colors to use appropriate brand shades for dark mode */
   --border-primary: 55 65 81;
   --border-secondary: 75 85 99;
-  --border-brand: 74 222 128;
+  --border-brand: 134 239 172;
 
   /* Scrollbar Colors (dark mode) */
   --scrollbar-track: 31 41 55;
@@ -274,6 +277,8 @@
   --color-border-primary: rgb(var(--border-primary));
   --color-border-secondary: rgb(var(--border-secondary));
   --color-border-brand: rgb(var(--border-brand));
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
+  --font-roboto-mono: "Roboto Mono", monospace;
 }
 
 @layer base {
@@ -507,7 +512,7 @@
 
 body {
   margin: 0;
-  font-family: "Host Grotesk", sans-serif;
+  font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -30,13 +30,13 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="min-h-screen py-20 bg-secondary bg-gradient-to-b from-neutral-50 to-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="font-serif font-bold text-3xl md:text-4xl text-gray-900 mb-4">
+          <h2 className="font-sans font-bold text-3xl md:text-4xl text-neutral-900 dark:text-neutral-100 mb-4 text-balance">
             Success Stories from Our Community
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-neutral-600 dark:text-neutral-300 max-w-2xl mx-auto text-pretty">
             Hear from franchisors and franchisees who have found success through
             MitraChain's transparent marketplace.
           </p>
@@ -46,35 +46,35 @@ export function Testimonials() {
           {testimonials.map((testimonial, index) => (
             <Card
               key={index}
-              className="bg-white border-gray-200 hover:shadow-lg transition-shadow"
+              className="bg-background dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 hover:shadow-lg hover:shadow-brand-200/20 transition-all duration-300 hover:border-brand-400"
             >
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star
                       key={i}
-                      className="w-5 h-5 text-yellow-400 fill-current"
+                      className="w-5 h-5 text-yellow-500 fill-current"
                     />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-6 leading-relaxed">
+                <p className="text-neutral-600 dark:text-neutral-300 mb-6 leading-relaxed text-pretty">
                   "{testimonial.content}"
                 </p>
                 <div className="flex items-center">
                   <img
                     src={
                       "https://picsum.photos/seed/" +
-                      testimonial.name.length +
-                      "/300/200"
+                        testimonial.name.length +
+                        "/300/200" || "/placeholder.svg"
                     }
                     alt={testimonial.name}
-                    className="w-12 h-12 rounded-full mr-4"
+                    className="w-12 h-12 rounded-full mr-4 border-2 border-brand-200 dark:border-brand-700"
                   />
                   <div>
-                    <div className="font-semibold text-gray-900">
+                    <div className="font-semibold text-neutral-900 dark:text-neutral-100 font-jetbrains-mono">
                       {testimonial.name}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
                       {testimonial.role}
                     </div>
                   </div>
