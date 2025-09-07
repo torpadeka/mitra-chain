@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { useUser } from "@/context/AuthContext";
 import { FranchiseHandler } from "@/handler/FranchiseHandler";
-import NoPP from '../../assets/no_pp.webp'
+import NoPP from "../../assets/no_pp.webp";
 
 type FrontendFranchise = {
   id: number;
@@ -625,9 +625,7 @@ export default function FranchiseDashboard() {
               <div className="space-y-4">
                 <div className="relative">
                   <img
-                    src={
-                      franchise.data.productGallery[currentImage] || NoPP
-                    }
+                    src={franchise.data.productGallery[currentImage] || NoPP}
                     alt={`Gallery image ${currentImage + 1}`}
                     className="w-full h-80 object-cover rounded-lg"
                   />
@@ -636,7 +634,7 @@ export default function FranchiseDashboard() {
                       variant="outline"
                       size="sm"
                       onClick={prevImage}
-                      className="bg-white/90 hover:bg-white"
+                      className="bg-background hover:bg-background/80"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
@@ -644,7 +642,7 @@ export default function FranchiseDashboard() {
                       variant="outline"
                       size="sm"
                       onClick={nextImage}
-                      className="bg-white/90 hover:bg-white"
+                      className="bg-background hover:bg-background/80"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>
@@ -667,9 +665,7 @@ export default function FranchiseDashboard() {
                         }`}
                       >
                         <img
-                          src={
-                            image || NoPP
-                          }
+                          src={image || NoPP}
                           alt={`Thumbnail ${index + 1}`}
                           className="w-full h-20 object-cover hover:scale-105 transition-transform"
                         />

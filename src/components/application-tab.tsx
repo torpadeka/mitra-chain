@@ -259,7 +259,8 @@ export function ApplicationsTab({
                         <Button
                           onClick={handleApprove}
                           disabled={!selectedApplication}
-                          className="bg-green-600 hover:bg-green-700"
+                          variant={"primary"}
+                          className="shadow-xs"
                         >
                           Approve
                         </Button>

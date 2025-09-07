@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
-import NoPP from '../assets/no_pp.webp'
+import NoPP from "../assets/no_pp.webp";
 
 interface FranchiseGalleryProps {
   images: string[];
@@ -34,9 +34,7 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
           {/* Main Image */}
           <div className="relative">
             <img
-              src={
-                images[currentImage] || NoPP
-              }
+              src={images[currentImage] || NoPP}
               alt={`Gallery image ${currentImage + 1}`}
               className="w-full h-80 object-cover rounded-lg"
             />
@@ -45,7 +43,7 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
                 variant="outline"
                 size="sm"
                 onClick={prevImage}
-                className="bg-white/90 hover:bg-white"
+                className="bg-background hover:bg-background/80"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -53,13 +51,13 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
                 variant="outline"
                 size="sm"
                 onClick={nextImage}
-                className="bg-white/90 hover:bg-white"
+                className="bg-background hover:bg-background/80"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-              <div className="bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+              <div className="bg-background/80 text-primary px-3 py-1 rounded-full text-sm font-jetbrains-mono">
                 {currentImage + 1} / {images.length}
               </div>
             </div>
@@ -76,9 +74,7 @@ export function FranchiseGallery({ images }: FranchiseGalleryProps) {
                 }`}
               >
                 <img
-                  src={
-                    image || NoPP
-                  }
+                  src={image || NoPP}
                   alt={`Thumbnail ${index + 1}`}
                   className="w-full h-20 object-cover hover:scale-105 transition-transform"
                 />

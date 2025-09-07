@@ -180,7 +180,7 @@ export default function EventsPage() {
             </p>
           </div>
           {user && (
-            <Button asChild className="btn-primary mt-4 md:mt-0">
+            <Button asChild variant={"primary"} className="shadow-xs">
               <a href="/events/create">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Event
@@ -253,7 +253,7 @@ export default function EventsPage() {
                     : "Be the first to create an event!"}
                 </p>
                 {user && (
-                  <Button asChild className="btn-primary">
+                  <Button asChild variant={"primary"} className="shadow xs">
                     <a href="/events/create">Create Event</a>
                   </Button>
                 )}

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { FranchiseHandler } from "@/handler/FranchiseHandler";
-import NoPP from '../../assets/no_pp.webp'
+import NoPP from "../../assets/no_pp.webp";
 
 type FrontendFranchise = {
   id: number;
@@ -197,16 +197,16 @@ export default function FranchiseDashboard() {
     return <div className="">Loading...</div>;
   } else {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-background">
         {/* Dashboard Header */}
-        <header className="bg-white shadow">
+        <header className="bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-primary">
                   {franchise.data.name} Dashboard
                 </h1>
-                <p className="text-gray-600 mt-1">
+                <p className="text-neutral-700 mt-1">
                   Manage your franchise details and operations
                 </p>
               </div>
@@ -220,7 +220,7 @@ export default function FranchiseDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-neutral-700">
                   Total Outlets
                 </CardTitle>
               </CardHeader>
@@ -233,7 +233,7 @@ export default function FranchiseDashboard() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-neutral-700">
                   Net Profit Range
                 </CardTitle>
               </CardHeader>
@@ -247,7 +247,7 @@ export default function FranchiseDashboard() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-neutral-700">
                   Status
                 </CardTitle>
               </CardHeader>
@@ -271,22 +271,29 @@ export default function FranchiseDashboard() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-gray-600 font-medium">Description</p>
-                  <p className="text-gray-700">{franchise.data.description}</p>
+                  <p className="text-neutral-700 font-medium">Description</p>
+                  <div
+                    className="text-neutral-700"
+                    dangerouslySetInnerHTML={{
+                      __html: franchise.data.description,
+                    }}
+                  ></div>
                 </div>
                 <div>
-                  <p className="text-gray-600 font-medium">Legal Entity</p>
-                  <p className="text-gray-700">{franchise.data.legalEntity}</p>
+                  <p className="text-neutral-700 font-medium">Legal Entity</p>
+                  <p className="text-neutral-700">
+                    {franchise.data.legalEntity}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-gray-600 font-medium">Founded</p>
-                  <p className="text-gray-700">
+                  <p className="text-neutral-700 font-medium">Founded</p>
+                  <p className="text-neutral-700">
                     {franchise.data.foundedIn.getFullYear()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-600 font-medium">Locations</p>
-                  <p className="text-gray-700">
+                  <p className="text-neutral-700 font-medium">Locations</p>
+                  <p className="text-neutral-700">
                     {franchise.data.locations.join(", ")}
                   </p>
                 </div>
@@ -306,26 +313,26 @@ export default function FranchiseDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Franchise Fee</span>
+                    <span className="text-neutral-700">Franchise Fee</span>
                     <span className="font-semibold">
                       {franchise.data.royaltyFee}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Starting Price</span>
+                    <span className="text-neutral-700">Starting Price</span>
                     <span className="font-semibold">
                       ${franchise.data.startingPrice.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Gross Profit</span>
+                    <span className="text-neutral-700">Gross Profit</span>
                     <span className="font-semibold">
                       ${franchise.data.minGrossProfit?.toLocaleString()} - $
                       {franchise.data.maxGrossProfit?.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Net Profit</span>
+                    <span className="text-neutral-700">Net Profit</span>
                     <span className="font-semibold">
                       ${franchise.data.minNetProfit?.toLocaleString()} - $
                       {franchise.data.maxNetProfit?.toLocaleString()}
@@ -334,7 +341,7 @@ export default function FranchiseDashboard() {
                 </div>
                 <div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 font-medium">
+                    <span className="text-neutral-700 font-medium">
                       Deposit Required
                     </span>
                     <span className="text-black">
@@ -342,7 +349,7 @@ export default function FranchiseDashboard() {
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 font-medium">
+                    <span className="text-neutral-700 font-medium">
                       License Duration
                     </span>
                     <span className="text-black">
@@ -370,9 +377,7 @@ export default function FranchiseDashboard() {
               <div className="space-y-4">
                 <div className="relative">
                   <img
-                    src={
-                      franchise.data.productGallery[currentImage] || NoPP
-                    }
+                    src={franchise.data.productGallery[currentImage] || NoPP}
                     alt={`Gallery image ${currentImage + 1}`}
                     className="w-full h-80 object-cover rounded-lg"
                   />
@@ -381,7 +386,7 @@ export default function FranchiseDashboard() {
                       variant="outline"
                       size="sm"
                       onClick={prevImage}
-                      className="bg-white/90 hover:bg-white"
+                      className="bg-background hover:bg-background/80"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
@@ -389,7 +394,7 @@ export default function FranchiseDashboard() {
                       variant="outline"
                       size="sm"
                       onClick={nextImage}
-                      className="bg-white/90 hover:bg-white"
+                      className="bg-background hover:bg-background/80"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>
@@ -412,9 +417,7 @@ export default function FranchiseDashboard() {
                         }`}
                       >
                         <img
-                          src={
-                            image || NoPP
-                          }
+                          src={image || NoPP}
                           alt={`Thumbnail ${index + 1}`}
                           className="w-full h-20 object-cover hover:scale-105 transition-transform"
                         />

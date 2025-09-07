@@ -15,7 +15,7 @@ interface FranchiseDetailsProps {
 
 export function FranchiseDetails({ franchise }: FranchiseDetailsProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 bg-secondary">
       {/* About */}
       <Card>
         <CardHeader>
@@ -26,7 +26,7 @@ export function FranchiseDetails({ franchise }: FranchiseDetailsProps) {
         </CardHeader>
         <CardContent>
           <div
-            className="text-gray-700 leading-relaxed"
+            className="text-neutral-700 leading-relaxed"
             style={{ whiteSpace: "pre-line" }}
           >
             <p
@@ -48,7 +48,7 @@ export function FranchiseDetails({ franchise }: FranchiseDetailsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-700 leading-relaxed">
+          <p className="text-neutral-700 leading-relaxed">
             {franchise.licenseDuration.Years} years
           </p>
         </CardContent>
@@ -65,21 +65,21 @@ export function FranchiseDetails({ franchise }: FranchiseDetailsProps) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">Franchise Fee</span>
+              <div className="flex justify-between items-center py-2 border-b border-neutral-500">
+                <span className="text-neutral-700">Franchise Fee</span>
                 <span className="font-semibold">
                   ${franchise.royaltyFee?.toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">Gross Profit</span>
+              <div className="flex justify-between items-center py-2 border-b border-neutral-500">
+                <span className="text-neutral-700">Gross Profit</span>
                 <span className="font-semibold">
                   ${franchise.minGrossProfit?.toLocaleString()} - $
                   {franchise.maxGrossProfit?.toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">Net Profit</span>
+              <div className="flex justify-between items-center py-2 border-b border-neutral-500">
+                <span className="text-neutral-700">Net Profit</span>
                 <span className="font-semibold">
                   ${franchise.minNetProfit?.toLocaleString()} - $
                   {franchise.maxNetProfit?.toLocaleString()}

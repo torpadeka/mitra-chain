@@ -210,7 +210,7 @@ export default function CreateEventPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Events
           </a>
-          <h1 className="text-3xl font-serif font-bold text-primary">
+          <h1 className="text-3xl font-sans font-bold text-primary">
             Create New Event
           </h1>
           <p className="text-secondary mt-2">
@@ -228,7 +228,7 @@ export default function CreateEventPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="title">Event Title *</Label>
                 <Input
                   id="title"
@@ -239,7 +239,7 @@ export default function CreateEventPage() {
                 />
               </div>
 
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="category">Category *</Label>
                 <Select
                   value={formData.category}
@@ -261,7 +261,7 @@ export default function CreateEventPage() {
                 </Select>
               </div>
 
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
@@ -276,7 +276,7 @@ export default function CreateEventPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label htmlFor="startTime">Start Date & Time *</Label>
                   <Input
                     id="startTime"
@@ -288,7 +288,7 @@ export default function CreateEventPage() {
                     required
                   />
                 </div>
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label htmlFor="endTime">End Date & Time *</Label>
                   <Input
                     id="endTime"
@@ -313,7 +313,7 @@ export default function CreateEventPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label>Event Type *</Label>
                 <RadioGroup
                   value={formData.locationType}
@@ -334,7 +334,7 @@ export default function CreateEventPage() {
               </div>
 
               {formData.locationType === "online" ? (
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label htmlFor="onlineUrl">Meeting URL *</Label>
                   <Input
                     id="onlineUrl"
@@ -348,7 +348,7 @@ export default function CreateEventPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <Label htmlFor="physicalAddress">Address *</Label>
                     <Input
                       id="physicalAddress"
@@ -360,7 +360,7 @@ export default function CreateEventPage() {
                       required
                     />
                   </div>
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <Label htmlFor="physicalCity">City *</Label>
                     <Input
                       id="physicalCity"
@@ -387,7 +387,7 @@ export default function CreateEventPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
+                <div className="flex flex-col gap-2">
                   <Label htmlFor="eventImage">Upload Event Banner</Label>
                   <Input
                     id="eventImage"
@@ -460,7 +460,7 @@ export default function CreateEventPage() {
               <CardTitle>Registration Settings</CardTitle>
             </CardHeader>
             <CardContent>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label>Registration Mode *</Label>
                 <RadioGroup
                   value={formData.registrationMode}

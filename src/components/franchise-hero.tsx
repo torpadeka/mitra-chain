@@ -28,6 +28,7 @@ import { useNavigate } from "react-router";
 import { principal } from "@ic-reactor/react/dist/utils";
 import { ChatHandler } from "@/handler/ChatHandler";
 import { Principal } from "@dfinity/principal";
+import { stringToPrincipal } from "@/lib/utils";
 
 interface FrontendFranchise {
   id: number;
@@ -66,13 +67,14 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
   const [coverLetter, setCoverLetter] = useState("");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const chatHandler = new ChatHandler(actor!);
   const handleApply = async () => {
     if (!user || !actor) {
       setError("You must be logged in to apply.");
       return;
     }
 
-    if (!("Franchisee" in user.role)) {
+    if (!("Franchisee" === user.role)) {
       setError("Only franchisees can apply for franchises.");
       return;
     }
@@ -93,10 +95,10 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
 
   const handleContact = async () => {
     if (!actor || !principal) return;
-    const chatHandler = new ChatHandler(actor);
     try {
-      const conversations =
-        await chatHandler.getAllConversationsByPrincipal(principal);
+      const conversations = await chatHandler.getAllConversationsByPrincipal(
+        stringToPrincipal(principal)
+      );
 
       let existingConversation = conversations.find((c: any) => {
         return c.participants.some((p: string) => p === franchise.owner);
@@ -108,12 +110,11 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
         conversationId = Number(existingConversation.conversationId);
       } else {
         conversationId = Number(
-          await actor.createConversation([
-            principal,
-            Principal.fromText(franchise.owner),
-          ])
+          await chatHandler.createConversation(franchise.owner)
         );
       }
+
+      console.log(conversationId);
 
       navigate(`/dashboard/franchisee/chat/${conversationId}`);
     } catch (err) {
@@ -122,7 +123,7 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
   };
 
   return (
-    <section className="bg-white border-b border-gray-200">
+    <section className="bg-background border-b border-brand-400 min-h-screen py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Content */}
@@ -160,30 +161,23 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
               )}
             </div>
 
-            <h1 className="font-serif font-bold text-4xl md:text-5xl text-gray-900 mb-4">
+            <h1 className="font-jetbrains-mono font-bold text-4xl md:text-5xl text-primary mb-4">
               {franchise.name}
             </h1>
 
             <div className="flex items-center gap-6 mb-6">
-              <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                <span className="font-semibold text-lg text-gray-900">4.8</span>
-                <span className="text-gray-600">
-                  ({franchise.reviewsCount} reviews)
-                </span>
-              </div>
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-neutral-700">
                 <MapPin className="w-4 h-4 mr-1" />
                 {franchise.locations.join(", ")}
               </div>
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-neutral-700">
                 <Calendar className="w-4 h-4 mr-1" />
                 {franchise.foundedIn.getFullYear()}
               </div>
             </div>
 
             <p
-              className="text-xl text-gray-700 mb-8 leading-relaxed"
+              className="text-lg text-neutral-700 mb-8 leading-relaxed"
               style={{ whiteSpace: "pre-line" }}
               dangerouslySetInnerHTML={{ __html: franchise.description }}
             >
@@ -191,9 +185,9 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
             </p>
 
             <div className="flex items-center gap-4 mb-8">
-              <div className="flex items-center text-gray-700">
-                <DollarSign className="w-5 h-5 mr-2 text-green-600" />
-                <span className="font-semibold">
+              <div className="flex items-center text-primary">
+                <DollarSign className="w-5 h-5 mr-2 text-brand-600" />
+                <span className="font-semibold text-xl">
                   From ${franchise.startingPrice.toLocaleString()}
                 </span>
               </div>
@@ -203,13 +197,15 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
               <Dialog open={isApplyOpen} onOpenChange={setIsApplyOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    className="btn-primary text-lg px-8 py-4"
+                    variant={"primary"}
+                    size={"lg"}
+                    className="shadow-brand-400"
                     onClick={() => {
                       if (!user) {
                         setError("You must be logged in to apply.");
                         return;
                       }
-                      if (!("Franchisee" in user.role)) {
+                      if (!("Franchisee" === user.role)) {
                         setError("Only franchisees can apply for franchises.");
                         return;
                       }
@@ -243,31 +239,15 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
                 </DialogContent>
               </Dialog>
 
-              {user?.role && "Franchisee" in user?.role && (
+              {user?.role && "Franchisee" === user?.role && (
                 <Button
-                  className="btn-secondary text-lg px-8 py-4"
+                  variant={"primary_outline"}
+                  size={"lg"}
                   onClick={handleContact}
                 >
                   Contact Franchisor
                 </Button>
               )}
-
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="px-4 bg-transparent"
-                >
-                  <Heart className="w-5 h-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="px-4 bg-transparent"
-                >
-                  <Share2 className="w-5 h-5" />
-                </Button>
-              </div>
             </div>
           </div>
 
@@ -276,7 +256,7 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
             <img
               src={franchise.coverImageUrl}
               alt={franchise.name}
-              className="w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-lg"
+              className="w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-lg shadow-neutral-200"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl" />
           </div>

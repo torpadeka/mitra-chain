@@ -45,7 +45,7 @@ interface ApplicationDetail {
 }
 
 export default function FranchiseeDashboard() {
-  const { actor, principal, loadFromSession } = useUser();
+  const { actor, user, principal, loadFromSession } = useUser();
   const [franchises, setFranchises] = useState<FrontendFranchise[]>([]);
   const [applications, setApplications] = useState<FrontendApplication[]>([]);
   const [pendingFranchises, setPendingFranchises] = useState<
@@ -173,7 +173,7 @@ export default function FranchiseeDashboard() {
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                Welcome back, Users!
+                Welcome back, {user?.name || "User"}
               </h1>
               <p className="text-muted-foreground">
                 Manage your franchises and stay connected with your franchisors.
@@ -246,10 +246,6 @@ export default function FranchiseeDashboard() {
                     <h2 className="text-xl font-semibold text-foreground">
                       Your Franchises
                     </h2>
-                    <Button className="bg-brand-600 hover:bg-brand-700">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Browse New Franchises
-                    </Button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

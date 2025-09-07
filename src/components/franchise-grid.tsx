@@ -87,7 +87,7 @@ export function FranchiseGrid({
             key={franchise.id}
             className={
               viewMode === "grid"
-                ? "group hover:shadow-lg transition-shadow"
+                ? "group hover:shadow-lg transition-shadow shadow-neutral-200"
                 : "group flex flex-col md:flex-row items-start hover:shadow-lg transition-shadow"
             }
           >
@@ -101,8 +101,8 @@ export function FranchiseGrid({
                 alt={franchise.name}
                 className={
                   viewMode === "grid"
-                    ? "w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    : "w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    ? "w-full h-48 object-cover"
+                    : "w-full h-48 md:h-full object-cover"
                 }
               />
               <div className="absolute top-3 left-3 flex gap-2">
@@ -136,30 +136,33 @@ export function FranchiseGrid({
             </div>
 
             <CardContent className={viewMode === "grid" ? "p-6" : "p-6 flex-1"}>
-              <h3 className="font-semibold text-lg">{franchise.name}</h3>
-              <p className="text-sm text-gray-500">{franchise.legalEntity}</p>
-
-              <p
-                className="text-sm text-gray-600 mt-2 line-clamp-2"
-                style={{ whiteSpace: "pre-line" }}
-              >
-                {franchise.description}
+              <h3 className="font-jetbrains-mono font-semibold text-2xl">
+                {franchise.name}
+              </h3>
+              <p className="text-sm text-neutral-600">
+                {franchise.legalEntity}
               </p>
 
-              <div className="text-sm text-gray-600 mt-3">
+              <div
+                className="text-sm text-neutral-700 mt-2 line-clamp-3"
+                dangerouslySetInnerHTML={{ __html: franchise.description }}
+                style={{ whiteSpace: "pre-line" }}
+              />
+
+              <div className="text-sm text-neutral-700 mt-3">
                 <MapPin className="w-4 h-4 inline mr-1" />
                 {franchise.locations.join(", ")}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-neutral-700">
                 <DollarSign className="w-4 h-4 inline mr-1" />$
                 {franchise.startingPrice.toLocaleString()}
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-neutral-700">
                 Founded: {new Date(franchise.foundedIn).getFullYear()} |
                 Outlets: {franchise.totalOutlets}
               </div>
 
-              <div className="mt-3 text-sm text-gray-600">
+              <div className="mt-3 text-sm text-neutral-700">
                 Reviews: {franchise.reviewsCount}
               </div>
 

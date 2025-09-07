@@ -94,14 +94,14 @@ export function FranchiseContact({ franchise }: FranchiseContactProps) {
         <CardContent>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Starting Price</span>
+              <span className="text-neutral-700">Starting Price</span>
               <span className="font-semibold">
                 ${franchise.startingPrice.toLocaleString()}
               </span>
             </div>
             {franchise.royaltyFee && (
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Franchise Fee</span>
+                <span className="text-neutral-700">Franchise Fee</span>
                 <span className="font-semibold">
                   ${franchise.royaltyFee.toLocaleString()}
                 </span>
@@ -120,25 +120,21 @@ export function FranchiseContact({ franchise }: FranchiseContactProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <Phone className="w-4 h-4 text-green-600" />
-              <span className="text-gray-700">
+              <span className="text-primary">
                 {franchise.contactNumber || "1-800-FRANCHISE"}
               </span>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="w-4 h-4 text-green-600" />
-              <span className="text-gray-700">
+              <span className="text-primary">
                 {franchise.contactEmail || "info@example.com"}
               </span>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="w-4 h-4 text-green-600" />
-              <span className="text-gray-700">
+              <span className="text-primary">
                 {franchise.locations?.join(", ") || "Available Nationwide"}
               </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Clock className="w-4 h-4 text-green-600" />
-              <span className="text-gray-700">Mon-Fri 9AM-6PM EST</span>
             </div>
           </div>
         </CardContent>

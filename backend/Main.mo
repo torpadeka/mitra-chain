@@ -15,6 +15,7 @@ import Array "mo:base/Array";
 import Hash "mo:base/Hash";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
+import Debug "mo:base/Debug";
 
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
@@ -77,6 +78,7 @@ persistent actor {
   };
 
   system func postupgrade() {
+    Debug.print("Starting postupgrade...");
     users := HashMap.fromIter<Principal, Types.User>(usersEntries.vals(), usersEntries.size(), Principal.equal, Principal.hash);
     franchises := HashMap.fromIter<Nat, Types.Franchise>(franchisesEntries.vals(), franchisesEntries.size(), Nat.equal, natHash);
     categories := HashMap.fromIter<Nat, Types.Category>(categoriesEntries.vals(), categoriesEntries.size(), Nat.equal, natHash);
@@ -96,7 +98,9 @@ persistent actor {
       franchisorComments.put(f, List.fromArray(innerArray));
     };
     // Seed categories if empty
+    Debug.print("Check category size: " # Nat.toText(categories.size()));
     if (categories.size() == 0) {
+      Debug.print("Seeding categories...");
       var id : Nat = nextCategoryId;
       categories.put(id, { id; name = "Barber & Salon"; description = "Offers hair cutting, styling, and other personal grooming services." });
       id += 1;
@@ -111,6 +115,7 @@ persistent actor {
       categories.put(id, { id; name = "Food (Express)"; description = "Refers to businesses providing fast food or quick-service meals for takeout or delivery." });
       nextCategoryId := id + 1;
     };
+    Debug.print("Postupgrade completed.");
   };
 
   // User functions

@@ -63,7 +63,7 @@ export default function FranchiseDetailsPage() {
       {!franchise.data ? (
         <div className="">Loading</div>
       ) : (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-secondary">
           {/* You may need to update FranchiseHero to accept new fields */}
           <FranchiseHero franchise={franchise.data} />
 
@@ -73,7 +73,7 @@ export default function FranchiseDetailsPage() {
               <div className="lg:col-span-2 space-y-8">
                 <FranchiseDetails franchise={franchise.data} />
                 <FranchiseGallery images={franchise.data.productGallery} />
-                <FranchiseReviews franchiseId={String(franchise.data.id)} />
+                {/* <FranchiseReviews franchiseId={String(franchise.data.id)} /> */}
               </div>
 
               {/* Sidebar */}
@@ -82,7 +82,7 @@ export default function FranchiseDetailsPage() {
               </div>
             </div>
 
-            <RelatedFranchises currentFranchiseId={String(franchise.data.id)} />
+            {/* <RelatedFranchises currentFranchiseId={String(franchise.data.id)} /> */}
           </div>
 
           <Footer />
