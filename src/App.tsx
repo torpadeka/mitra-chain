@@ -17,7 +17,7 @@ import EventsPage from "./pages/events/EventsPage";
 import CreateEventPage from "./pages/events/CreateEventPage";
 import EventDetailPage from "./pages/events/EventDetailPage";
 import { Toaster } from "sonner";
-import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import AdminDashboardPage from "./pages/dashboard/AdminDashboardPage";
 
 const App: React.FC = () => {
   const {
@@ -67,7 +67,7 @@ const App: React.FC = () => {
           <Route path="/franchises" element={<FranchisesPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/franchise/:id" element={<FranchiseDetailsPage />} />
-          <Route path="/dashboard/admin" element={<AdminDashboard />} />
+          <Route path="/dashboard/admin" element={<AdminDashboardPage />} />
           <Route
             path="/dashboard/franchisee"
             element={<FranchiseeDashboard />}

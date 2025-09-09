@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { IcrcLedgerCanister, IcrcTokenMetadata } from '@dfinity/ledger-icrc';
-import { HttpAgent, type Agent } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
-import { Signer } from '@slide-computer/signer';
-import { SignerAgent } from '@slide-computer/signer-agent';
-import { PostMessageTransport } from '@slide-computer/signer-web';
-import { AccountIdentifier } from '@dfinity/ledger-icp';
-import { decodeIcrcAccount, mapTokenMetadata } from '@dfinity/ledger-icrc';
-import { toBaseUnits } from '@/lib/utils';
-import { CKUSDC_LEDGER_ID, ICP_LEDGER_ID } from '@/lib/constants';
+import { useState, useEffect } from "react";
+import { IcrcLedgerCanister, IcrcTokenMetadata } from "@dfinity/ledger-icrc";
+import { HttpAgent, type Agent } from "@dfinity/agent";
+import { Principal } from "@dfinity/principal";
+import { Signer } from "@slide-computer/signer";
+import { SignerAgent } from "@slide-computer/signer-agent";
+import { PostMessageTransport } from "@slide-computer/signer-web";
+import { AccountIdentifier } from "@dfinity/ledger-icp";
+import { decodeIcrcAccount, mapTokenMetadata } from "@dfinity/ledger-icrc";
+import { toBaseUnits } from "@/lib/utils";
+import { CKUSDC_LEDGER_ID, ICP_LEDGER_ID } from "@/lib/constants";
 
 // Define interface for the hook's return value
 interface OisyWallet {
@@ -22,26 +22,52 @@ interface OisyWallet {
   ckUsdcBalance: bigint | null;
   icpMetadata: IcrcTokenMetadata | undefined;
   ckUsdcMetadata: IcrcTokenMetadata | undefined;
-  transferIcp: () => Promise<{ success: boolean; message: string; blockIndex?: bigint }>;
-  transferCkUsdc: () => Promise<{ success: boolean; message: string; blockIndex?: bigint }>;
+  transferIcp: (
+    ownerPrincipal: Principal,
+    amount: number
+  ) => Promise<{
+    success: boolean;
+    message: string;
+    blockIndex?: bigint;
+  }>;
+  transferCkUsdc: (
+    ownerPrincipal: Principal,
+    amount: number
+  ) => Promise<{
+    success: boolean;
+    message: string;
+    blockIndex?: bigint;
+  }>;
 }
 
 export function useOisyWallet(): OisyWallet {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [principal, setPrincipal] = useState<Principal | null>(null);
-  const [accountIdentifier, setAccountIdentifier] = useState<AccountIdentifier | null>(null);
+  const [accountIdentifier, setAccountIdentifier] =
+    useState<AccountIdentifier | null>(null);
   const [defaultAgent, setDefaultAgent] = useState<Agent | null>(null);
-  const [oisySignerAgent, setOisySignerAgent] = useState<SignerAgent | null>(null);
-  const [oisyIcpActor, setOisyIcpActor] = useState<IcrcLedgerCanister | null>(null);
-  const [oisyCkUsdcActor, setOisyCkUsdcActor] = useState<IcrcLedgerCanister | null>(null);
+  const [oisySignerAgent, setOisySignerAgent] = useState<SignerAgent | null>(
+    null
+  );
+  const [oisyIcpActor, setOisyIcpActor] = useState<IcrcLedgerCanister | null>(
+    null
+  );
+  const [oisyCkUsdcActor, setOisyCkUsdcActor] =
+    useState<IcrcLedgerCanister | null>(null);
 
-  const [icpMetadata, setIcpMetadata] = useState<IcrcTokenMetadata | undefined>(undefined);
-  const [ckUsdcMetadata, setCkUsdcMetadata] = useState<IcrcTokenMetadata | undefined>(undefined);
+  const [icpMetadata, setIcpMetadata] = useState<IcrcTokenMetadata | undefined>(
+    undefined
+  );
+  const [ckUsdcMetadata, setCkUsdcMetadata] = useState<
+    IcrcTokenMetadata | undefined
+  >(undefined);
   const [icpBalance, setIcpBalance] = useState<bigint | null>(null);
   const [ckUsdcBalance, setCkUsdcBalance] = useState<bigint | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const oisyTransport = new PostMessageTransport({ url: 'https://oisy.com/sign' });
+  const oisyTransport = new PostMessageTransport({
+    url: "https://oisy.com/sign",
+  });
   const oisySigner = new Signer({ transport: oisyTransport });
 
   useEffect(() => {
@@ -74,14 +100,24 @@ export function useOisyWallet(): OisyWallet {
           canisterId: Principal.fromText(CKUSDC_LEDGER_ID),
         });
 
-        setIcpMetadata(mapTokenMetadata(await defaultIcpLedgerAgent.metadata({ certified: true })));
-        setCkUsdcMetadata(
-          mapTokenMetadata(await defaultCkUsdcLedgerAgent.metadata({ certified: true }))
+        setIcpMetadata(
+          mapTokenMetadata(
+            await defaultIcpLedgerAgent.metadata({ certified: true })
+          )
         );
-        setIcpBalance(await defaultIcpLedgerAgent.balance({ owner: principal }));
-        setCkUsdcBalance(await defaultCkUsdcLedgerAgent.balance({ owner: principal }));
+        setCkUsdcMetadata(
+          mapTokenMetadata(
+            await defaultCkUsdcLedgerAgent.metadata({ certified: true })
+          )
+        );
+        setIcpBalance(
+          await defaultIcpLedgerAgent.balance({ owner: principal })
+        );
+        setCkUsdcBalance(
+          await defaultCkUsdcLedgerAgent.balance({ owner: principal })
+        );
       } catch (e: unknown) {
-        console.error('Failed to fetch balances', e);
+        console.error("Failed to fetch balances", e);
       } finally {
         setIsLoading(false);
       }
@@ -96,7 +132,7 @@ export function useOisyWallet(): OisyWallet {
     const principal = icrcAccount.owner;
     const accountIdentifier = AccountIdentifier.fromPrincipal({ principal });
 
-    const defaultAgent = await HttpAgent.create({ host: 'https://icp0.io' });
+    const defaultAgent = await HttpAgent.create({ host: "https://icp0.io" });
     const signerAgent = await SignerAgent.create({
       agent: defaultAgent,
       signer: oisySigner,
@@ -127,21 +163,23 @@ export function useOisyWallet(): OisyWallet {
 
   const transfer = async (
     ledger: IcrcLedgerCanister | null,
-    metadata: IcrcTokenMetadata | undefined
+    metadata: IcrcTokenMetadata | undefined,
+    ownerPrincipal: Principal,
+    amount: number
   ): Promise<{ success: boolean; message: string; blockIndex?: bigint }> => {
-    if (!ledger || !principal || !metadata) {
-      return { success: false, message: 'Missing transfer prerequisites.' };
+    if (!ledger || !ownerPrincipal || !metadata) {
+      return { success: false, message: "Missing transfer prerequisites." };
     }
 
     try {
       const blockIndex = await ledger.transfer({
-        to: { owner: principal, subaccount: [] },
-        amount: toBaseUnits(1, metadata.decimals),
+        to: { owner: ownerPrincipal, subaccount: [] },
+        amount: toBaseUnits(amount, metadata.decimals),
       });
 
-      return { success: true, message: 'Transfer successful.', blockIndex };
+      return { success: true, message: "Transfer successful.", blockIndex };
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Transfer failed.';
+      const message = err instanceof Error ? err.message : "Transfer failed.";
       return { success: false, message };
     }
   };
@@ -157,7 +195,9 @@ export function useOisyWallet(): OisyWallet {
     ckUsdcBalance,
     icpMetadata,
     ckUsdcMetadata,
-    transferIcp: () => transfer(oisyIcpActor, icpMetadata),
-    transferCkUsdc: () => transfer(oisyCkUsdcActor, ckUsdcMetadata),
+    transferIcp: (ownerPrincipal, amount) =>
+      transfer(oisyIcpActor, icpMetadata, ownerPrincipal, amount),
+    transferCkUsdc: (ownerPrincipal, amount) =>
+      transfer(oisyCkUsdcActor, ckUsdcMetadata, ownerPrincipal, amount),
   };
 }

@@ -90,11 +90,10 @@ export default function FranchiseeDashboard() {
         console.log("All Applications:", allApps);
 
         const approvedApps = allApps.filter(
-          (app) => app.status === "Approved" || app.status === "Completed"
+          (app) => app.status === "Completed"
         );
         const pendingApps = allApps.filter(
-          (app) =>
-            app.status === "Submitted" || app.status === "Pending Payment"
+          (app) => app.status === "Submitted" || app.status === "PendingPayment"
         );
         setApplications(approvedApps);
         setPendingApplications(pendingApps);

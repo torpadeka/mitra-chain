@@ -7,6 +7,7 @@ module {
       name = ?"MitraChain";
       description = ?"NFT License for Franchise";
       logo = ?"https://res.cloudinary.com/dqvlnzw9f/image/upload/v1757313932/logo_d0wvuj.png";
+      expires_at = null;
       supply_cap = null;
       allow_transfers = null;
       max_query_batch_size = ?100;

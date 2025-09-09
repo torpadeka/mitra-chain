@@ -21,6 +21,7 @@ import {
 import { useUser } from "@/context/AuthContext";
 import { EventHandler, FrontendEvent } from "@/handler/EventHandler";
 import { useNavigate, useParams } from "react-router";
+import { stringToPrincipal } from "@/lib/utils";
 
 type EventCategory =
   | "Expo"
@@ -86,7 +87,7 @@ export default function EventDetailPage() {
         if (user && user.principal) {
           const isUserRegistered = await eventHandler.isAttendee(
             eventId,
-            user.principal
+            stringToPrincipal(user.principal)
           );
           setIsRegistered(isUserRegistered);
         }
