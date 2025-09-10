@@ -122,6 +122,7 @@ export default function AdminDashboardPage() {
     try {
       const applicationHandler = new ApplicationHandler(actor);
       await applicationHandler.completeApplication(applicationId);
+      // BIKIN NFTTTTTTT
       setPendingNFTApplications((prev) =>
         prev.filter((detail) => detail.application.id !== applicationId)
       );

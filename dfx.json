@@ -8,6 +8,10 @@
         "node_compatibility": true
       }
     },
+    "icrc": {
+      "type": "motoko",
+      "main": "backend/ICRC.mo"
+    },
     "frontend": {
       "dependencies": ["backend"],
       "type": "assets",

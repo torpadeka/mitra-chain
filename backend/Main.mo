@@ -14,7 +14,6 @@ import Hash "mo:base/Hash";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
 import Debug "mo:base/Debug";
-import ICRC7 "mo:icrc7-mo";
 
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
@@ -30,7 +29,7 @@ persistent actor {
   var nextEventId : Nat = 0;
 
   // Stable storage arrays for upgrades
-   var usersEntries : [(Principal, Types.User)] = [];
+  var usersEntries : [(Principal, Types.User)] = [];
   var franchisesEntries : [(Nat, Types.Franchise)] = [];
   var categoriesEntries : [(Nat, Types.Category)] = [];
   var applicationsEntries : [(Nat, Types.Application)] = [];

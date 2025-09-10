@@ -5,6 +5,7 @@ import List "mo:base/List";
 import Float "mo:base/Float";
 import Time "mo:base/Time";
 import Blob "mo:base/Blob";
+import ICRC7 "mo:icrc7-mo";
 
 module {
   public type Role = {
@@ -104,13 +105,13 @@ module {
   public type NFTLicense = {
     tokenId : Nat;
     franchiseId : Nat;
-    owner : Account;
-    issuer : Account;
+    owner : ICRC7.Account;
+    issuer : ICRC7.Account;
     issueDate : Time.Time;
     expiryDate : ?Time.Time;
-    name : ?Text; // Added to store NFT name
-    description : ?Text; // Added to store NFT description
-    tokenUri : ?Text; // Added to store NFT token URI
+    name : ?Text;
+    description : ?Text;
+    tokenUri : ?Text;
   };
 
   public type Transaction = {

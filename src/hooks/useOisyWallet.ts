@@ -46,9 +46,7 @@ export function useOisyWallet(): OisyWallet {
   const [accountIdentifier, setAccountIdentifier] =
     useState<AccountIdentifier | null>(null);
   const [defaultAgent, setDefaultAgent] = useState<Agent | null>(null);
-  const [oisySignerAgent, setOisySignerAgent] = useState<SignerAgent | null>(
-    null
-  );
+  const [oisySignerAgent, setOisySignerAgent] = useState<Agent | null>(null);
   const [oisyIcpActor, setOisyIcpActor] = useState<IcrcLedgerCanister | null>(
     null
   );
@@ -140,7 +138,7 @@ export function useOisyWallet(): OisyWallet {
     });
 
     setDefaultAgent(defaultAgent);
-    setOisySignerAgent(signerAgent);
+    setOisySignerAgent(signerAgent as unknown as Agent);
     setPrincipal(principal);
     setAccountIdentifier(accountIdentifier);
     setIsConnected(true);
