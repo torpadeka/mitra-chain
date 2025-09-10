@@ -14,6 +14,9 @@ import Hash "mo:base/Hash";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
 import Debug "mo:base/Debug";
+import Int "mo:base/Int";
+import LLM "mo:llm";
+import ICRC7 "mo:icrc7-mo";
 
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
@@ -65,14 +68,24 @@ persistent actor {
     conversationsEntries := Iter.toArray(conversations.entries());
     messagesEntries := Iter.toArray(messages.entries());
     eventsEntries := Iter.toArray(events.entries());
-    franchisorRatingsEntries := Iter.toArray(Iter.map<(Principal, HashMap.HashMap<Principal, Nat>), (Principal, [(Principal, Nat)])>(franchisorRatings.entries(), func(tuple) {
-      let (f, r) = tuple;
-      (f, Iter.toArray(r.entries()))
-    }));
-    franchisorCommentsEntries := Iter.toArray(Iter.map<(Principal, List.List<Types.Comment>), (Principal, [Types.Comment])>(franchisorComments.entries(), func(tuple) {
-      let (f, c) = tuple;
-      (f, List.toArray(c))
-    }));
+    franchisorRatingsEntries := Iter.toArray(
+      Iter.map<(Principal, HashMap.HashMap<Principal, Nat>), (Principal, [(Principal, Nat)])>(
+        franchisorRatings.entries(),
+        func(tuple) {
+          let (f, r) = tuple;
+          (f, Iter.toArray(r.entries()));
+        },
+      )
+    );
+    franchisorCommentsEntries := Iter.toArray(
+      Iter.map<(Principal, List.List<Types.Comment>), (Principal, [Types.Comment])>(
+        franchisorComments.entries(),
+        func(tuple) {
+          let (f, c) = tuple;
+          (f, List.toArray(c));
+        },
+      )
+    );
   };
 
   system func postupgrade() {
@@ -177,12 +190,21 @@ persistent actor {
         let updatedUser : Types.User = {
           user with
           bio = switch (bio) { case null user.bio; case (?b) b };
-          profilePicUrl = switch (profilePicUrl) { case null user.profilePicUrl; case (?p) p };
+          profilePicUrl = switch (profilePicUrl) {
+            case null user.profilePicUrl;
+            case (?p) p;
+          };
           linkedin = switch (linkedin) { case null user.linkedin; case (?l) ?l };
-          instagram = switch (instagram) { case null user.instagram; case (?i) ?i };
+          instagram = switch (instagram) {
+            case null user.instagram;
+            case (?i) ?i;
+          };
           twitter = switch (twitter) { case null user.twitter; case (?t) ?t };
           address = switch (address) { case null user.address; case (?a) ?a };
-          phoneNumber = switch (phoneNumber) { case null user.phoneNumber; case (?ph) ?ph };
+          phoneNumber = switch (phoneNumber) {
+            case null user.phoneNumber;
+            case (?ph) ?ph;
+          };
         };
         users.put(caller, updatedUser);
         ?updatedUser;
@@ -206,7 +228,10 @@ persistent actor {
         let updatedUser : Types.User = {
           user with
           bio = switch (bio) { case null user.bio; case (?b) b };
-          profilePicUrl = switch (profilePicUrl) { case null user.profilePicUrl; case (?p) p };
+          profilePicUrl = switch (profilePicUrl) {
+            case null user.profilePicUrl;
+            case (?p) p;
+          };
         };
         users.put(caller, updatedUser);
         ?updatedUser;
@@ -872,5 +897,154 @@ persistent actor {
       case (?comments) List.toArray(comments);
       case null [];
     };
+  };
+
+  public func askAI(question : Text) : async Text {
+    let response = await LLM.prompt(#Llama3_1_8B, question);
+    response;
+  };
+
+  public func analyzeFranchise(userMessage : Text, franchise : Types.Franchise) : async Text {
+    // Serialize franchise data to Text for the tool
+    let franchiseText = serializeFranchise(franchise);
+
+    let response = await LLM.chat(#Llama3_1_8B).withMessages([
+      #system_ {
+        content = "You are a helpful assistant for analyzing franchise opportunities.";
+      },
+      #user {
+        content = userMessage # "\nFranchise data: " # franchiseText;
+      },
+    ]).withTools([
+      LLM.tool("analyze_franchise").withDescription("Analyze the score and potential of a franchise based on its attributes").withParameter(
+        LLM.parameter("franchise", #String).withDescription("Serialized franchise data as text").isRequired()
+      ).build()
+    ]).send();
+
+    switch (response.message.tool_calls.size()) {
+      case (0) {
+        switch (response.message.content) {
+          case (?content) { content };
+          case null { "No response received" };
+        };
+      };
+      case (_) {
+        var toolResults : [LLM.ChatMessage] = [];
+
+        for (toolCall in response.message.tool_calls.vals()) {
+          let result = switch (toolCall.function.name) {
+            case ("analyze_franchise") {
+              await analyzeFranchiseData(franchise);
+            };
+            case (_) {
+              "Unknown tool: " # toolCall.function.name;
+            };
+          };
+
+          toolResults := Array.append(
+            toolResults,
+            [
+              #tool {
+                content = result;
+                tool_call_id = toolCall.id;
+              }
+            ],
+          );
+        };
+
+        let finalResponse = await LLM.chat(#Llama3_1_8B).withMessages(
+          Array.append(
+            [
+              #system_ {
+                content = "You are a helpful assistant for analyzing franchise opportunities.";
+              },
+              #user {
+                content = userMessage # "\nFranchise data: " # franchiseText;
+              },
+              #assistant(response.message),
+            ],
+            toolResults,
+          )
+        ).send();
+
+        switch (finalResponse.message.content) {
+          case (?content) { content };
+          case null { "No final response received" };
+        };
+      };
+    };
+  };
+
+  private func serializeFranchise(franchise : Types.Franchise) : Text {
+    let categoryIdsText = Text.join(", ", List.toIter(List.map(franchise.categoryIds, Nat.toText)));
+    let productGalleryText = Text.join(", ", List.toIter(franchise.productGallery));
+    let locationsText = Text.join(", ", List.toIter(franchise.locations));
+    let profitSummary = switch (franchise.minNetProfit, franchise.maxNetProfit) {
+      case (?min, ?max) { Float.toText(min) # " - " # Float.toText(max) };
+      case _ { "unavailable" };
+    };
+    let licenseDurationText = switch (franchise.licenseDuration) {
+      case (#OneTime) { "OneTime" };
+      case (#Years n) { Nat.toText(n) # " years" };
+    };
+    "ID: " # Nat.toText(franchise.id) # ", " #
+    "Owner: " # Principal.toText(franchise.owner) # ", " #
+    "Name: " # franchise.name # ", " #
+    "Categories: [" # categoryIdsText # "], " #
+    "Description: " # franchise.description # ", " #
+    "Starting Price: $" # Float.toText(franchise.startingPrice) # ", " #
+    "Founded: " # Nat.toText(timeToYear(franchise.foundedIn)) # ", " #
+    "Outlets: " # Nat.toText(franchise.totalOutlets) # ", " #
+    "Legal Entity: " # franchise.legalEntity # ", " #
+    "Net Profit: " # profitSummary # ", " #
+    "Deposit Required: " # (if (franchise.isDepositRequired) "Yes" else "No") # ", " #
+    "Royalty Fee: " # (switch (franchise.royaltyFee) { case (?fee) fee; case null "None" }) # ", " #
+    "License Duration: " # licenseDurationText # ", " #
+    "Cover Image: " # franchise.coverImageUrl # ", " #
+    "Gallery: [" # productGalleryText # "], " #
+    "Contact Number: " # (switch (franchise.contactNumber) { case (?num) num; case null "None" }) # ", " #
+    "Contact Email: " # (switch (franchise.contactEmail) { case (?email) email; case null "None" }) # ", " #
+    "Locations: [" # locationsText # "], " #
+    "Status: " # (switch (franchise.status) { case (#Active) "Active"; case (#Inactive) "Inactive" }) # ", " #
+    "Verified: " # (if (franchise.isVerified) "Yes" else "No") # ", " #
+    "Reviews: " # Nat.toText(franchise.reviewsCount);
+  };
+
+  private func timeToYear(time : Time.Time) : Nat {
+    let nanosPerYear : Int = 365 * 24 * 60 * 60 * 1_000_000_000;
+    let year : Int = time / nanosPerYear + 1970;
+    Int.abs(year);
+  };
+
+  private func analyzeFranchiseData(franchise : Types.Franchise) : async Text {
+    let nanosPerYear : Int = 365 * 24 * 60 * 60 * 1_000_000_000;
+    let currentYear : Int = Time.now() / nanosPerYear + 1970;
+    let foundedYear : Int = franchise.foundedIn / nanosPerYear + 1970;
+    let yearsInOperation : Nat = if (currentYear >= foundedYear) {
+      Int.abs(currentYear - foundedYear);
+    } else {
+      0;
+    };
+
+    let profitSummary = switch (franchise.minNetProfit, franchise.maxNetProfit) {
+      case (?min, ?max) {
+        "Net profit range: $" # Float.toText(min) # " - $" # Float.toText(max);
+      };
+      case _ { "Profit data unavailable" };
+    };
+
+    let licenseDurationText = switch (franchise.licenseDuration) {
+      case (#OneTime) { "One-time license" };
+      case (#Years n) { Nat.toText(n) # " years" };
+    };
+
+    "Analysis of " # franchise.name # ":\n" #
+    "- Years in operation: " # Nat.toText(yearsInOperation) # "\n" #
+    "- Total outlets: " # Nat.toText(franchise.totalOutlets) # "\n" #
+    "- Starting price: $" # Float.toText(franchise.startingPrice) # "\n" #
+    "- " # profitSummary # "\n" #
+    "- Status: " # (switch (franchise.status) { case (#Active) "Active"; case (#Inactive) "Inactive" }) # "\n" #
+    "- Verified: " # (if (franchise.isVerified) "Yes" else "No") # "\n" #
+    "This franchise appears " # (if (franchise.isVerified and franchise.status == #Active) "promising" else "risky") # ".";
   };
 };
