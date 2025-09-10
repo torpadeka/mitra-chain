@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import NoPP from "../assets/no_pp.webp";
-import { useOisyWallet } from "@/hooks/useOisyWallet";
 import { useTheme } from "@/hooks/useTheme";
 
 export function Navigation() {
@@ -20,7 +19,6 @@ export function Navigation() {
   const { user, login, isAuthenticated, isInitializing, principal, logout } =
     useUser();
   const navigate = useNavigate();
-  const { connect, disconnect, isConnected } = useOisyWallet();
   const { theme, toggleTheme } = useTheme();
 
   // Determine dashboard path based on user role
@@ -183,17 +181,6 @@ export function Navigation() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-
-                <Button
-                  className={`font-medium px-4 py-2.5 rounded-lg transition-all duration-300 ${
-                    isConnected
-                      ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-brand-600 hover:bg-brand-700 text-white"
-                  }`}
-                  onClick={isConnected ? disconnect : connect}
-                >
-                  {isConnected ? "Disconnect OISY" : "Connect OISY"}
-                </Button>
               </div>
             )}
           </div>
@@ -302,20 +289,6 @@ export function Navigation() {
                         Dashboard
                       </Button>
                     )}
-
-                    <Button
-                      className={`w-full font-medium py-3 rounded-lg transition-all duration-300 ${
-                        isConnected
-                          ? "bg-red-600 hover:bg-red-700 text-white"
-                          : "bg-brand-600 hover:bg-brand-700 text-white"
-                      }`}
-                      onClick={() => {
-                        isConnected ? disconnect() : connect();
-                        setIsMenuOpen(false);
-                      }}
-                    >
-                      {isConnected ? "Disconnect OISY" : "Connect OISY"}
-                    </Button>
 
                     <Button
                       className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 py-3"

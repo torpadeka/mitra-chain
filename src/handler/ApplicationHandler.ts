@@ -11,13 +11,18 @@ export interface FrontendApplication {
   id: number;
   franchiseId: number;
   applicantPrincipal: string;
-  status: "Submitted" | "InReview" | "Approved" | "Rejected" | "Pending Payment" | "Completed";
+  status:
+    | "Submitted"
+    | "PendingPayment"
+    | "Rejected"
+    | "PendingNFT"
+    | "Completed";
   coverLetter: string;
   createdAt: Date;
   updatedAt: Date;
   rejectionReason?: string;
   price: number;
-  completedAt?: Date; 
+  completedAt?: Date;
 }
 
 export class ApplicationHandler {
@@ -33,10 +38,9 @@ export class ApplicationHandler {
       FrontendApplication["status"]
     > = {
       Submitted: "Submitted",
-      InReview: "InReview",
-      Approved: "Approved",
+      PendingPayment: "PendingPayment",
       Rejected: "Rejected",
-      PendingPayment: "Pending Payment",
+      PendingNFT: "PendingNFT",
       Completed: "Completed",
     };
     return {
@@ -79,10 +83,6 @@ export class ApplicationHandler {
     const result = await this.actor.getApplicationsByOwner(principal);
     return result.map(this.mapApplication);
   }
-  
-  async payApplication(id: number){
-    const result = await this.actor.payApplication(BigInt(id));
-  }
 
   async getApplicationsByApplicant(
     applicant: string
@@ -92,9 +92,24 @@ export class ApplicationHandler {
     return result.map(this.mapApplication);
   }
 
-  async approveApplication(applicationId: number, price: number): Promise<number> {
-    const result = await this.actor.approveApplication(BigInt(applicationId), BigInt(price));
-    return Number(result);
+  async approveApplication(
+    applicationId: number,
+    price: number
+  ): Promise<void> {
+    await this.actor.approveApplication(BigInt(applicationId), BigInt(price));
+  }
+
+  async payApplication(applicationId: number): Promise<void> {
+    await this.actor.payApplication(BigInt(applicationId));
+  }
+
+  async completeApplication(applicationId: number): Promise<void> {
+    await this.actor.completeApplication(BigInt(applicationId));
+  }
+
+  async listPendingNFTApplications(): Promise<FrontendApplication[]> {
+    const result = await this.actor.listPendingNFTApplications();
+    return result.map(this.mapApplication);
   }
 
   async rejectApplication(

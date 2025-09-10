@@ -5,8 +5,6 @@ import Nat "mo:base/Nat";
 import Time "mo:base/Time";
 import List "mo:base/List";
 import Iter "mo:base/Iter";
-import Option "mo:base/Option";
-import Blob "mo:base/Blob";
 import Bool "mo:base/Bool";
 import Error "mo:base/Error";
 import Text "mo:base/Text";
@@ -18,6 +16,7 @@ import Result "mo:base/Result";
 import Debug "mo:base/Debug";
 import Int "mo:base/Int";
 import LLM "mo:llm";
+import ICRC7 "mo:icrc7-mo";
 
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
@@ -111,22 +110,20 @@ persistent actor {
     };
     // Seed categories if empty
     Debug.print("Check category size: " # Nat.toText(categories.size()));
-    if (categories.size() == 0) {
-      Debug.print("Seeding categories...");
-      var id : Nat = nextCategoryId;
-      categories.put(id, { id; name = "Barber & Salon"; description = "Offers hair cutting, styling, and other personal grooming services." });
-      id += 1;
-      categories.put(id, { id; name = "Beverage"; description = "Includes places that sell drinks, like coffee shops, juice bars, or bubble tea stores." });
-      id += 1;
-      categories.put(id, { id; name = "Expedition & Delivery"; description = "Covers courier and logistics services for shipping packages and goods." });
-      id += 1;
-      categories.put(id, { id; name = "Entertainment"; description = "Features venues and services for leisure activities, such as movie theaters, arcades, or event organizers." });
-      id += 1;
-      categories.put(id, { id; name = "Restaurant"; description = "Describes establishments that serve meals, from casual diners to fine dining." });
-      id += 1;
-      categories.put(id, { id; name = "Food (Express)"; description = "Refers to businesses providing fast food or quick-service meals for takeout or delivery." });
-      nextCategoryId := id + 1;
-    };
+    Debug.print("Seeding categories...");
+    var id : Nat = nextCategoryId;
+    categories.put(id, { id; name = "Barber & Salon"; description = "Offers hair cutting, styling, and other personal grooming services." });
+    id += 1;
+    categories.put(id, { id; name = "Beverage"; description = "Includes places that sell drinks, like coffee shops, juice bars, or bubble tea stores." });
+    id += 1;
+    categories.put(id, { id; name = "Expedition & Delivery"; description = "Covers courier and logistics services for shipping packages and goods." });
+    id += 1;
+    categories.put(id, { id; name = "Entertainment"; description = "Features venues and services for leisure activities, such as movie theaters, arcades, or event organizers." });
+    id += 1;
+    categories.put(id, { id; name = "Restaurant"; description = "Describes establishments that serve meals, from casual diners to fine dining." });
+    id += 1;
+    categories.put(id, { id; name = "Food (Express)"; description = "Refers to businesses providing fast food or quick-service meals for takeout or delivery." });
+    nextCategoryId := id + 1;
     Debug.print("Postupgrade completed.");
   };
 
@@ -251,6 +248,15 @@ persistent actor {
 
   public query (message) func whoami() : async Principal {
     message.caller;
+  };
+
+  public query (msg) func listUsers() : async [Types.User] {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    if (user.role != #Admin) {
+      throw Error.reject("Only admins can list all users");
+    };
+    Iter.toArray(users.vals());
   };
 
   // Franchise functions (only franchisors can create)
@@ -414,8 +420,7 @@ persistent actor {
     Iter.toArray(categories.vals());
   };
 
-  public shared (msg) func createCategory(name : Text, description : Text) : async Nat {
-    let caller = msg.caller;
+  public shared func createCategory(name : Text, description : Text) : async Nat {
     // let ?user = users.get(caller) else throw Error.reject("User not registered");
     // if (user.role != #Admin) {
     //   throw Error.reject("Only admins can create categories");
@@ -464,8 +469,8 @@ persistent actor {
       createdAt = Time.now();
       updatedAt = Time.now();
       rejectionReason = null;
-      completedAt = null;
       price = 0;
+      completedAt = null;
     };
 
     applications.put(id, application);
@@ -538,11 +543,37 @@ persistent actor {
     let ?franchise = franchises.get(app.franchiseId) else throw Error.reject("Franchise not found");
     if (app.status != #PendingPayment) { throw Error.reject("Invalid status") };
     let updatedApp = {
+      app with status = #PendingNFT;
+      updatedAt = Time.now();
+    };
+    applications.put(applicationId, updatedApp);
+  };
+
+  public shared (msg) func completeApplication(applicationId : Nat) : async () {
+    let caller = msg.caller;
+    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    if (user.role != #Admin) {
+      throw Error.reject("Only admins can complete applications");
+    };
+    let ?app = applications.get(applicationId) else throw Error.reject("Application not found");
+    let ?franchise = franchises.get(app.franchiseId) else throw Error.reject("Franchise not found");
+    if (app.status != #PendingNFT) { throw Error.reject("Invalid status") };
+    let updatedApp = {
       app with status = #Completed;
       completedAt = ?Time.now();
       updatedAt = Time.now();
     };
     applications.put(applicationId, updatedApp);
+  };
+
+  public query func listPendingNFTApplications() : async [Types.Application] {
+    let results = Buffer.Buffer<Types.Application>(0);
+    for (application in applications.vals()) {
+      if (application.status == #PendingNFT) {
+        results.add(application);
+      };
+    };
+    Buffer.toArray(results);
   };
 
   public shared (msg) func rejectApplication(applicationId : Nat, reason : Text) : async Bool {
@@ -573,7 +604,7 @@ persistent actor {
   // Chat functions
   public shared (msg) func createConversation(participants : [Principal]) : async Nat {
     let caller = msg.caller;
-    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    let ?_ = users.get(caller) else throw Error.reject("User not registered");
 
     // Ensure exactly two participants
     if (participants.size() != 2) {
@@ -621,7 +652,7 @@ persistent actor {
 
   public shared (msg) func sendMessage(conversationId : Nat, recipientPrincipal : Principal, text : Text) : async Nat {
     let caller = msg.caller;
-    let ?user = users.get(caller) else throw Error.reject("User not registered");
+    let ?_ = users.get(caller) else throw Error.reject("User not registered");
     let ?conversation = conversations.get(conversationId) else throw Error.reject("Conversation not found");
 
     // Verify sender and recipient are in the conversation
@@ -700,7 +731,7 @@ persistent actor {
 
   public shared (msg) func registerInEvents(eventId : Nat) : async Bool {
     let caller = msg.caller;
-    let ?user = users.get(caller) else return false;
+    let ?_ = users.get(caller) else return false;
     let ?event = events.get(eventId) else return false;
 
     // Check if user is already registered

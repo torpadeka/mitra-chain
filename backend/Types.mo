@@ -5,7 +5,6 @@ import List "mo:base/List";
 import Float "mo:base/Float";
 import Time "mo:base/Time";
 import Blob "mo:base/Blob";
-import Nat64 "mo:base/Nat64";
 
 module {
   public type Role = {
@@ -15,12 +14,11 @@ module {
   };
 
   public type ApplicationStatus = {
-    #Submitted;
-    #InReview;
-    #PendingPayment;
-    #Approved;
-    #Rejected;
-    #Completed;
+    #Submitted; // Franchisee mengirim aplikasi ke franchisor, menunggu approve atau reject
+    #PendingPayment; // Aplikasi disetujui franchisor, franchisee bisa membayar
+    #Rejected; // Aplikasi ditolak
+    #PendingNFT; // Pembayaran selesai, menunggu NFT dibuat oleh admin
+    #Completed; // NFT sudah diterima oleh franchisee
   };
 
   public type LicenseDuration = {
@@ -110,8 +108,9 @@ module {
     issuer : Account;
     issueDate : Time.Time;
     expiryDate : ?Time.Time;
-    metadata : [MetadataEntry];
-    transferHistory : List.List<{ from : Account; to : Account; timestamp : Time.Time }>;
+    name : ?Text; // Added to store NFT name
+    description : ?Text; // Added to store NFT description
+    tokenUri : ?Text; // Added to store NFT token URI
   };
 
   public type Transaction = {

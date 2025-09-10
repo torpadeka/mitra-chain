@@ -1,8 +1,6 @@
 import { ActorSubclass } from "@dfinity/agent";
 import { _SERVICE, Franchise } from "@/declarations/backend/backend.did";
 import {
-  List,
-  List_1,
   listToArray,
   optionalToUndefined,
   principalToString,
