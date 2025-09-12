@@ -24,7 +24,6 @@ import {
   Upload,
   Loader2,
 } from "lucide-react";
-import { useOisyWallet } from "@/hooks/useOisyWallet";
 
 export default function ProfilePage() {
   const {
