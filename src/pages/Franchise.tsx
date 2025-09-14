@@ -24,6 +24,7 @@ import FloatingActionButton from "@/components/analyse-franchise";
 
 export default function FranchiseDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  console.log("Franchise ID from params:", id);
 
   const { actor, principal } = useUser();
   const [franchise, setFranchise] = useState<FranchiseResult>({
@@ -40,6 +41,7 @@ export default function FranchiseDetailsPage() {
     }
 
     const fetchFranchise = async () => {
+      console.log("Fetching franchise with ID:", id);
       setFranchise((prev) => ({ ...prev, loading: true }));
       try {
         const franchiseHandler = new FranchiseHandler(actor);

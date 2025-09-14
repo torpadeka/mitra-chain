@@ -33,11 +33,12 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const restoreUser = async () => {
+      console.log(principal);
       if (!user && actor && principal) {
         try {
           const fetchedUser = await getUser(principal);
           console.log("Restored user:", fetchedUser);
-          // console.log(actor);
+          console.log(actor);
           if (fetchedUser) {
             setUser(fetchedUser);
             saveToSession(fetchedUser, true, principal.toString());

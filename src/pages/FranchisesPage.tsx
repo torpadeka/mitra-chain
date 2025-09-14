@@ -11,6 +11,8 @@ import { FranchiseSearch } from "@/components/franchise-search";
 import { FranchiseGrid } from "@/components/franchise-grid";
 import { CategoryHandler } from "@/handler/CategoryHandler";
 import { useSearchParams } from "react-router";
+import { Principal } from "@dfinity/principal";
+import { stringToPrincipal } from "@/lib/utils";
 
 export default function FranchisesPage() {
   // State from FranchiseSearch
@@ -38,35 +40,57 @@ export default function FranchisesPage() {
     { id: string; label: string; count: number }[]
   >([]);
 
-  const { actor, principal } = useUser();
+  const { actor, principal, loadFromSession } = useUser();
 
-  const franchiseHandler = useMemo(
-    () => (actor ? new FranchiseHandler(actor) : null),
-    [actor]
-  );
-
+  // const franchiseHandler = useMemo(
+  //   () => (actor ? new FranchiseHandler(actor) : null),
+  //   [actor]
+  // );
   // Fetch franchises
   useEffect(() => {
-    let isMounted = true;
-    async function fetchFranchises() {
-      if (!franchiseHandler) {
-        setFranchises([]);
-        return;
-      }
+    if (!actor || !principal) {
+      setFranchises([]);
+      return;
+    }
+    const fetchFranchises = async () => {
       try {
+        const franchiseHandler = new FranchiseHandler(actor);
         const result = await franchiseHandler.listFranchises();
         console.log("Fetched franchises:", result);
-        if (isMounted) setFranchises(result || []);
+        setFranchises(result || []);
       } catch (err) {
         console.error("Failed to fetch franchises:", err);
+        setFranchises([]);
       }
-    }
-    console.log(actor);
-    fetchFranchises();
-    return () => {
-      isMounted = false;
     };
-  }, [franchiseHandler]);
+    fetchFranchises();
+  }, [actor, principal]);
+
+  useEffect(() => {
+    if (!actor) return;
+
+    const fetchIndustries = async () => {
+      try {
+        const categoryHandler = new CategoryHandler(actor);
+        const categories = await categoryHandler.listCategories();
+
+        // Map backend categories into industries format
+        const mapped = categories.map((category: any) => ({
+          id: `category-${category.id}`,
+          label: category.name,
+          count: Math.floor(Math.random() * 100) + 1,
+        }));
+
+        console.log("Fetched categories:", categories);
+
+        setIndustries(mapped);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+
+    fetchIndustries();
+  }, [actor, principal, franchises]);
 
   // Filter and sort franchises
   const filteredFranchises = useMemo(() => {
@@ -135,30 +159,6 @@ export default function FranchisesPage() {
     selectedLocations,
     sortBy,
   ]);
-
-  useEffect(() => {
-    if (!actor) return;
-    const categoryHandler = new CategoryHandler(actor);
-
-    async function fetchIndustries() {
-      try {
-        const categories = await categoryHandler.listCategories();
-
-        // Map backend categories into industries format
-        const mapped = categories.map((category: any) => ({
-          id: `category-${category.id}`,
-          label: category.name,
-          count: Math.floor(Math.random() * 100) + 1,
-        }));
-
-        setIndustries(mapped);
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      }
-    }
-
-    fetchIndustries();
-  }, [actor, franchises]);
 
   return (
     <div className="w-full min-h-screen p-10 bg-background">

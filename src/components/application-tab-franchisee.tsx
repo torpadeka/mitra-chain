@@ -38,7 +38,7 @@ import { ChatHandler } from "@/handler/ChatHandler";
 import { Principal } from "@dfinity/principal";
 import { useNavigate } from "react-router";
 import { stringToPrincipal } from "@/lib/utils";
-import PaymentModal from "./payment-modal";
+// import PaymentModal from "./payment-modal";
 
 interface ApplicationDetail {
   franchise: FrontendFranchise;
@@ -294,22 +294,22 @@ export function ApplicationsTab({
                   <MessageSquare className="w-4 h-4 mr-1" />
                   Contact
                 </Button>
-                {detail.application.status === "PendingPayment" && (
-                  // <Button
-                  //   variant="outline"
-                  //   size="sm"
-                  //   className="hover:cursor-pointer"
-                  //   onClick={() => handlePay(detail.application.id)}
-                  // >
-                  //   <Coins className="w-4 h-4 mr-1" />
-                  //   Pay
-                  // </Button>
+                {/* {detail.application.status === "PendingPayment" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hover:cursor-pointer"
+                    onClick={() => handlePay(detail.application.id)}
+                  >
+                    <Coins className="w-4 h-4 mr-1" />
+                    Pay
+                  </Button>
                   <PaymentModal
                     ownerPrincipal={detail.franchise.owner}
                     amount={detail.application.price}
                     id={detail.application.id}
                   />
-                )}
+                )} */}
               </div>
             </div>
           ))}
