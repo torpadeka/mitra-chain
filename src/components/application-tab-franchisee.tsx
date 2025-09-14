@@ -32,13 +32,11 @@ import {
   MessageSquare,
   Coins,
 } from "lucide-react";
-import { TabsContent } from "./ui/tabs";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ChatHandler } from "@/handler/ChatHandler";
 import { Principal } from "@dfinity/principal";
 import { useNavigate } from "react-router";
 import { stringToPrincipal } from "@/lib/utils";
-import PaymentModal from "./payment-modal";
 
 interface ApplicationDetail {
   franchise: FrontendFranchise;
@@ -295,20 +293,16 @@ export function ApplicationsTab({
                   Contact
                 </Button>
                 {detail.application.status === "PendingPayment" && (
-                  // <Button
-                  //   variant="outline"
-                  //   size="sm"
-                  //   className="hover:cursor-pointer"
-                  //   onClick={() => handlePay(detail.application.id)}
-                  // >
-                  //   <Coins className="w-4 h-4 mr-1" />
-                  //   Pay
-                  // </Button>
-                  <PaymentModal
-                    ownerPrincipal={detail.franchise.owner}
-                    amount={detail.application.price}
-                    id={detail.application.id}
-                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hover:cursor-pointer"
+                    onClick={() => {}}
+                  >
+                    <Coins className="w-4 h-4 mr-1" />
+                    Pay
+                  </Button>
+                  // TODO: PAYMENT MODAL DI SINI
                 )}
               </div>
             </div>

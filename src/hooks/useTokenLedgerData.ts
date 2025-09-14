@@ -1,8 +1,12 @@
-import { useState } from 'react';
-import { Principal } from '@dfinity/principal';
-import { IcrcLedgerCanister, IcrcTokenMetadata, mapTokenMetadata } from '@dfinity/ledger-icrc';
-import { type Agent } from '@dfinity/agent';
-import { CKUSDC_LEDGER_ID, ICP_LEDGER_ID } from '@/lib/constants';
+import { useState } from "react";
+import { Principal } from "@dfinity/principal";
+import {
+  IcrcLedgerCanister,
+  IcrcTokenMetadata,
+  mapTokenMetadata,
+} from "@dfinity/ledger-icrc";
+import { type Agent } from "@dfinity/agent";
+import { CKUSDC_LEDGER_ID, ICP_LEDGER_ID } from "@/lib/constants";
 
 // Define interface for the hook's return value
 interface TokenLedgerData {
@@ -17,8 +21,12 @@ interface TokenLedgerData {
 export function useTokenLedgerData(): TokenLedgerData {
   const [icpBalance, setIcpBalance] = useState<bigint | null>(null);
   const [ckUsdcBalance, setCkUsdcBalance] = useState<bigint | null>(null);
-  const [icpMetadata, setIcpMetadata] = useState<IcrcTokenMetadata | undefined>(undefined);
-  const [ckUsdcMetadata, setCkUsdcMetadata] = useState<IcrcTokenMetadata | undefined>(undefined);
+  const [icpMetadata, setIcpMetadata] = useState<IcrcTokenMetadata | undefined>(
+    undefined
+  );
+  const [ckUsdcMetadata, setCkUsdcMetadata] = useState<
+    IcrcTokenMetadata | undefined
+  >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const load = async (principal: Principal, agent: Agent): Promise<void> => {
@@ -47,7 +55,7 @@ export function useTokenLedgerData(): TokenLedgerData {
       setIcpBalance(icpBal);
       setCkUsdcBalance(usdcBal);
     } catch (err: unknown) {
-      console.error('Error loading token metadata/balance:', err);
+      console.error("Error loading token metadata/balance:", err);
     } finally {
       setIsLoading(false);
     }
