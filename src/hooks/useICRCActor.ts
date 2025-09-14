@@ -1,56 +1,56 @@
-// import { useInternetIdentity } from "ic-use-internet-identity";
-// import { useQuery, useQueryClient } from "@tanstack/react-query";
-// import { useEffect } from "react";
-// import { canisterId, createActor } from "@/declarations/icrc";
+import { useInternetIdentity } from "ic-use-internet-identity";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { canisterId, createActor } from "@/declarations/icrc";
 
-// const ACTOR_QUERY_KEY = "actor";
-// export function useActor() {
-//   const { identity } = useInternetIdentity();
-//   const queryClient = useQueryClient();
+const ACTOR_QUERY_KEY = "actor";
+export function useActor() {
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
 
-//   const actorQuery = useQuery({
-//     queryKey: [
-//       ACTOR_QUERY_KEY,
-//       identity?.getPrincipal().toString() || "anonymous",
-//     ],
-//     queryFn: async () => {
-//       if (!canisterId) {
-//         throw new Error("Canister ID not available");
-//       }
+  const actorQuery = useQuery({
+    queryKey: [
+      ACTOR_QUERY_KEY,
+      identity?.getPrincipal().toString() || "anonymous",
+    ],
+    queryFn: async () => {
+      if (!canisterId) {
+        throw new Error("Canister ID not available");
+      }
 
-//       if (!identity) {
-//         // Create anonymous actor
-//         return createActor(canisterId);
-//       }
+      if (!identity) {
+        // Create anonymous actor
+        return createActor(canisterId);
+      }
 
-//       // Create authenticated actor
-//       return createActor(canisterId, {
-//         agentOptions: {
-//           identity,
-//         },
-//       });
-//     },
-//     staleTime: Infinity,
-//     enabled: true,
-//     retry: (failureCount, error) => {
-//       console.error("Actor creation failed:", error);
-//       return failureCount < 2; // Retry up to 2 times
-//     },
-//   });
+      // Create authenticated actor
+      return createActor(canisterId, {
+        agentOptions: {
+          identity,
+        },
+      });
+    },
+    staleTime: Infinity,
+    enabled: true,
+    retry: (failureCount, error) => {
+      console.error("Actor creation failed:", error);
+      return failureCount < 2; // Retry up to 2 times
+    },
+  });
 
-//   // Clear all dependent queries when identity changes
-//   useEffect(() => {
-//     queryClient.invalidateQueries({
-//       predicate: (query) => {
-//         return !query.queryKey.includes(ACTOR_QUERY_KEY);
-//       },
-//     });
-//   }, [identity?.getPrincipal().toString(), queryClient]);
+  // Clear all dependent queries when identity changes
+  useEffect(() => {
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        return !query.queryKey.includes(ACTOR_QUERY_KEY);
+      },
+    });
+  }, [identity?.getPrincipal().toString(), queryClient]);
 
-//   return {
-//     actor: actorQuery.data || null,
-//     isFetching: actorQuery.isFetching,
-//     isError: actorQuery.isError,
-//     error: actorQuery.error,
-//   };
-// }
+  return {
+    actor: actorQuery.data || null,
+    isFetching: actorQuery.isFetching,
+    isError: actorQuery.isError,
+    error: actorQuery.error,
+  };
+}

@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, CheckCircle } from "lucide-react";
+import { Users, FileText, CheckCircle, Crown } from "lucide-react";
 import { useUser } from "@/context/AuthContext";
 import { UserHandler, FrontendUser } from "@/handler/UserHandler";
 import {
@@ -27,6 +27,16 @@ import {
   FranchiseHandler,
   FrontendFranchise,
 } from "@/handler/FranchiseHandler";
+import {
+  SetNFTResult,
+  useClaimCollection,
+  useCollectionOwner,
+  useCollectionStatus,
+  useMintNFT,
+  useTransferNFT,
+} from "@/hooks/useICRCQueries";
+import { useInternetIdentity } from "ic-use-internet-identity";
+import { stringToPrincipal } from "@/lib/utils";
 
 interface ApplicationDetails {
   application: FrontendApplication;
@@ -40,7 +50,20 @@ export default function AdminDashboardPage() {
   const [pendingNFTApplications, setPendingNFTApplications] = useState<
     ApplicationDetails[]
   >([]);
-  const navigate = useNavigate();
+  const { data: hasBeenClaimed, isLoading: isCheckingClaim } =
+    useCollectionStatus();
+  const { mutate: claimCollection, isPending: isClaiming } =
+    useClaimCollection();
+  const { identity } = useInternetIdentity();
+  const { data: collectionOwner, isLoading: isLoadingOwner } =
+    useCollectionOwner();
+  const { mutate: mintNFT, isPending: isMinting } = useMintNFT();
+  const { mutate: transferNFT, isPending: isTransferring } = useTransferNFT();
+  const isOwner =
+    identity &&
+    collectionOwner &&
+    identity.getPrincipal().toString() === collectionOwner.toString();
+  console.log("Collection Owner:", collectionOwner?.toString());
 
   const session = loadFromSession();
   if (!session.user || session.user.role !== "Admin") {
@@ -117,14 +140,64 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleCompleteApplication = async (applicationId: number) => {
-    if (!actor) return;
+  const handleCompleteApplication = async (
+    applicationDetails: ApplicationDetails
+  ) => {
+    if (!actor || !collectionOwner || !isOwner) return;
     try {
       const applicationHandler = new ApplicationHandler(actor);
-      await applicationHandler.completeApplication(applicationId);
-      // BIKIN NFTTTTTTT
+      await applicationHandler.completeApplication(
+        applicationDetails.application.id
+      );
+
+      const recipientPrincipal = stringToPrincipal(
+        applicationDetails.application.applicantPrincipal
+      );
+
+      const mintResult = await new Promise<SetNFTResult[]>(() => {
+        mintNFT({
+          to: { owner: recipientPrincipal, subaccount: [] },
+          name: `${applicationDetails.franchise.name} License`,
+          description: `${applicationDetails.franchise.name} License`,
+          tokenUri: applicationDetails.franchise.coverImageUrl,
+          franchiseId: applicationDetails.franchise.id,
+          licenseDuration: applicationDetails.franchise.licenseDuration,
+          issueDate: new Date(),
+        });
+      });
+
+      // Extract tokenId from mintResult
+      const mintOutcome = mintResult[0];
+      if (!mintOutcome || "Err" in mintOutcome) {
+        throw new Error(
+          `Mint failed: ${
+            mintOutcome?.Err?.GenericError?.message || "No result"
+          } (code: ${mintOutcome?.Err?.GenericError?.error_code || "unknown"})`
+        );
+      }
+      if (mintOutcome.Ok.length === 0) {
+        throw new Error("Mint failed: No token ID returned");
+      }
+      const tokenId = mintOutcome.Ok[0]; // Extract token_id from [bigint]
+
+      await new Promise((resolve, reject) => {
+        transferNFT(
+          {
+            tokenId,
+            to: { owner: recipientPrincipal, subaccount: [] },
+          },
+          {
+            onSuccess: () => resolve(true),
+            onError: (error) => reject(error),
+          }
+        );
+      });
+
       setPendingNFTApplications((prev) =>
-        prev.filter((detail) => detail.application.id !== applicationId)
+        prev.filter(
+          (detail) =>
+            detail.application.id !== applicationDetails.application.id
+        )
       );
     } catch (error: any) {
       console.error("Error completing application:", error);
@@ -145,6 +218,44 @@ export default function AdminDashboardPage() {
             </p>
           </div>
         </div>
+
+        {isCheckingClaim ? (
+          <div className="flex items-center gap-2 text-neutral-600 text-sm mb-8">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-400"></div>
+            Checking collection status...
+          </div>
+        ) : (
+          <div className="mb-8">
+            {hasBeenClaimed ? (
+              <div className="flex items-center gap-2 text-brand-400 text-sm sm:text-base">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                Collection has been claimed
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <div className="">Please claim this collection</div>
+                <Button
+                  onClick={() => claimCollection()}
+                  disabled={isClaiming}
+                  variant={"primary"}
+                  className="shadow-xs"
+                >
+                  {isClaiming ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Claiming...
+                    </>
+                  ) : (
+                    <>
+                      <Crown className="w-4 h-4" />
+                      Claim Collection
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
@@ -377,9 +488,7 @@ export default function AdminDashboardPage() {
                           <Button
                             variant="outline"
                             className="w-full bg-transparent"
-                            onClick={() =>
-                              handleCompleteApplication(detail.application.id)
-                            }
+                            onClick={() => handleCompleteApplication(detail)}
                           >
                             <CheckCircle className="w-4 h-4 mr-2" />
                             Complete Application

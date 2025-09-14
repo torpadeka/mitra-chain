@@ -16,7 +16,6 @@ import Result "mo:base/Result";
 import Debug "mo:base/Debug";
 import Int "mo:base/Int";
 import LLM "mo:llm";
-import ICRC7 "mo:icrc7-mo";
 
 persistent actor {
   private func natHash(n : Nat) : Hash.Hash {
@@ -56,6 +55,20 @@ persistent actor {
   transient var events = HashMap.HashMap<Nat, Types.Event>(0, Nat.equal, natHash);
   transient var franchisorRatings = HashMap.HashMap<Principal, HashMap.HashMap<Principal, Nat>>(0, Principal.equal, Principal.hash);
   transient var franchisorComments = HashMap.HashMap<Principal, List.List<Types.Comment>>(0, Principal.equal, Principal.hash);
+  Debug.print("Seeding categories...");
+  var id : Nat = nextCategoryId;
+  categories.put(id, { id; name = "Barber & Salon"; description = "Offers hair cutting, styling, and other personal grooming services." });
+  id += 1;
+  categories.put(id, { id; name = "Beverage"; description = "Includes places that sell drinks, like coffee shops, juice bars, or bubble tea stores." });
+  id += 1;
+  categories.put(id, { id; name = "Expedition & Delivery"; description = "Covers courier and logistics services for shipping packages and goods." });
+  id += 1;
+  categories.put(id, { id; name = "Entertainment"; description = "Features venues and services for leisure activities, such as movie theaters, arcades, or event organizers." });
+  id += 1;
+  categories.put(id, { id; name = "Restaurant"; description = "Describes establishments that serve meals, from casual diners to fine dining." });
+  id += 1;
+  categories.put(id, { id; name = "Food (Express)"; description = "Refers to businesses providing fast food or quick-service meals for takeout or delivery." });
+  nextCategoryId := id + 1;
 
   // Upgrade hooks
   system func preupgrade() {
@@ -1033,7 +1046,7 @@ persistent actor {
       case _ { "Profit data unavailable" };
     };
 
-    let licenseDurationText = switch (franchise.licenseDuration) {
+    let _ = switch (franchise.licenseDuration) {
       case (#OneTime) { "One-time license" };
       case (#Years n) { Nat.toText(n) # " years" };
     };

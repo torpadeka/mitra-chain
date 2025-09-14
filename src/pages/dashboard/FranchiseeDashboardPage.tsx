@@ -38,6 +38,9 @@ import { useNavigate, useParams } from "react-router";
 import { protectedPage } from "@/context/ProtectedRoutes";
 import { ApplicationsTab } from "@/components/application-tab-franchisee";
 import { cp } from "fs";
+import { mapNFTLicenseToFrontend, useOwnedNFTs } from "@/hooks/useICRCQueries";
+import { Separator } from "@/components/ui/separator";
+import { NFTCard } from "@/components/nft-card";
 
 interface ApplicationDetail {
   franchise: FrontendFranchise;
@@ -60,6 +63,7 @@ export default function FranchiseeDashboard() {
   const [loading, setLoading] = useState(false);
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
+  const { data: ownedNFTs, isLoading, error } = useOwnedNFTs();
 
   const defaultTab = conversationId ? "chat" : "franchises";
 
@@ -182,6 +186,7 @@ export default function FranchiseeDashboard() {
             <Tabs defaultValue={defaultTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="franchises">My Franchises</TabsTrigger>
+                <TabsTrigger value="nft-license">NFT License</TabsTrigger>
                 <TabsTrigger value="pending">Pending Franchises</TabsTrigger>
                 <TabsTrigger value="chat">Messages</TabsTrigger>
               </TabsList>
@@ -252,6 +257,17 @@ export default function FranchiseeDashboard() {
                       <FranchiseCard franchise={franchise} key={franchise.id} />
                     ))}
                   </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="nft-license" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {ownedNFTs?.map((nft) => (
+                    <NFTCard
+                      key={nft.tokenId.toString()}
+                      nft={mapNFTLicenseToFrontend(nft)}
+                    />
+                  ))}
                 </div>
               </TabsContent>
 
