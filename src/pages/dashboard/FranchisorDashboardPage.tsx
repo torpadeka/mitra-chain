@@ -79,9 +79,7 @@ export default function FranchisorDashboard() {
       setFranchises((prev) => ({ ...prev, loading: true }));
       try {
         const franchiseHandler = new FranchiseHandler(actor);
-        const franchise = await franchiseHandler.getFranchiseByOwner(
-          stringToPrincipal(principal)
-        );
+        const franchise = await franchiseHandler.getFranchiseByOwner(principal);
         setFranchises(franchise);
         const applicationHandler = new ApplicationHandler(actor);
         const applications = await applicationHandler.getApplicationsByOwner(

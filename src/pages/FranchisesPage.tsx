@@ -40,7 +40,7 @@ export default function FranchisesPage() {
     { id: string; label: string; count: number }[]
   >([]);
 
-  const { actor, principal, loadFromSession } = useUser();
+  const { actor, principal, whoami } = useUser();
 
   // const franchiseHandler = useMemo(
   //   () => (actor ? new FranchiseHandler(actor) : null),
@@ -159,6 +159,22 @@ export default function FranchisesPage() {
     selectedLocations,
     sortBy,
   ]);
+
+  const [whoamiResult, setWhoamiResult] = useState<string>("Loading...");
+  useEffect(() => {
+    const fetchWhoami = async () => {
+      if (!actor) return setWhoamiResult("Actor not available");
+      try {
+        const result = await whoami();
+        setWhoamiResult(result);
+      } catch (error) {
+        console.error("Whoami call failed:", error);
+        setWhoamiResult("Failed to fetch whoami");
+      }
+    };
+
+    fetchWhoami();
+  }, [actor, whoami]);
 
   return (
     <div className="w-full min-h-screen p-10 bg-background">

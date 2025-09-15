@@ -18,6 +18,10 @@ import CreateEventPage from "./pages/events/CreateEventPage";
 import EventDetailPage from "./pages/events/EventDetailPage";
 import { Toaster } from "sonner";
 import AdminDashboardPage from "./pages/dashboard/AdminDashboardPage";
+import {
+  o,
+  u,
+} from "node_modules/react-router/dist/development/index-react-server-client-DRhjXpk2.mjs";
 
 const App: React.FC = () => {
   const {
@@ -29,11 +33,15 @@ const App: React.FC = () => {
     isAuthenticated,
     saveToSession,
     loadFromSession,
+    whoami,
   } = useUser();
 
   useEffect(() => {
     const restoreUser = async () => {
       console.log(principal);
+      console.log(actor);
+      console.log(user);
+      // console.log("WHOAMI", await whoami());
       if (!user && actor && principal) {
         try {
           const fetchedUser = await getUser(principal);

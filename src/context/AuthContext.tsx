@@ -41,7 +41,7 @@ export interface FrontendUser {
 interface UserContextType {
   user: FrontendUser | null;
   actor: ActorSubclass<_SERVICE> | null;
-  principal: string | null;
+  principal: Principal | null;
   authClient: AuthClient | null;
   isAuthenticated: boolean;
   isInitializing: boolean; // Added
@@ -60,7 +60,7 @@ interface UserContextType {
   clearSession: () => void;
   logout: (onSuccess: () => void) => Promise<void>;
   whoami: () => Promise<string>;
-  getUser: (principal: string) => Promise<FrontendUser | null>;
+  getUser: (principal: Principal) => Promise<FrontendUser | null>;
   createUser: (
     name: string,
     email: string,
@@ -86,7 +86,7 @@ interface UserContextType {
     bio?: string,
     profilePicUrl?: string
   ) => Promise<FrontendUser | null>;
-  init: () => Promise<void>;
+  // init: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -94,7 +94,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<FrontendUser | null>(null);
   const [actor, setActor] = useState<ActorSubclass<_SERVICE> | null>(null);
-  const [principal, setPrincipal] = useState<string | null>(null);
+  const [principal, setPrincipal] = useState<Principal | null>(null);
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true); // Added
@@ -200,7 +200,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const actor = createActor(canisterId, {
-        agentOptions: { identity },
+        agent,
       });
       if (!actor) {
         console.error("Failed to create actor with canisterId:", canisterId);
@@ -208,7 +208,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       setActor(actor);
-      setPrincipal(principalStr);
+      setPrincipal(principalObj);
 
       // Handle session data
       if (storedUser && storedIsAuthenticated && storedPrincipal) {
@@ -223,7 +223,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthenticated(await client.isAuthenticated());
       if ((await client.isAuthenticated()) && !storedUser && principalStr) {
         try {
-          const fetchedUser = await getUser(principalStr);
+          const fetchedUser = await getUser(principalObj);
           if (fetchedUser && fetchedUser.name !== "") {
             setUser(fetchedUser);
             saveToSession(fetchedUser, true, principalStr);
@@ -247,19 +247,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (): Promise<void> => {
+    console.log("Starting login process...");
+    console.log("AuthClient:", authClient);
+    console.log("Actor:", actor);
+    console.log("Principal:", principal);
     if (!authClient || !actor || !principal) return;
+    console.log("AuthClient, actor, and principal are available.");
     setIsInitializing(true);
     await authClient.login({
       identityProvider,
       onSuccess: async () => {
         try {
+          // init();
           const fetchedUser = await getUser(principal);
+          // console.log("Fetched user on login:", fetchedUser);
           if (!fetchedUser || fetchedUser.name === "") {
             window.location.href = "/register";
           } else {
             setUser(fetchedUser);
             setIsAuthenticated(true);
-            saveToSession(fetchedUser, true, principal);
+            saveToSession(fetchedUser, true, principal.toString());
           }
         } catch (err) {
           console.error("Error during login user fetch:", err);
@@ -289,11 +296,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getUser = async (
-    principalStr: string
+    principal: Principal
   ): Promise<FrontendUser | null> => {
     if (!actor) return null;
-    const principalObj = Principal.fromText(principalStr);
-    const result = await actor.getUser(principalObj);
+    const result = await actor.getUser(principal);
     const user = optionalToUndefined(result);
     return user ? mapUser(user) : null;
   };
@@ -331,7 +337,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       const mappedUser = mapUser(user);
       setUser(mappedUser); // Update context with new user
-      saveToSession(mappedUser, true, principal);
+      saveToSession(mappedUser, true, principal?.toString() || "");
       return mappedUser;
     } finally {
       setIsInitializing(false); // Set to false after user creation completes
@@ -366,7 +372,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (user) {
         const mappedUser = mapUser(user);
         setUser(mappedUser); // Update context with new user data
-        saveToSession(mappedUser, isAuthenticated, principal);
+        saveToSession(mappedUser, isAuthenticated, principal?.toString() || "");
         return mappedUser;
       }
       return null;
@@ -390,7 +396,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (user) {
         const mappedUser = mapUser(user);
         setUser(mappedUser); // Update context with new user data
-        saveToSession(mappedUser, isAuthenticated, principal);
+        saveToSession(mappedUser, isAuthenticated, principal?.toString() || "");
         return mappedUser;
       }
       return null;
@@ -419,7 +425,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         createUser,
         updateFranchisorProfile,
         updateFranchiseeProfile,
-        init,
+        // init,
       }}
     >
       {children}
