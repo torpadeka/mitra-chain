@@ -38,20 +38,20 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const restoreUser = async () => {
-      console.log(principal);
-      console.log(actor);
-      console.log(user);
+      // console.log(principal);
+      // console.log(actor);
+      // console.log(user);
       // console.log("WHOAMI", await whoami());
       if (!user && actor && principal) {
         try {
           const fetchedUser = await getUser(principal);
-          console.log("Restored user:", fetchedUser);
-          console.log(actor);
+          // console.log("Restored user:", fetchedUser);
+          // console.log(actor);
           if (fetchedUser) {
             setUser(fetchedUser);
             saveToSession(fetchedUser, true, principal.toString());
-            console.log(loadFromSession());
-            console.log("Ada user.");
+            // console.log(loadFromSession());
+            // console.log("Ada user.");
           } else {
             saveToSession(null, false, principal.toString());
             console.warn("No user found, session cleared.");

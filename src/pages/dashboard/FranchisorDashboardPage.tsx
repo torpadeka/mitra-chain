@@ -13,19 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Building2,
-  Users,
-  Plus,
-  Eye,
-  MessageSquare,
-  MapPin,
-  Calendar,
-  Star,
-  FileText,
-  Text,
-  Notebook,
-} from "lucide-react";
+import { Building2, Plus, Eye, MessageSquare } from "lucide-react";
 import { ChatSystem } from "@/components/chat";
 import { useUser } from "@/context/AuthContext";
 import {
@@ -37,10 +25,9 @@ import {
   FrontendApplication,
 } from "@/handler/ApplicationHandler";
 import { ApplicationsTab } from "@/components/application-tab";
-import { protectedPage } from "@/context/ProtectedRoutes";
 import { useNavigate } from "react-router";
 import { AddFranchiseModal } from "@/components/add-franchise-modal";
-import { stringToPrincipal } from "@/lib/utils";
+import { principalToString, stringToPrincipal } from "@/lib/utils";
 
 interface ApplicationDetails {
   application: FrontendApplication;
@@ -62,7 +49,7 @@ export default function FranchisorDashboard() {
   const navigate = useNavigate();
 
   const session = loadFromSession();
-  console.log("Session:", session);
+  // console.log("Session:", session);
   if (!session.user) {
     window.location.href = "/";
   } else if (!("Franchisor" === session.user.role)) {
@@ -70,6 +57,8 @@ export default function FranchisorDashboard() {
   }
 
   useEffect(() => {
+    // console.log(actor);
+    // console.log(principal);
     if (!actor || !principal) {
       setFranchises([]);
       return;
@@ -79,12 +68,16 @@ export default function FranchisorDashboard() {
       setFranchises((prev) => ({ ...prev, loading: true }));
       try {
         const franchiseHandler = new FranchiseHandler(actor);
-        const franchise = await franchiseHandler.getFranchiseByOwner(principal);
+        let principalReal;
+        if (typeof principal === "string")
+          principalReal = stringToPrincipal(principal);
+        else principalReal = principal;
+        const franchise =
+          await franchiseHandler.getFranchiseByOwner(principalReal);
         setFranchises(franchise);
         const applicationHandler = new ApplicationHandler(actor);
-        const applications = await applicationHandler.getApplicationsByOwner(
-          principal.toString()
-        );
+        const applications =
+          await applicationHandler.getApplicationsByOwner(principalReal);
         setRecentApplications(applications);
 
         const franchiseResults = await Promise.all(
@@ -104,7 +97,9 @@ export default function FranchisorDashboard() {
             })
             .filter((detail): detail is ApplicationDetails => detail !== null)
         );
+        console.log(franchises);
       } catch (error: any) {
+        console.error(error);
         setFranchises([]);
       }
     };

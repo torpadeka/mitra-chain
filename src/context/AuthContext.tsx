@@ -237,7 +237,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       console.error("Initialization failed:", err);
     } finally {
-      console.log("Actor:", actor);
+      // console.log("Actor:", actor);
       setIsInitializing(false);
     }
   };
@@ -247,12 +247,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (): Promise<void> => {
-    console.log("Starting login process...");
-    console.log("AuthClient:", authClient);
-    console.log("Actor:", actor);
-    console.log("Principal:", principal);
+    // console.log("Starting login process...");
+    // console.log("AuthClient:", authClient);
+    // console.log("Actor:", actor);
+    // console.log("Principal:", principal);
     if (!authClient || !actor || !principal) return;
-    console.log("AuthClient, actor, and principal are available.");
+    // console.log("AuthClient, actor, and principal are available.");
     setIsInitializing(true);
     await authClient.login({
       identityProvider,
@@ -356,7 +356,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (!actor) throw new Error("Actor not initialized");
     setIsInitializing(true); // Set to true during profile update
     try {
-      console.log("try");
+      // console.log("try");
       const result = await actor.updateFranchisorProfile(
         bio ? [bio] : [],
         profilePicUrl ? [profilePicUrl] : [],
@@ -366,9 +366,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         address ? [address] : [],
         phoneNumber ? [phoneNumber] : []
       );
-      console.log(result);
+      // console.log(result);
       const user = optionalToUndefined(result);
-      console.log(user);
+      // console.log(user);
       if (user) {
         const mappedUser = mapUser(user);
         setUser(mappedUser); // Update context with new user data

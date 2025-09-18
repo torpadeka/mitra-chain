@@ -85,26 +85,26 @@ export function ApplicationsTab({
     setError(null);
   };
 
-  // const handlePay = async (id: number) => {
-  //   if (!user || !actor) return;
-  //   const applicationHandler = new ApplicationHandler(actor);
-  //   try {
-  //     await applicationHandler.payApplication(id);
-  //     alert("Payment successful!");
-  //     navigate("/dashboard/franchisee");
-  //   } catch (err) {
-  //     console.error("Payment error:", err);
-  //     setError("Failed to process payment. Please try again later.");
-  //   }
-  // };
+  const handlePay = async (id: number) => {
+    if (!user || !actor) return;
+    console.log(actor);
+    const applicationHandler = new ApplicationHandler(actor);
+    try {
+      await applicationHandler.payApplication(id); // TODO: THIS ONE ONLY UPDATE THE STATUS TO PendingNFT (HAS COMPLETED THE PAYMENT)
+      alert("Payment successful!");
+      navigate("/dashboard/franchisee");
+    } catch (err) {
+      console.error("Payment error:", err);
+      setError("Failed to process payment. Please try again later.");
+    }
+  };
 
   const handleContact = async (franchise: FrontendFranchise | null) => {
     if (!actor || !principal || !franchise) return;
     const chatHandler = new ChatHandler(actor);
     try {
-      const conversations = await chatHandler.getAllConversationsByPrincipal(
-        stringToPrincipal(principal)
-      );
+      const conversations =
+        await chatHandler.getAllConversationsByPrincipal(principal);
 
       let existingConversation = conversations.find((c: any) => {
         return c.participants.some((p: string) => p === franchise.owner);
@@ -117,7 +117,7 @@ export function ApplicationsTab({
       } else {
         conversationId = Number(
           await actor.createConversation([
-            stringToPrincipal(principal),
+            principal,
             Principal.fromText(franchise.owner),
           ])
         );
@@ -297,7 +297,7 @@ export function ApplicationsTab({
                     variant="outline"
                     size="sm"
                     className="hover:cursor-pointer"
-                    onClick={() => {}}
+                    onClick={() => handlePay(detail.application.id)}
                   >
                     <Coins className="w-4 h-4 mr-1" />
                     Pay

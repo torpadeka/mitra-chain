@@ -44,7 +44,7 @@ interface ApplicationDetails {
 }
 
 export default function AdminDashboardPage() {
-  const { actor, user, principal, loadFromSession } = useUser();
+  const { actor, loadFromSession } = useUser();
   const [users, setUsers] = useState<FrontendUser[]>([]);
   const [transactions, setTransactions] = useState<FrontendTransaction[]>([]);
   const [pendingNFTApplications, setPendingNFTApplications] = useState<
@@ -71,7 +71,9 @@ export default function AdminDashboardPage() {
   }
 
   useEffect(() => {
-    if (!actor || !principal) {
+    console.log(actor);
+    console.log(typeof actor);
+    if (!actor) {
       setUsers([]);
       setTransactions([]);
       setPendingNFTApplications([]);
@@ -121,7 +123,7 @@ export default function AdminDashboardPage() {
     };
 
     fetchAll();
-  }, [actor, principal]);
+  }, [actor]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

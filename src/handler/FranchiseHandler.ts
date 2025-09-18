@@ -195,6 +195,7 @@ export class FranchiseHandler {
     principle: Principal
   ): Promise<FrontendFranchise[]> {
     const result = await this.actor.getFranchisesByOwner(principle);
+    console.log(result);
     return result.map(this.mapFranchise);
   }
 

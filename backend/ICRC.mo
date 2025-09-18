@@ -11,6 +11,7 @@ import Text "mo:base/Text";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
+import Debug "mo:base/Debug";
 
 // --- Third-Party/External Imports ---
 import Vec "mo:vector";
@@ -148,7 +149,12 @@ shared (init_msg) persistent actor class NftCanister() : async (ICRC7.Service.Se
   };
 
   public query func icrc7_tokens_of(account : ICRC7.Account, prev : ?Nat, take : ?Nat) : async [Nat] {
-    icrc7().get_tokens_of_paginated(account, prev, take);
+    Debug.print("icrc7_tokens_of called");
+    let tokenIds = icrc7().get_tokens_of_paginated(account, prev, take);
+    // Convert [Nat] to Text for debugging
+    let tokenIdsText = "[" # Text.join(", ", Iter.map<Nat, Text>(Iter.fromArray(tokenIds), Nat.toText)) # "]";
+    Debug.print("Tokens of account: " # tokenIdsText);
+    tokenIds;
   };
 
   public query func icrc10_supported_standards() : async ICRC7.SupportedStandards {

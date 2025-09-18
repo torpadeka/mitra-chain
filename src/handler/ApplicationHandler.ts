@@ -4,6 +4,7 @@ import { _SERVICE, Application } from "@/declarations/backend/backend.did";
 import {
   optionalToUndefined,
   principalToString,
+  stringToPrincipal,
   timeToDate,
 } from "@/lib/utils";
 
@@ -78,8 +79,10 @@ export class ApplicationHandler {
       : null;
   }
 
-  async getApplicationsByOwner(owner: string): Promise<FrontendApplication[]> {
-    const principal = Principal.fromText(owner);
+  async getApplicationsByOwner(
+    owner: Principal
+  ): Promise<FrontendApplication[]> {
+    const principal = owner;
     const result = await this.actor.getApplicationsByOwner(principal);
     return result.map(this.mapApplication);
   }
@@ -100,6 +103,7 @@ export class ApplicationHandler {
   }
 
   async payApplication(applicationId: number): Promise<void> {
+    console.log(this.actor);
     await this.actor.payApplication(BigInt(applicationId));
   }
 

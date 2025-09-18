@@ -11,8 +11,6 @@ import { FranchiseSearch } from "@/components/franchise-search";
 import { FranchiseGrid } from "@/components/franchise-grid";
 import { CategoryHandler } from "@/handler/CategoryHandler";
 import { useSearchParams } from "react-router";
-import { Principal } from "@dfinity/principal";
-import { stringToPrincipal } from "@/lib/utils";
 
 export default function FranchisesPage() {
   // State from FranchiseSearch
@@ -48,6 +46,7 @@ export default function FranchisesPage() {
   // );
   // Fetch franchises
   useEffect(() => {
+    console.log(actor);
     if (!actor || !principal) {
       setFranchises([]);
       return;

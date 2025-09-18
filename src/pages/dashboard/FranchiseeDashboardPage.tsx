@@ -91,7 +91,7 @@ export default function FranchiseeDashboard() {
           principal.toString()
         );
 
-        console.log("All Applications:", allApps);
+        // console.log("All Applications:", allApps);
 
         const approvedApps = allApps.filter(
           (app) => app.status === "Completed"
@@ -116,7 +116,7 @@ export default function FranchiseeDashboard() {
         setFranchises(
           franchiseResults.filter((fr): fr is FrontendFranchise => fr !== null)
         );
-        console.log("Raw Pending Franchise Results:", pendingFranchiseResults);
+        // console.log("Raw Pending Franchise Results:", pendingFranchiseResults);
         const pendingFranchiseResults2 = pendingFranchiseResults.filter(
           (fr): fr is FrontendFranchise => fr != null
         );
@@ -130,7 +130,7 @@ export default function FranchiseeDashboard() {
             return { franchise, application: app };
           })
           .filter((item): item is ApplicationDetail => item !== null);
-        console.log(combined);
+        // console.log(combined);
 
         setCombinePendingApplications(combined);
       } catch (error) {
@@ -141,6 +141,11 @@ export default function FranchiseeDashboard() {
       }
     };
 
+    const fetchedOwnedNFTs = async () => {
+      console.log("Owned NFTs: ", await ownedNFTs);
+    };
+
+    fetchedOwnedNFTs();
     fetchFranchises();
   }, [actor, principal]);
 
@@ -184,7 +189,7 @@ export default function FranchiseeDashboard() {
             </div>
 
             <Tabs defaultValue={defaultTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="franchises">My Franchises</TabsTrigger>
                 <TabsTrigger value="nft-license">NFT License</TabsTrigger>
                 <TabsTrigger value="pending">Pending Franchises</TabsTrigger>

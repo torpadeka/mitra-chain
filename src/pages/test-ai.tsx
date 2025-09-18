@@ -35,13 +35,13 @@ const FranchiseAnalyzer: React.FC = () => {
   };
 
   const handleAnalyze = async () => {
-    try {
-      const response = await analyzeFranchise(userMessage, sampleFranchise);
-      setResult(response.content || "No result returned");
-    } catch (error) {
-      console.error("Error analyzing franchise:", error);
-      setResult("An error occurred while analyzing the franchise.");
-    }
+    // try {
+    //   const response = await analyzeFranchise(userMessage, sampleFranchise);
+    //   setResult(response.content || "No result returned");
+    // } catch (error) {
+    //   console.error("Error analyzing franchise:", error);
+    //   setResult("An error occurred while analyzing the franchise.");
+    // }
   };
 
   return (

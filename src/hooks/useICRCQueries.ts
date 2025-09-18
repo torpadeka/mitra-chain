@@ -1,23 +1,71 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useInternetIdentity } from "ic-use-internet-identity";
 import { useActor } from "./useICRCActor";
 import { Account } from "@dfinity/ledger-icp";
 import { FrontendNFTLicense } from "@/handler/NFTHandler";
 import { Principal } from "@dfinity/principal";
+import { useUser } from "@/context/AuthContext";
+import { stringToPrincipal } from "@/lib/utils";
 
 export function mapNFTLicenseToFrontend(nft: any): FrontendNFTLicense {
+  console.log(
+    "NFT:",
+    JSON.stringify(nft, (k, v) => (typeof v === "bigint" ? v.toString() : v))
+  );
+
+  const getMetadataValue = (key: string) => {
+    const entry = nft.metadata?.[0]?.find(([k]: [string, any]) => k === key);
+    return entry ? entry[1] : null;
+  };
+
+  // Extract metadata
+  const name = getMetadataValue("name")?.Text ?? "Unnamed NFT";
+  const description = getMetadataValue("description")?.Text ?? "No description";
+  const tokenUri = getMetadataValue("tokenUri")?.Text ?? "";
+  const franchiseId = getMetadataValue("franchiseId")?.Nat ?? 0n;
+  const issueDate =
+    getMetadataValue("issueDate")?.Int ??
+    getMetadataValue("issueDate")?.Nat ??
+    0n;
+  const expiryDate =
+    getMetadataValue("expiryDate")?.Array?.length === 0 ? null : undefined;
+  const issuerText = getMetadataValue("issuer")?.Text;
+
+  // Owner comes from the hook response
+  const ownerData = nft.owner;
+  const ownerPrincipal =
+    ownerData?.owner instanceof Principal
+      ? ownerData.owner
+      : Principal.fromText(ownerData?.owner?.__principal__ ?? "aaaaa-aa"); // fallback
+
+  const ownerSubaccount = ownerData?.subaccount || [];
+
+  // Validation
+  if (!ownerPrincipal || !issuerText) {
+    console.error("Missing owner or issuer in metadata:", {
+      ownerPrincipal,
+      issuerText,
+    });
+    throw new Error("Invalid NFT metadata: missing owner or issuer");
+  }
+
   return {
     tokenId: nft.tokenId,
-    franchiseId: Number(nft.franchiseId),
-    owner: { owner: Principal.fromText(nft.owner.owner), subaccount: [] },
-    issuer: { owner: Principal.fromText(nft.issuer.owner), subaccount: [] },
-    issueDate: new Date(Number(nft.issueDate) / 1_000_000),
-    expiryDate: nft.expiryDate
-      ? new Date(Number(nft.expiryDate) / 1_000_000)
+    franchiseId: Number(franchiseId),
+    owner: {
+      owner: ownerPrincipal,
+      subaccount: ownerSubaccount,
+    },
+    issuer: {
+      owner: Principal.fromText(issuerText),
+      subaccount: [],
+    },
+    issueDate: new Date(Number(issueDate) / 1_000_000),
+    expiryDate: expiryDate
+      ? new Date(Number(expiryDate) / 1_000_000)
       : undefined,
-    name: nft.name || "Unnamed NFT",
-    description: nft.description || "No description",
-    tokenUri: nft.tokenUri || "",
+    name,
+    description,
+    tokenUri,
   };
 }
 
@@ -133,32 +181,59 @@ export function useMintNFT() {
 
 // Owned NFTs
 export function useOwnedNFTs() {
-  const { identity } = useInternetIdentity();
+  const { principal } = useUser();
   const { actor, isFetching } = useActor();
 
   return useQuery({
-    queryKey: ["ownedNFTs", identity?.getPrincipal().toString()],
+    queryKey: ["ownedNFTs", principal],
     queryFn: async () => {
-      if (!actor || !identity) return [];
+      console.log("ok");
+      if (!actor || !principal) return [];
 
-      const tokenIds = await actor.icrc7_tokens_of(
-        { owner: identity.getPrincipal(), subaccount: [] },
-        [],
-        []
-      );
+      console.log("ok2");
+      console.log(actor);
+      console.log(principal);
 
-      // Get metadata for all tokens in one call
-      const metadataArray = await actor.icrc7_token_metadata(tokenIds);
+      let principalReal;
 
-      // Map token IDs to their corresponding metadata (same order)
-      const nftsWithMetadata = tokenIds.map((tokenId, index) => ({
-        tokenId,
-        metadata: metadataArray[index] || [],
-      }));
+      if (typeof principal === "string")
+        principalReal = stringToPrincipal(principal);
+      else principalReal = principal;
 
-      return nftsWithMetadata;
+      try {
+        const tokenIds = await actor.icrc7_tokens_of(
+          { owner: principalReal, subaccount: [] },
+          [], // prev
+          [] // take
+        );
+        console.log("Token IDs:", tokenIds);
+
+        // Get metadata for all tokens in one call
+        const metadataArray = await actor.icrc7_token_metadata(tokenIds);
+        console.log("Metadata Array:", metadataArray);
+
+        // Get owners for all tokens
+        const ownerResponse = await actor.icrc7_owner_of(tokenIds);
+        const owners = ownerResponse; // Array of [?ICRC7.Account] matching tokenIds order
+
+        console.log("Owner Response:", owners);
+
+        // Map token IDs to their corresponding metadata and owners
+        const nftsWithMetadata = tokenIds.map((tokenId, index) => {
+          const metadata = metadataArray[index] || [];
+          const owner = owners[index]?.[0] || null; // First owner for the tokenId
+          return { tokenId, metadata, owner };
+        });
+
+        console.log("NFTs with Metadata:", nftsWithMetadata);
+
+        return nftsWithMetadata;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    enabled: !!actor && !!identity && !isFetching,
+    enabled: !!actor && !!principal && !isFetching,
+    retry: true,
   });
 }
 

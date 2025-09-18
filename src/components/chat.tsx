@@ -65,9 +65,8 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
     const fetchConversations = async () => {
       try {
         setLoading(true);
-        const convs = await chatHandler.getAllConversationsByPrincipal(
-          stringToPrincipal(principal)
-        );
+        const convs =
+          await chatHandler.getAllConversationsByPrincipal(principal);
         setConversations(convs);
 
         // Pre-fetch participant names
@@ -78,7 +77,7 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
         await Promise.all(
           Array.from(uniquePrincipals).map(async (principalH) => {
             if (!userNameCache[principalH]) {
-              const user = await getUser(principalH);
+              const user = await getUser(stringToPrincipal(principalH));
               setUserNameCache((prev) => ({
                 ...prev,
                 [principalH]: user
@@ -137,7 +136,7 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
     if (message.trim() && selectedConv && principal) {
       try {
         const recipient = selectedConv.participants.find(
-          (p) => p !== principal
+          (p) => stringToPrincipal(p) !== principal
         );
         if (recipient) {
           await chatHandler.sendMessage(
@@ -171,13 +170,13 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
 
   // Get participant name (async, cached)
   const getParticipantName = async (principalH: string): Promise<string> => {
-    if (principalH === principal) {
+    if (stringToPrincipal(principalH) === principal) {
       return "You";
     }
     if (userNameCache[principalH]) {
       return userNameCache[principalH];
     }
-    const user = await getUser(principalH);
+    const user = await getUser(stringToPrincipal(principalH));
     const name = user
       ? user.name
       : `${principalH.slice(0, 5)}...${principalH.slice(-5)}`;
@@ -187,7 +186,7 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
 
   // Synchronous display name for rendering
   const getDisplayName = (principalH: string): string => {
-    if (principalH === principal) {
+    if (stringToPrincipal(principalH) === principal) {
       return "You";
     }
     return (
@@ -223,8 +222,9 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
               <div className="space-y-1 p-4">
                 {filteredConversations.map((conversation) => {
                   const otherParticipant =
-                    conversation.participants.find((p) => p !== principal) ||
-                    "";
+                    conversation.participants.find(
+                      (p) => stringToPrincipal(p) !== principal
+                    ) || "";
                   return (
                     <div
                       key={conversation.conversationId}
@@ -300,7 +300,7 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
                     <AvatarFallback>
                       {getDisplayName(
                         selectedConv.participants.find(
-                          (p) => p !== principal
+                          (p) => stringToPrincipal(p) !== principal
                         ) || ""
                       )
                         .split(" ")
@@ -312,7 +312,7 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
                     <h3 className="font-semibold">
                       {getDisplayName(
                         selectedConv.participants.find(
-                          (p) => p !== principal
+                          (p) => stringToPrincipal(p) !== principal
                         ) || ""
                       )}
                     </h3>
@@ -344,14 +344,14 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
                       <div
                         key={msg.messageId}
                         className={`flex ${
-                          msg.senderPrincipal === principal
+                          stringToPrincipal(msg.senderPrincipal) === principal
                             ? "justify-end"
                             : "justify-start"
                         }`}
                       >
                         <div
                           className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                            msg.senderPrincipal === principal
+                            stringToPrincipal(msg.senderPrincipal) === principal
                               ? "bg-brand-500 text-white"
                               : "bg-muted"
                           }`}
@@ -359,7 +359,8 @@ export function ChatSystem({ userType, currentChat }: ChatSystemProps) {
                           <p className="text-sm">{msg.text}</p>
                           <p
                             className={`text-xs mt-1 ${
-                              msg.senderPrincipal === principal
+                              stringToPrincipal(msg.senderPrincipal) ===
+                              principal
                                 ? "text-brand-100"
                                 : "text-muted-foreground"
                             }`}

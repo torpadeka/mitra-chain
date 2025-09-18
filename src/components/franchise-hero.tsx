@@ -71,11 +71,13 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
   const handleApply = async () => {
     if (!user || !actor) {
       setError("You must be logged in to apply.");
+      console.error(error);
       return;
     }
 
     if (!("Franchisee" === user.role)) {
       setError("Only franchisees can apply for franchises.");
+      console.error(error);
       return;
     }
 
@@ -90,15 +92,15 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
       const rejectMessage =
         err?.message?.match(/"Reject message": "([^"]+)"/)?.[1] || err.message;
       setError("Failed to submit application: " + rejectMessage);
+      console.error(err);
     }
   };
 
   const handleContact = async () => {
     if (!actor || !principal) return;
     try {
-      const conversations = await chatHandler.getAllConversationsByPrincipal(
-        stringToPrincipal(principal)
-      );
+      const conversations =
+        await chatHandler.getAllConversationsByPrincipal(principal);
 
       let existingConversation = conversations.find((c: any) => {
         return c.participants.some((p: string) => p === franchise.owner);
@@ -203,10 +205,12 @@ export function FranchiseHero({ franchise }: FranchiseHeroProps) {
                     onClick={() => {
                       if (!user) {
                         setError("You must be logged in to apply.");
+                        console.error(error);
                         return;
                       }
                       if (!("Franchisee" === user.role)) {
                         setError("Only franchisees can apply for franchises.");
+                        console.error(error);
                         return;
                       }
                       setIsApplyOpen(true);
