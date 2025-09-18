@@ -86,7 +86,7 @@ export default function FranchiseDetailsPage() {
 
             {/* <RelatedFranchises currentFranchiseId={String(franchise.data.id)} /> */}
           </div>
-          <FloatingActionButton />
+          <FloatingActionButton franchise={franchise.data} />
           <Footer />
         </div>
       )}

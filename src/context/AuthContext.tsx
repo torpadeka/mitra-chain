@@ -176,16 +176,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const client = await AuthClient.create();
     setAuthClient(client);
     try {
-      const {
-        user: storedUser,
-        isAuthenticated: storedIsAuthenticated,
-        principal: storedPrincipal,
-      } = loadFromSession();
-
-      // Initialize agent and actor first
+      // Get identity and principal
       const identity = client.getIdentity();
       const principalObj = identity.getPrincipal();
       const principalStr = principalObj.toString();
+      const isAuthenticated = await client.isAuthenticated();
+      const isAnonymous = principalObj.isAnonymous();
+
+      // Initialize HttpAgent
       const agent = new HttpAgent({
         host: network === "local" ? `http://${wslIp}:4943` : "https://ic0.app",
         identity,
@@ -199,9 +197,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         }
       }
 
-      const actor = createActor(canisterId, {
-        agent,
-      });
+      // Always initialize the actor, even for anonymous users
+      const actor = createActor(canisterId, { agent });
       if (!actor) {
         console.error("Failed to create actor with canisterId:", canisterId);
         setIsInitializing(false);
@@ -210,34 +207,55 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       setActor(actor);
       setPrincipal(principalObj);
 
-      // Handle session data
-      if (storedUser && storedIsAuthenticated && storedPrincipal) {
+      // Load session data
+      const {
+        user: storedUser,
+        isAuthenticated: storedIsAuthenticated,
+        principal: storedPrincipal,
+      } = loadFromSession();
+
+      // If session data exists and matches the current principal, restore it
+      if (
+        storedUser &&
+        storedIsAuthenticated &&
+        storedPrincipal &&
+        storedPrincipal === principalStr &&
+        isAuthenticated
+      ) {
         setUser(storedUser);
-        setIsAuthenticated(storedIsAuthenticated);
-        setPrincipal(storedPrincipal);
+        setIsAuthenticated(true);
         setIsInitializing(false);
         return;
       }
 
-      // Fetch user data if authenticated and no session user
-      setIsAuthenticated(await client.isAuthenticated());
-      if ((await client.isAuthenticated()) && !storedUser && principalStr) {
+      // If authenticated but no session data, fetch user
+      if (isAuthenticated && !isAnonymous) {
         try {
           const fetchedUser = await getUser(principalObj);
           if (fetchedUser && fetchedUser.name !== "") {
             setUser(fetchedUser);
+            setIsAuthenticated(true);
             saveToSession(fetchedUser, true, principalStr);
           } else {
             console.warn("No user found for principal:", principalStr);
+            setIsAuthenticated(true); // Still authenticated, but needs registration
           }
         } catch (err) {
           console.error("Error fetching user on init:", err);
+          setIsAuthenticated(false);
         }
+      } else {
+        // Not authenticated or anonymous
+        setIsAuthenticated(false);
+        setUser(null);
+        saveToSession(null, false, null);
       }
     } catch (err) {
       console.error("Initialization failed:", err);
+      setIsAuthenticated(false);
+      setUser(null);
+      saveToSession(null, false, null);
     } finally {
-      // console.log("Actor:", actor);
       setIsInitializing(false);
     }
   };
@@ -247,26 +265,51 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (): Promise<void> => {
-    // console.log("Starting login process...");
-    // console.log("AuthClient:", authClient);
-    // console.log("Actor:", actor);
-    // console.log("Principal:", principal);
-    if (!authClient || !actor || !principal) return;
-    // console.log("AuthClient, actor, and principal are available.");
+    if (!authClient) return;
     setIsInitializing(true);
     await authClient.login({
       identityProvider,
+      maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000), // 7 days
       onSuccess: async () => {
         try {
-          // init();
-          const fetchedUser = await getUser(principal);
-          // console.log("Fetched user on login:", fetchedUser);
+          // Re-initialize identity, agent, and actor
+          const identity = authClient.getIdentity();
+          const principalObj = identity.getPrincipal();
+          const principalStr = principalObj.toString();
+          const agent = new HttpAgent({
+            host:
+              network === "local" ? `http://${wslIp}:4943` : "https://ic0.app",
+            identity,
+          });
+
+          if (network === "local") {
+            try {
+              await agent.fetchRootKey();
+            } catch (err) {
+              console.error("Failed to fetch root key:", err);
+            }
+          }
+
+          const actor = createActor(canisterId, { agent });
+          if (!actor) {
+            console.error(
+              "Failed to create actor with canisterId:",
+              canisterId
+            );
+            setIsInitializing(false);
+            return;
+          }
+          setActor(actor);
+          setPrincipal(principalObj);
+          setIsAuthenticated(true);
+
+          // Fetch user data
+          const fetchedUser = await getUser(principalObj);
           if (!fetchedUser || fetchedUser.name === "") {
             window.location.href = "/register";
           } else {
             setUser(fetchedUser);
-            setIsAuthenticated(true);
-            saveToSession(fetchedUser, true, principal.toString());
+            saveToSession(fetchedUser, true, principalStr);
           }
         } catch (err) {
           console.error("Error during login user fetch:", err);
@@ -274,6 +317,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         } finally {
           setIsInitializing(false);
         }
+      },
+      onError: (err) => {
+        console.error("Login failed:", err);
+        setIsInitializing(false);
       },
     });
   };
