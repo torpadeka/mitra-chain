@@ -25,9 +25,7 @@ export default function FloatingActionButton({
   const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  // const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
-  const apiKey =
-    "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";
+  const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
 
   // Close modal when clicking outside
   useEffect(() => {
