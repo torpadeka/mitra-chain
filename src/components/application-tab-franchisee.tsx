@@ -242,7 +242,7 @@ export function ApplicationsTab({
         const applicationHandler = new ApplicationHandler(actor);
         await applicationHandler.payApplication(selectedApplication.id);
 
-        alert("Payment successful!");
+        alert("Payment successful! Franchise added to your portfolio.");
         setIsPaymentModalOpen(false);
         navigate("/dashboard/franchisee");
       }
