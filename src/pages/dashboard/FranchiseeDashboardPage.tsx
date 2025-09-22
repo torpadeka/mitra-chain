@@ -94,7 +94,7 @@ export default function FranchiseeDashboard() {
         // console.log("All Applications:", allApps);
 
         const approvedApps = allApps.filter(
-          (app) => app.status === "Completed"
+          (app) => app.status === "Completed" || app.status === "PendingNFT"
         );
         const pendingApps = allApps.filter(
           (app) => app.status === "Submitted" || app.status === "PendingPayment"
