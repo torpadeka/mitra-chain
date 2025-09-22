@@ -1,34 +1,80 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Download, FileSpreadsheet, FileText, Calendar, BarChart3 } from "lucide-react"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Calendar,
+  BarChart3,
+} from "lucide-react";
 
 export function ExportManager() {
-  const [selectedFormat, setSelectedFormat] = useState("xlsx")
-  const [selectedData, setSelectedData] = useState<string[]>([])
-  const [dateRange, setDateRange] = useState("last-month")
+  const [selectedFormat, setSelectedFormat] = useState("xlsx");
+  const [selectedData, setSelectedData] = useState<string[]>([]);
+  const [dateRange, setDateRange] = useState("last-month");
 
   const dataTypes = [
-    { id: "revenue", label: "Revenue Data", description: "Monthly and yearly revenue reports" },
-    { id: "customers", label: "Customer Analytics", description: "Customer demographics and behavior" },
-    { id: "performance", label: "Performance Metrics", description: "KPIs and business performance data" },
-    { id: "applications", label: "Applications", description: "Franchise application data" },
-    { id: "documents", label: "Document Logs", description: "Document access and management logs" },
-  ]
+    {
+      id: "revenue",
+      label: "Revenue Data",
+      description: "Monthly and yearly revenue reports",
+    },
+    {
+      id: "customers",
+      label: "Customer Analytics",
+      description: "Customer demographics and behavior",
+    },
+    {
+      id: "performance",
+      label: "Performance Metrics",
+      description: "KPIs and business performance data",
+    },
+    {
+      id: "applications",
+      label: "Applications",
+      description: "Franchise application data",
+    },
+    {
+      id: "documents",
+      label: "Document Logs",
+      description: "Document access and management logs",
+    },
+  ];
 
   const handleDataToggle = (dataId: string) => {
-    setSelectedData((prev) => (prev.includes(dataId) ? prev.filter((id) => id !== dataId) : [...prev, dataId]))
-  }
+    setSelectedData((prev) =>
+      prev.includes(dataId)
+        ? prev.filter((id) => id !== dataId)
+        : [...prev, dataId]
+    );
+  };
 
   const handleExport = () => {
     // TODO: Implement actual export functionality
-    console.log("Exporting:", { format: selectedFormat, data: selectedData, dateRange })
-  }
+    console.log("Exporting:", {
+      format: selectedFormat,
+      data: selectedData,
+      dateRange,
+    });
+  };
 
   return (
     <Card>
@@ -99,10 +145,15 @@ export function ExportManager() {
                     onCheckedChange={() => handleDataToggle(dataType.id)}
                   />
                   <div className="space-y-1">
-                    <Label htmlFor={dataType.id} className="text-sm font-medium">
+                    <Label
+                      htmlFor={dataType.id}
+                      className="text-sm font-medium"
+                    >
                       {dataType.label}
                     </Label>
-                    <p className="text-xs text-muted-foreground">{dataType.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {dataType.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -111,8 +162,14 @@ export function ExportManager() {
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t">
-          <div className="text-sm text-muted-foreground">{selectedData.length} data type(s) selected</div>
-          <Button onClick={handleExport} disabled={selectedData.length === 0} className="btn-primary">
+          <div className="text-sm text-muted-foreground">
+            {selectedData.length} data type(s) selected
+          </div>
+          <Button
+            onClick={handleExport}
+            disabled={selectedData.length === 0}
+            className="btn-primary"
+          >
             <Download className="w-4 h-4 mr-2" />
             Export Data
           </Button>
@@ -134,5 +191,5 @@ export function ExportManager() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

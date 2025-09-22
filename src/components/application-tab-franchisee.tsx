@@ -31,12 +31,34 @@ import {
   DollarSign,
   MessageSquare,
   Coins,
+  Wallet,
 } from "lucide-react";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { ChatHandler } from "@/handler/ChatHandler";
 import { Principal } from "@dfinity/principal";
 import { useNavigate } from "react-router";
-import { stringToPrincipal } from "@/lib/utils";
+
+// Type guard for Plug wallet
+declare global {
+  interface Window {
+    ic?: {
+      plug?: {
+        isConnected: () => Promise<boolean>;
+        requestConnect: (params?: {
+          whitelist?: string[];
+          host?: string;
+          timeout?: number;
+        }) => Promise<any>;
+        requestTransfer: (params: {
+          to: string;
+          amount: number;
+          memo?: string;
+        }) => Promise<{ height: number }>;
+        onExternalDisconnect: (callback: () => void) => void;
+      };
+    };
+  }
+}
 
 interface ApplicationDetail {
   franchise: FrontendFranchise;
@@ -59,6 +81,10 @@ export function ApplicationsTab({
   const [selectedFranchise, setSelectedFranchise] =
     useState<FrontendFranchise | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isPlugConnected, setIsPlugConnected] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const navigate = useNavigate();
 
   console.log("Application Details:", applicationDetails.length);
@@ -70,6 +96,29 @@ export function ApplicationsTab({
       return;
     }
   }, [actor, principal]);
+
+  // Check Plug wallet connection
+  useEffect(() => {
+    const checkPlugConnection = async () => {
+      if (typeof window !== "undefined" && window.ic?.plug) {
+        try {
+          const connected = await window.ic.plug!.isConnected();
+          setIsPlugConnected(connected);
+        } catch (err) {
+          console.error("Error checking Plug connection:", err);
+        }
+      }
+    };
+
+    checkPlugConnection();
+
+    // Listen for Plug wallet events
+    if (typeof window !== "undefined" && window.ic?.plug) {
+      window.ic.plug!.onExternalDisconnect(() => {
+        setIsPlugConnected(false);
+      });
+    }
+  }, []);
 
   const handleViewOpen = (
     application: FrontendApplication,
@@ -85,17 +134,136 @@ export function ApplicationsTab({
     setError(null);
   };
 
-  const handlePay = async (id: number) => {
-    if (!user || !actor) return;
-    console.log(actor);
-    const applicationHandler = new ApplicationHandler(actor);
+  const handleConnectPlug = async () => {
+    if (typeof window === "undefined" || !window.ic?.plug) {
+      setError(
+        "Plug wallet extension not found. Please install Plug wallet first."
+      );
+      return;
+    }
+
     try {
-      await applicationHandler.payApplication(id); // TODO: THIS ONE ONLY UPDATE THE STATUS TO PendingNFT (HAS COMPLETED THE PAYMENT)
-      alert("Payment successful!");
-      navigate("/dashboard/franchisee");
-    } catch (err) {
+      const backendCanister = import.meta.env.VITE_CANISTER_ID_BACKEND || import.meta.env.CANISTER_ID_BACKEND;
+      const icrcCanister = import.meta.env.VITE_CANISTER_ID_ICRC || import.meta.env.CANISTER_ID_ICRC;
+
+      const whitelist = [backendCanister, icrcCanister].filter(Boolean);
+
+      if (whitelist.length === 0) {
+        throw new Error("No canister IDs configured. Please check your environment variables.");
+      }
+
+      await window.ic.plug!.requestConnect({
+        whitelist,
+        host: "https://icp0.io",
+        timeout: 50000,
+      });
+
+      setIsPlugConnected(true);
+      setError(null);
+    } catch (err: any) {
+      console.error("Error connecting to Plug:", err);
+
+      let errorMessage = "Failed to connect to Plug wallet. Please try again.";
+
+      if (err?.message?.includes("User rejected the request")) {
+        errorMessage = "Connection request was rejected by user.";
+      } else if (err?.message?.includes("Plug wallet extension not found")) {
+        errorMessage = "Plug wallet extension not found. Please install Plug wallet first.";
+      }
+
+      setError(errorMessage);
+    }
+  };
+
+  const handlePaymentModalOpen = (
+    applicationId: number,
+    franchise: FrontendFranchise
+  ) => {
+    setSelectedApplication(
+      applicationDetails.find((d) => d.application.id === applicationId)
+        ?.application || null
+    );
+    setSelectedFranchise(franchise);
+    setPaymentAmount(franchise.startingPrice.toString());
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePayment = async () => {
+    if (!isPlugConnected) {
+      setError("Please connect your Plug wallet first.");
+      return;
+    }
+
+    if (!selectedApplication || !selectedFranchise) {
+      setError("Invalid application selected.");
+      return;
+    }
+
+    setPaymentLoading(true);
+    setError(null);
+
+    try {
+      const amountInE8s = Math.floor(parseFloat(paymentAmount) * 100000000);
+      const recipientPrincipal = import.meta.env.VITE_PAYMENT_RECIPIENT_PRINCIPAL ||
+                               import.meta.env.VITE_CANISTER_ID_BACKEND ||
+                               import.meta.env.CANISTER_ID_BACKEND ||
+                               "uxrrr-q7777-77774-qaaaq-cai";
+
+      const isLocalDevelopment = import.meta.env.DFX_NETWORK === 'local' ||
+                                import.meta.env.VITE_DFX_NETWORK === 'local' ||
+                                window.location.hostname === 'localhost' ||
+                                window.location.hostname === '127.0.0.1';
+
+      let result;
+
+      if (isLocalDevelopment) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        result = {
+          height: Math.floor(Math.random() * 1000000),
+          network: "local",
+          simulated: true,
+          message: "Payment successful"
+        };
+      } else {
+        if (!window.ic?.plug) {
+          throw new Error("Plug wallet not connected. Please connect your wallet first.");
+        }
+
+        result = await window.ic.plug!.requestTransfer({
+          to: recipientPrincipal,
+          amount: amountInE8s,
+          memo: selectedApplication.id.toString(),
+        });
+      }
+
+      // Update application status after successful payment
+      if (actor && selectedApplication) {
+        const applicationHandler = new ApplicationHandler(actor);
+        await applicationHandler.payApplication(selectedApplication.id);
+
+        alert("Payment successful!");
+        setIsPaymentModalOpen(false);
+        navigate("/dashboard/franchisee");
+      }
+    } catch (err: any) {
       console.error("Payment error:", err);
-      setError("Failed to process payment. Please try again later.");
+
+      let errorMessage = "Failed to process payment. Please try again later.";
+
+      if (err?.message?.includes("User rejected the request")) {
+        errorMessage = "Transaction cancelled by user.";
+      } else if (err?.message?.includes("Insufficient balance")) {
+        errorMessage = "Insufficient ICP balance to complete this transaction.";
+      } else if (err?.message?.includes("Invalid principal")) {
+        errorMessage = "Invalid recipient address. Please contact support.";
+      } else if (err?.code === 3000) {
+        errorMessage = "Network error. Please check your internet connection and try again.";
+      }
+
+      setError(errorMessage);
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -283,6 +451,92 @@ export function ApplicationsTab({
                     </div>
                   </DialogContent>
                 </Dialog>
+
+                {/* Payment Modal */}
+                <Dialog
+                  open={isPaymentModalOpen}
+                  onOpenChange={setIsPaymentModalOpen}
+                >
+                  <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Wallet className="w-5 h-5" />
+                        Payment with Plug Wallet
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      {!isPlugConnected ? (
+                        <div className="space-y-4">
+                          <p className="text-sm text-muted-foreground">
+                            Connect your Plug wallet to make payments
+                          </p>
+                          <Button
+                            onClick={handleConnectPlug}
+                            className="w-full"
+                            disabled={paymentLoading}
+                          >
+                            <Wallet className="w-4 h-4 mr-2" />
+                            Connect Plug Wallet
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-green-600">
+                            <Wallet className="w-4 h-4" />
+                            <span className="text-sm">
+                              Plug wallet connected
+                            </span>
+                          </div>
+
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Franchise:
+                            </p>
+                            <p className="font-medium">
+                              {selectedFranchise?.name}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Payment Amount (ICP):
+                            </p>
+                            <input
+                              type="number"
+                              value={paymentAmount}
+                              onChange={(e) => setPaymentAmount(e.target.value)}
+                              className="w-full p-2 border rounded-md"
+                              min="0"
+                              step="0.00000001"
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between pt-4 border-t">
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsPaymentModalOpen(false)}
+                              disabled={paymentLoading}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handlePayment}
+                              disabled={
+                                paymentLoading ||
+                                !paymentAmount ||
+                                parseFloat(paymentAmount) <= 0
+                              }
+                            >
+                              {paymentLoading
+                                ? "Processing..."
+                                : `Pay ${paymentAmount} ICP`}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <Button
                   variant="outline"
                   size="sm"
@@ -297,12 +551,16 @@ export function ApplicationsTab({
                     variant="outline"
                     size="sm"
                     className="hover:cursor-pointer"
-                    onClick={() => handlePay(detail.application.id)}
+                    onClick={() =>
+                      handlePaymentModalOpen(
+                        detail.application.id,
+                        detail.franchise
+                      )
+                    }
                   >
                     <Coins className="w-4 h-4 mr-1" />
                     Pay
                   </Button>
-                  // TODO: PAYMENT MODAL DI SINI
                 )}
               </div>
             </div>
