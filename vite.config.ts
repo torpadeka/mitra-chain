@@ -2,83 +2,53 @@ import react from "@vitejs/plugin-react";
 import dotenv from "dotenv";
 import { defineConfig } from "vite";
 import environment from "vite-plugin-environment";
-import forwardTrailingSlash from "./forward-trailing-slash";
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 dotenv.config();
 
-function conditionalHeaders() {
-    return {
-        name: "conditional-headers",
-        configureServer(server) {
-            server.middlewares.use((req, res, next) => {
-                // Apply headers only for WebContainer-related routes (e.g., /z9)
-                const webContainerRoutes = ["/z9"];
-                const isWebContainerRoute = webContainerRoutes.some((route) =>
-                    req.url.startsWith(route)
-                );
-
-                if (isWebContainerRoute) {
-                    // Apply headers for StackBlitz WebContainer routes
-                    res.setHeader(
-                        "Cross-Origin-Embedder-Policy",
-                        "require-corp"
-                    );
-                    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-                }
-                next();
-            });
-        },
-    };
+function addCSPHeaders() {
+  return {
+    name: "add-csp-headers",
+    configureServer(server: import("vite").ViteDevServer) {
+      server.middlewares.use((req, res, next) => {
+        // Allow fetch calls to ic0.app
+        res.setHeader(
+          "Content-Security-Policy",
+          "default-src 'self'; connect-src 'self' https://ic0.app; img-src 'self' data:; script-src 'self'; style-src 'self';"
+        );
+        next();
+      });
+    },
+  };
 }
 
 export default defineConfig({
-    root: "src",
-    build: {
-        outDir: "../dist",
-        emptyOutDir: true,
+  root: "src",
+  build: {
+    outDir: "../dist",
+    emptyOutDir: true,
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: { global: "globalThis" },
     },
-    optimizeDeps: {
-        esbuildOptions: {
-            define: {
-                global: "globalThis",
-            },
-        },
+  },
+  server: {
+    // If you’re not using proxies right now, you can remove or comment these out
+    // proxy: { ... }
+  },
+  plugins: [
+    react(),
+    environment("all", { prefix: "CANISTER_" }),
+    environment("all", { prefix: "DFX_" }),
+    tailwindcss(),
+    addCSPHeaders(),
+  ],
+  cacheDir: "../node_modules/.vite",
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    server: {
-        proxy: {
-            "/api/openai": {
-                target: "https://darre-m9zcxamt-eastus2.services.ai.azure.com",
-                changeOrigin: true,
-                rewrite: (path) =>
-                    path.replace(
-                        /^\/api\/openai/,
-                        "/models/chat/completions?api-version=2024-05-01-preview"
-                    ),
-                headers: {
-                    Authorization: `Bearer ${process.env.VITE_AZURE_OPENAI_KEY}`,
-                    "Content-Type": "application/json",
-                },
-            },
-            "/api": {
-                target: "http://127.0.0.1:4943",
-                changeOrigin: true,
-            },
-        },
-    },
-    plugins: [
-        react(),
-        environment("all", { prefix: "CANISTER_" }),
-        environment("all", { prefix: "DFX_" }),
-        tailwindcss(),
-        forwardTrailingSlash(),
-        conditionalHeaders(),
-    ],
-    cacheDir: "../node_modules/.vite",
-    resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./src"),
-        },
-    },
+  },
 });
